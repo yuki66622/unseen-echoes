@@ -8475,6 +8475,7 @@ var DbConnection = class _DbConnection extends DbConnectionImpl {
 var CALL_TIMEOUT_MS = 5e3;
 var CONNECT_TIMEOUT_MS = 12e3;
 var SUBSCRIBE_TIMEOUT_MS = 1e4;
+var IDENTITY_CHECK_TIMEOUT_MS = 2e3;
 function failureDetails(stage, error, reason) {
   const message = typeof error?.message === "string" ? error.message : "";
   if (/\bunauthorized\b|\bforbidden\b|invalid.{0,16}token|token.{0,16}expired/i.test(message)) {
@@ -8530,6 +8531,7 @@ var RoomConnection = class {
     this.timer = null;
     this.watchdog = null;
     this.handleSocketClosed = null;
+    this.identityProbe = null;
     this.pendingCalls = /* @__PURE__ */ new Set();
   }
   connect() {
@@ -8538,6 +8540,7 @@ var RoomConnection = class {
     const generation = ++this.generation;
     this.ready = false;
     this.conn = null;
+    this.cancelIdentityProbe();
     clearTimeout(this.timer);
     clearTimeout(this.watchdog);
     this.timer = null;
@@ -8551,7 +8554,7 @@ var RoomConnection = class {
     report(this.attempt ? "\u6B63\u5728\u91CD\u65B0\u8FDE\u63A5\u2026" : "\u6B63\u5728\u8FDE\u63A5\u2026", this.attempt ? "reconnecting" : "connecting");
     const fail = (error, reason) => {
       if (!current()) return;
-      this.generation++;
+      const failedGeneration = ++this.generation;
       this.ready = false;
       this.conn = null;
       this.handleSocketClosed = null;
@@ -8562,16 +8565,23 @@ var RoomConnection = class {
       this.rejectPendingCalls("\u8FDE\u63A5\u4E2D\u65AD\uFF0C\u6682\u65F6\u65E0\u6CD5\u786E\u8BA4\u8FD9\u6B21\u64CD\u4F5C\u3002");
       closeConnection(connection);
       const details = failureDetails(stage, error, reason);
-      if (uris.length > 1 && ["transport-error", "connection-timeout"].includes(details.reason)) {
-        this.routeIndex = (this.routeIndex + 1) % uris.length;
-      }
-      const delay = Math.min(5e3, 500 * 2 ** Math.min(4, this.attempt++));
-      if (!details.permanent) this.timer = setTimeout(() => {
-        this.timer = null;
-        this.connect();
-      }, delay);
       this.onChange(null);
-      report(details.message, details.permanent ? "error" : "reconnecting", details.reason);
+      const finish = (details2) => {
+        if (this.closed || this.generation !== failedGeneration) return;
+        if (uris.length > 1 && ["transport-error", "connection-timeout"].includes(details2.reason)) {
+          this.routeIndex = (this.routeIndex + 1) % uris.length;
+        }
+        const delay = Math.min(5e3, 500 * 2 ** Math.min(4, this.attempt++));
+        if (!details2.permanent) this.timer = setTimeout(() => {
+          this.timer = null;
+          this.connect();
+        }, delay);
+        report(details2.message, details2.permanent ? "error" : "reconnecting", details2.reason);
+      };
+      if (this.config.hosting === "cloud" && this.token && this.routeIndex === 0 && stage === "connection" && details.reason === "identity-check-failed") {
+        report("\u6B63\u5728\u68C0\u67E5\u8054\u673A\u5165\u53E3\u2026", "reconnecting", details.reason);
+        this.checkIdentityStatus(uris[0], failedGeneration, details, finish);
+      } else finish(details);
     };
     this.handleSocketClosed = () => fail(void 0);
     const deadline = (duration, reason) => {
@@ -8657,7 +8667,7 @@ var RoomConnection = class {
   resume() {
     const socketClosed = this.conn?.isSocketClosed === true;
     if (socketClosed) this.handleSocketClosed?.();
-    if (this.closed || socketClosed || this.timer !== null || !this.ready && this.watchdog === null) {
+    if (this.closed || socketClosed || this.timer !== null || !this.ready && this.watchdog === null && !this.identityProbe) {
       this.reconnect();
       return true;
     }
@@ -8666,6 +8676,52 @@ var RoomConnection = class {
   goOffline() {
     this.disconnect();
     this.onStatus("\u5F53\u524D\u7F51\u7EDC\u5DF2\u79BB\u7EBF\uFF0C\u6062\u590D\u8054\u7F51\u540E\u4F1A\u91CD\u65B0\u8FDE\u63A5\u3002", { state: "error", attempt: this.attempt, stage: "connection", reason: "offline" });
+  }
+  checkIdentityStatus(uri, generation, originalDetails, finish) {
+    let controller;
+    try {
+      controller = new AbortController();
+    } catch {
+      finish(originalDetails);
+      return;
+    }
+    const probe = { controller, timer: null };
+    this.identityProbe = probe;
+    const complete = (details) => {
+      if (this.closed || this.generation !== generation || this.identityProbe !== probe) return;
+      this.cancelIdentityProbe();
+      finish(details);
+    };
+    const transportFailure = () => complete(failureDetails("connection"));
+    probe.timer = setTimeout(transportFailure, IDENTITY_CHECK_TIMEOUT_MS);
+    try {
+      const endpoint = new URL("v1/identity/websocket-token", uri);
+      if (endpoint.protocol === "wss:") endpoint.protocol = "https:";
+      if (endpoint.protocol === "ws:") endpoint.protocol = "http:";
+      Promise.resolve(fetch(endpoint, { method: "POST", headers: { Authorization: `Bearer ${this.token}` }, signal: controller.signal, credentials: "omit", cache: "no-store", redirect: "error" })).then((response) => {
+        const status = response.status;
+        try {
+          response.body?.cancel()?.catch(() => {
+          });
+        } catch {
+        }
+        if (status === 401 || status === 403) complete(failureDetails("connection", { message: "Unauthorized" }));
+        else if (status >= 500) transportFailure();
+        else complete(originalDetails);
+      }, transportFailure);
+    } catch {
+      transportFailure();
+    }
+  }
+  cancelIdentityProbe() {
+    const probe = this.identityProbe;
+    this.identityProbe = null;
+    if (!probe) return;
+    clearTimeout(probe.timer);
+    try {
+      probe.controller.abort();
+    } catch {
+    }
   }
   call(name, args = {}) {
     if (!this.ready || !this.conn) return Promise.reject(new Error("\u8BF7\u7B49\u5F85\u8FDE\u63A5\u6062\u590D\u3002"));
@@ -8695,6 +8751,7 @@ var RoomConnection = class {
     this.generation++;
     clearTimeout(this.timer);
     clearTimeout(this.watchdog);
+    this.cancelIdentityProbe();
     this.timer = null;
     this.watchdog = null;
     this.ready = false;

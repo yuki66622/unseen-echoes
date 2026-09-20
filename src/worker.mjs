@@ -6,6 +6,7 @@ const subscribePath=`/v1/database/${database}/subscribe`;
 const tokenPath='/v1/identity/websocket-token';
 const safeHeaders={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{...safeHeaders,'Content-Type':'application/json; charset=utf-8'}});}
+function gatewayUnavailable(){return json({error:'对局线路暂时不可用，请稍后重试。'},502);}
 function trusted(request,url){const origin=request.headers.get('Origin');return (!origin||origin===url.origin)&&request.headers.get('Sec-Fetch-Site')!=='cross-site';}
 
 // Only the game's own public database endpoints are reachable. No arbitrary URL,
@@ -46,11 +47,12 @@ export async function route(request,env,fetchImpl=fetch){
     try{
       const response=await fetchImpl(target,{method:request.method,headers,redirect:'manual',...(!socket?{signal:AbortSignal.timeout(8000)}:{})});
       if(socket&&response.status===101)return response;
-      if(response.status>=300&&response.status<400)return json({error:'对局服务暂时不可用。'},502);
+      if(response.status>=300&&response.status<400)return gatewayUnavailable();
+      if(path===tokenPath&&response.status>=500)return gatewayUnavailable();
       const returned=new Headers(safeHeaders);returned.set('Content-Type',response.headers.get('Content-Type')||'application/json');
       // Preserve an explicit rejection for SDK versions that inspect statusText.
       return new Response(response.body,{status:response.status,statusText:response.status===401?'Unauthorized':response.status===403?'Forbidden':response.statusText,headers:returned});
-    }catch{return json({error:'对局服务暂时不可用，请稍后重试。'},502);}
+    }catch{return gatewayUnavailable();}
   }
   if(path.startsWith('/api/')||path.startsWith('/v1/'))return json({error:'找不到这个入口。'},404);
   if(env.ASSETS)return env.ASSETS.fetch(request);

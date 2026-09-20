@@ -42,6 +42,13 @@ test('cross-site requests and unsupported WebSocket query keys fail before egres
   assert.equal((await route(new Request(origin+subscription,{headers:{Upgrade:'websocket',Origin:'https://other.invalid'}}),{},fetchImpl)).status,403);
   assert.equal((await route(new Request(origin+subscription+'?url=https://other.invalid',{headers:{Upgrade:'websocket'}}),{},fetchImpl)).status,400);
 });
+test('gateway transport failures preserve a numeric 502 without exposing upstream details',async()=>{
+  for(const upstream of [async()=>{throw Error('private details');},async()=>new Response('{}',{status:503})]){
+    const result=await route(new Request(origin+'/v1/identity/websocket-token',{method:'POST',headers:{Authorization:'Bearer TEST_ONLY'}}),{},upstream);
+    assert.equal(result.status,502);
+    assert.doesNotMatch(await result.text(),/private details|TEST_ONLY/);
+  }
+});
 test('upstream errors are sanitized and never cached',async()=>{
   const response=await route(new Request(origin+'/api/connection-check'),{},async()=>{throw Error('SECRET_TEST_ONLY');});
   assert.deepEqual(await response.json(),{ok:false,code:'network-error'});

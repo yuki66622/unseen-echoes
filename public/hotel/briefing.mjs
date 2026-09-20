@@ -12,3 +12,4 @@ document.getElementById('case-close').addEventListener('click', () => {
   envelope.setAttribute('aria-expanded','false');
   envelope.focus({preventScroll:true}); window.scrollTo({top:0});
 });
+envelope.disabled = false;

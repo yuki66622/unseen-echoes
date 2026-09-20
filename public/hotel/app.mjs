@@ -426,4 +426,5 @@ window.addEventListener('pagehide',()=>{voice.destroy();audio.stop();});
 $('qa-route').onclick=()=>void qaWalk();$('qa-return').onclick=()=>void qaWalk(true);
 $('qa-assist').onclick=()=>{if(debug)startAssistance(navigationGoal(state,collected,recordingHeard));};
 voice.init().then(status=>{voiceReady=status.configured;$('connection').textContent=voiceReady?'Gemini connected':'Gemini unavailable';renderControls();}).catch(()=>{$('connection').textContent='Gemini unavailable';});
+$('start').disabled=false;$('load-status').textContent='Sound begins only after you enter.';
 requestAnimationFrame(frame);

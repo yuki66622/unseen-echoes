@@ -53,7 +53,7 @@ npm test
 npm run typecheck
 ```
 
-`verify-rounds.cjs` 检查重开重选角色、五次机会和无重复操作按钮；`verify-ui.cjs` 检查开场快进、按键、信封、样式与明确模拟的失败重试；`verify-chapters.cjs` 运行双人章节衔接；`verify-browser.cjs` 完成真实旅馆调查。均使用 Playwright 和静音 Chrome，可通过 `PLAYWRIGHT_MODULE`、`CHROME_PATH`、`GAME_SITE_URL` 指定环境。完整旅馆验证会以虚构答案调用真实已配置的 Gemini。所有自动试玩禁止开启扬声器与麦克风。验证结果及范围见 [VALIDATION.md](VALIDATION.md)。
+`verify-rounds.cjs` 检查重开重选角色、五次机会和无重复操作按钮；`verify-hotel-entry.cjs` 检查游戏模块加载延迟时，信封仍可阅读，进入按钮就绪后一次点击即可进入；`verify-ui.cjs` 检查开场快进、按键、信封、样式与明确模拟的失败重试；`verify-chapters.cjs` 运行双人章节衔接；`verify-browser.cjs` 完成真实旅馆调查。均使用 Playwright 和静音 Chrome，可通过 `PLAYWRIGHT_MODULE`、`CHROME_PATH`、`GAME_SITE_URL` 指定环境。完整旅馆验证会以虚构答案调用真实已配置的 Gemini。所有自动试玩禁止开启扬声器与麦克风。验证结果及范围见 [VALIDATION.md](VALIDATION.md)。
 
 ## 发布与后续同步
 

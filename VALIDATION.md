@@ -44,3 +44,7 @@ Preserve the previous saved Sites version and its corresponding SpacetimeDB rule
 The fifth hotel recording test collects the three initial witness statements through E, spends one empty check, then uses the fifth E for the recording. A sixth E neither spends another attempt nor stops playback; recording completion and the subsequent explanation remain possible. Actual microphone input and subjective listening remain outside these muted checks.
 
 Eight actual muted browser checks passed against the isolated local database: fifth-attempt capture, two-vote role reset, role swap, refresh-preserved attempts, five-attempt loss, hotel exhaustion/reset, unrestricted tutorial and absence of page errors.
+
+### Entry readiness follow-up
+
+Production confirmed all four multiplayer checks, then exposed a race between the independently loaded letter and game modules: the entry click occurred while its handler was still null, with the original load-status unchanged. The letter and entry buttons now remain disabled until their respective handlers are ready. `verify-hotel-entry.cjs` deliberately holds the game module, verifies that the letter is readable and entry unavailable, then releases it and enters with one click. This check failed against the prior build and passes against the updated build (three browser assertions, no page errors). All 22 hotel application tests also pass. Final live results belong to the outer release ledger.

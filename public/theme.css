@@ -246,3 +246,7 @@ html.unseen-ui {
 .unseen-ui[data-ui-chapter=multiplayer] #active-code{font-size:var(--ue-subtitle-size)}
 
 @media(max-width:650px){.unseen-ui[data-ui-chapter=hotel] .journey-nav{left:20px;right:110px;gap:12px;font-size:12px}.unseen-ui[data-ui-chapter=hotel] .journey-nav>span{display:none}.unseen-ui[data-ui-chapter=hotel] .journey-nav>a{white-space:nowrap}}
+
+/* Match the opening action to the parent-page language controls. */
+.unseen-ui #unseen-echoes-opening #ue-skip{position:fixed;top:16px;right:136px;min-height:40px;height:40px;padding:6px 4px;font-size:14px;line-height:1.7;letter-spacing:0}
+@media(max-width:650px){.unseen-ui #unseen-echoes-opening #ue-skip{top:10px;right:100px;font-size:13px}}

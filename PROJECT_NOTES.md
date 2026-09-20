@@ -84,3 +84,5 @@ Typography scale unified: chapter titles 32px desktop / 28px mobile, secondary d
 Refreshing the opening explicitly starts a new music journey and permits the piano again; regular chapter navigation or returning to title does not replay it. A restored browser-back page resumes menu rain while preserving the spent piano flag. This supersedes the prior no-replay-on-refresh rule.
 
 Hotel navigation includes Skip case before reading and during investigation, linking directly to the generated-world page and preserving existing language/audio navigation rules.
+
+Opening Skip intro and language controls share the same top offset, 40px control height and text baseline on desktop and mobile, including the iframe/parent boundary.

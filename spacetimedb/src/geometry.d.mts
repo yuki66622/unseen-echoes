@@ -1,0 +1,14 @@
+export type Point = { x: number; y: number };
+export type Segment = { a: Point; b: Point };
+export const ROOM_SIZE: number;
+export const PLAYER_RADIUS: number;
+export const LOCATIONS: readonly (Point & { id: string })[];
+export const WALLS: readonly Segment[];
+export const DOOR: Segment & { id: string; center: Point; nearRadius: number; rearmRadius: number };
+export function distance(a: Point, b: Point): number;
+export function pointSegmentDistance(p: Point, a: Point, b: Point): number;
+export function blockingSegments(doorOpen?: boolean): readonly Segment[];
+export function canTravel(from: Point, to: Point, doorOpen?: boolean): boolean;
+export function hasLineOfSight(from: Point, to: Point, doorOpen?: boolean): boolean;
+export function isNearDoor(player: Point): boolean;
+export function occupiesDoor(player: Point): boolean;

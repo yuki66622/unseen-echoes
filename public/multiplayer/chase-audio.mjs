@@ -1,7 +1,10 @@
 // Chase-only recorded audio. The square arena has no internal-wall acoustics.
 import {fetchWithTimeout} from './request.mjs';
-export const CHASE_MASTER_HEADROOM = 0.32;
-export const CHASE_PEAK_LIMIT = 0.6;
+export const CHASE_MASTER_HEADROOM = 0.8;
+export const CHASE_PEAK_LIMIT = 0.8;
+export const CHASE_DEFAULT_VOLUME = 0.75;
+export const CHASE_MIX = Object.freeze({ background: 0.25, motor: 1.5, rain: 0.45,
+  entry: 0.8, heartbeat: 0.85, ownStep: 0.3, remoteStep: 0.85, door: 0.8, victory: 0.8 });
 export const HEARTBEAT_FADE_SECONDS = 0.2;
 export const FOOTSTEP_OFFSET_SECONDS = 0.75;
 export const FOOTSTEP_DURATION_SECONDS = 0.35;
@@ -20,14 +23,14 @@ const validPose = pose => Number.isFinite(pose?.x) && Number.isFinite(pose?.y)
 const copyPose = pose => ({ x: pose.x, y: pose.y, heading: pose.heading ?? 0 });
 
 export const CHASE_ASSETS = Object.freeze({
-  entry: { label: '入场录音', path: './assets/chase/entry.mp3', targetRms: 0.085 },
-  heartbeat: { label: '心跳录音', path: './assets/chase/heartbeat.mp3', targetRms: 0.09 },
-  background: { label: '背景录音', path: './assets/chase/background.mp3', targetRms: 0.05 },
-  door: { label: '开门录音', path: './assets/chase/door.mp3', targetRms: null },
-  'hunter-win': { label: '监管者胜利录音', path: './assets/chase/hunter-win.mp3', targetRms: 0.08 },
-  footsteps: { label: '脚步录音', path: './assets/chase/footsteps.mp3', targetRms: 0.07 },
-  motor: { label: '老式电机', path: './assets/chase/motor.mp3', targetRms: 0.045 },
-  rain: { label: '出口雨声', path: '../assets/edgechat/rain-light.m4a', targetRms: 0.045, maxSeconds: 12, maxGain: 16 },
+  entry: { label: '女巫与狂风 · 入场', path: './assets/chase/entry.mp3', targetRms: 0.14 },
+  heartbeat: { label: '求生者心跳 · 监管者聆听', path: './assets/chase/heartbeat.mp3', targetRms: 0.13 },
+  background: { label: '暗黑鼓乐与弦乐 · 背景', path: './assets/chase/background.mp3', targetRms: 0.10 },
+  door: { label: '出口录音', path: './assets/chase/door.mp3', targetRms: null, maxGain: 1 },
+  'hunter-win': { label: '监管者胜利录音', path: './assets/chase/hunter-win.mp3', targetRms: 0.14 },
+  footsteps: { label: '泥地脚步', path: './assets/chase/footsteps.mp3', targetRms: 0.10 },
+  motor: { label: '老式电机', path: './assets/chase/motor.mp3', targetRms: 0.12 },
+  rain: { label: '出口雨声', path: '../assets/edgechat/rain-light.m4a', targetRms: 0.07, maxSeconds: 12, maxGain: 16 },
 });
 
 function setGain(parameter, value, time, seconds = 0) {
@@ -38,8 +41,8 @@ function setGain(parameter, value, time, seconds = 0) {
   if (seconds) parameter.linearRampToValueAtTime(value, time + seconds);
 }
 
-// No automatic amplification of user-supplied clips, especially the sparse door
-// recording. Only the older rain anchor may receive bounded gain.
+// Match sustained recordings to useful levels with bounded gain and peak guard.
+// Sparse one-shot door material keeps its original dynamics.
 export function prepareChaseBuffer(context, decoded, id) {
   const descriptor = CHASE_ASSETS[id];
   if (!descriptor || !decoded?.numberOfChannels || !Number.isFinite(decoded.duration)
@@ -62,7 +65,7 @@ export function prepareChaseBuffer(context, decoded, id) {
   for (const value of samples) { peak = Math.max(peak, Math.abs(value)); energy += value * value; }
   const rms = Math.sqrt(energy / samples.length);
   if (rms < 1e-7 || !Number.isFinite(rms)) throw new Error('录音没有有效声音。');
-  const gain = Math.min(descriptor.maxGain ?? 1, CHASE_PEAK_LIMIT / peak,
+  const gain = Math.min(descriptor.maxGain ?? 8, CHASE_PEAK_LIMIT / peak,
     descriptor.targetRms === null ? 1 : descriptor.targetRms / rms);
   let finalPeak = 0, finalEnergy = 0;
   // Quiet edges avoid discontinuities at the loop wrap and one-shot boundaries.
@@ -103,7 +106,7 @@ export class ChaseStepTracker {
   update(snapshot, time) {
     const players = validPose(snapshot?.self) ? [{ ...snapshot.self, id: 'self', own: true }] : [];
     const included = new Set(['self']);
-    for (const other of snapshot?.audiblePlayers ?? []) {
+    for (const other of snapshot?.role === 'survivor' ? snapshot?.audiblePlayers ?? [] : []) {
       if (!validPose(other) || typeof other.id !== 'string' || !other.id || included.has(other.id)
         || other.moving !== true || !validPose(snapshot?.self)
         || Math.hypot(other.x - snapshot.self.x, other.y - snapshot.self.y) > 5) continue;
@@ -150,7 +153,7 @@ function persistRounds(key, rounds) {
 
 export class ChaseAudio {
   constructor({ silent = false } = {}) {
-    this.silent = Boolean(silent); this.volume = 0.35;
+    this.silent = Boolean(silent); this.volume = CHASE_DEFAULT_VOLUME;
     this.context = null; this.master = null; this.initPromise = null;
     this.buffers = new Map(); this.assetDetails = {}; this.footstepBuffer = null;
     this.voices = new Set(); this.tracker = new ChaseStepTracker();
@@ -159,7 +162,30 @@ export class ChaseAudio {
     this.roundId = null; this.snapshot = null; this.listener = { x: 2, y: 1, heading: 0 };
     this.heartbeatTarget = 0; this.heartbeatVoice = null; this.lastDoorSeq = 0; this.lastError = null;
     this.counters = { entry: 0, door: 0, hunterWin: 0, footstepsSelf: 0, footstepsRemote: 0,
-      background: 0, heartbeat: 0, anchors: 0 };
+      background: 0, heartbeat: 0, anchors: 0, escape: 0 };
+  }
+
+  // Called synchronously by the Ready gesture, before the network starts a round.
+  // Resuming an empty graph does not play anything in the lobby.
+  unlock() {
+    if (!this.context) {
+      const Context = globalThis.AudioContext ?? globalThis.webkitAudioContext;
+      if (!Context) return Promise.reject(new Error('当前浏览器不支持游戏声音。'));
+      this.context = new Context();
+    }
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error('请再次点击“准备开始”以启用声音。')), 3000);
+      this.context.resume().then(() => {
+        clearTimeout(timeout);
+        if (this.context.state === 'running') resolve();
+        else reject(new Error('声音尚未启动，请再次点击“准备开始”。'));
+      }, error => { clearTimeout(timeout); reject(error); });
+    });
+  }
+
+  prepare() {
+    const unlocked = this.unlock();
+    return Promise.all([unlocked, this._init()]);
   }
 
   async _init() {
@@ -173,7 +199,16 @@ export class ChaseAudio {
       }
       if (!this.master) {
         this.master = this.context.createGain(); this.master.gain.value = 0;
-        this.master.connect(this.context.destination);
+        // Unity below 0.65, soft ceiling at 0.95. No permanent blanket attenuation.
+        const limiter = this.context.createWaveShaper();
+        limiter.curve = Float32Array.from({length:8193}, (_, i) => {
+          const x = i / 4096 - 1, magnitude = Math.abs(x);
+          return Math.sign(x) * (magnitude <= 0.65 ? magnitude
+            : 0.65 + 0.3 * Math.tanh((magnitude - 0.65) / 0.3));
+        });
+        limiter.oversample = '2x';
+        this.master.connect(limiter); limiter.connect(this.context.destination);
+        this.limiter = limiter;
       }
       const outcomes = await Promise.allSettled(Object.entries(CHASE_ASSETS).map(async ([id, descriptor]) => {
         try {
@@ -283,16 +318,19 @@ export class ChaseAudio {
       }
       this.listener = copyPose(current.self);
       this.running = true; this.mode = 'chase';
-      this._voice('background', { level: 0.16, loop: true }); this.counters.background++;
+      this._voice('background', { level: CHASE_MIX.background, loop: true }); this.counters.background++;
       for (const source of anchors) {
-        this._voice(source.soundId, { kind: 'anchor', level: source.id === 'a' ? 0.24 : 0.28,
+        this._voice(source.soundId, { kind: 'anchor', level: source.id === 'a' ? CHASE_MIX.motor : CHASE_MIX.rain,
           loop: true, position: source }); this.counters.anchors++;
       }
-      if (current.role === 'survivor') {
-        this.heartbeatVoice = this._voice('heartbeat', { level: 0, loop: true }); this.counters.heartbeat++;
+      if (current.role === 'hunter') {
+        this.heartbeatVoice = this._voice('heartbeat', { level: 0, loop: true,
+          position: validPose(current.heartbeatSource) ? current.heartbeatSource : current.self });
+        this.heartbeatVoice.panner.rolloffFactor = 0; // The server already supplies distance attenuation.
+        this.counters.heartbeat++;
       }
       if (playEntry) {
-        this._voice('entry', { level: 0.7 }); this.counters.entry++;
+        this._voice('entry', { level: CHASE_MIX.entry }); this.counters.entry++;
         this.enteredRounds.add(snapshot.roundId); persistRounds(ENTRY_STORAGE, this.enteredRounds);
       }
       this._masterLevel(); this.update(current);
@@ -315,17 +353,20 @@ export class ChaseAudio {
     // Finishing a snapshot stops the scene but preserves the user's sound intent
     // so finish() can still play the result after an update-first caller.
     if (snapshot.outcome) { this._stopVoices(); return; }
+    if (this.heartbeatVoice && validPose(snapshot.heartbeatSource)) {
+      this.heartbeatVoice.position = copyPose(snapshot.heartbeatSource);
+    }
     for (const voice of this.voices) this._position(voice);
-    const target = snapshot.role === 'survivor' && Number.isFinite(snapshot.heartbeatIntensity)
+    const target = snapshot.role === 'hunter' && Number.isFinite(snapshot.heartbeatIntensity)
       ? clamp(snapshot.heartbeatIntensity) : 0;
     if (target !== this.heartbeatTarget) {
       this.heartbeatTarget = target;
-      if (this.heartbeatVoice) setGain(this.heartbeatVoice.gain.gain, target * 0.45,
+      if (this.heartbeatVoice) setGain(this.heartbeatVoice.gain.gain, target * CHASE_MIX.heartbeat,
         this.context.currentTime, HEARTBEAT_FADE_SECONDS);
     }
     if (opened && validPose(event)) {
       for (const voice of [...this.voices]) if (voice.kind === 'door') this._dispose(voice, true);
-      this._voice('door', { level: 0.8, position: event }); this.counters.door++;
+      this._voice('door', { level: CHASE_MIX.door, position: event }); this.counters.door++;
     }
     const steps = this.tracker.update(snapshot, nowMs());
     for (const voice of [...this.voices]) {
@@ -333,7 +374,7 @@ export class ChaseAudio {
     }
     for (const step of steps) {
       if ([...this.voices].some(voice => voice.kind === 'footstep' && voice.actor === step.id)) continue;
-      this._voice('footsteps', { kind: 'footstep', level: step.own ? 0.55 : 0.8,
+      this._voice('footsteps', { kind: 'footstep', level: step.own ? CHASE_MIX.ownStep : CHASE_MIX.remoteStep,
         position: step.position, actor: step.id, buffer: this.footstepBuffer });
       this.counters[step.own ? 'footstepsSelf' : 'footstepsRemote']++;
     }
@@ -350,14 +391,16 @@ export class ChaseAudio {
     const enabled = this.enabled;
     const operation = ++this.operation;
     this.enabled = false; this._stopVoices();
-    if (!enabled || !playVictory || snapshot.winner !== 'hunter') return false;
+    const resultId = snapshot.winner === 'hunter' ? 'hunter-win' : snapshot.outcome === 'escaped' ? 'door' : null;
+    if (!enabled || !playVictory || !resultId) return false;
     try {
       await this._init();
       if (operation !== this.operation) return false;
       await this.context.resume();
       if (operation !== this.operation) return false;
       this.enabled = true; this.running = true; this.mode = 'victory';
-      this._voice('hunter-win', { level: 0.8 }); this.counters.hunterWin++;
+      this._voice(resultId, { level: CHASE_MIX.victory });
+      this.counters[resultId === 'hunter-win' ? 'hunterWin' : 'escape']++;
       this._masterLevel();
       return true;
     } catch (error) {

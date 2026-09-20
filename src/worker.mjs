@@ -1,4 +1,5 @@
 import connection from '../connection.json' with {type:'json'};
+import {gameApi} from './game-api.mjs';
 
 const database=connection.database,upstream=new URL(connection.uri);
 const identityPath=`/v1/database/${database}/identity`;
@@ -13,6 +14,9 @@ function trusted(request,url){const origin=request.headers.get('Origin');return 
 // SQL API, management API, cookies, or hosting credentials are forwarded.
 export async function route(request,env,fetchImpl=fetch){
   const url=new URL(request.url),path=url.pathname;
+  const gameResponse=await gameApi(request,env,fetchImpl);
+  if(gameResponse)return gameResponse;
+  if(path==='/tutorial'||path==='/hotel')return Response.redirect(url.origin+path+'/'+url.search,302);
   if(path==='/api/detective/config'&&request.method==='GET')return json({
     configured:false,model:'',csrf:'',hosting:'cloud',clientBuild:typeof __BUILD_ID__==='undefined'?'test':__BUILD_ID__,
     uri:url.origin,fallbackUri:upstream.origin,identityUri:upstream.origin,database,

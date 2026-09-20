@@ -3,8 +3,8 @@ import {localizeMessage,roleLabel} from './i18n.mjs';
 const $=id=>document.getElementById(id);
 const scenes={rules:'lobby-rules',name:'lobby-name',choice:'lobby-choice',join:'lobby-join',room:'room-details'};
 const rules=[
-  ['下一扇门后，\n你不再独行。','两人进入同一个世界。\n一个追寻脚步，一个寻找出口。'],
-  ['你要追寻，\n还是逃离？','监管者循着脚步接近对方，按 E 尝试抓捕。\n求生者循机械声找到电机，再到雨声处开门逃脱。'],
+  ['下一扇门后，\n你不再独行。','两人进入同一个世界。\n一个追寻心跳，一个听脚步躲避。'],
+  ['你要追寻，\n还是逃离？','监管者循着求生者的心跳接近，按 E 尝试抓捕。\n求生者听脚步躲避，找到电机后到雨声处按 E 逃脱。\n场地没有墙和门。'],
   ['等你们都准备好。','两人选择不同角色，再各自点击“准备开始”。\n当前测试场中，求生者先行 8 秒，一局限时 3 分钟。'],
 ];
 const stored=(storage,key)=>{try{return globalThis[storage].getItem(key)||'';}catch{return '';}};

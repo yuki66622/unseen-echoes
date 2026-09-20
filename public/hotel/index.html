@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pinewood Inn · An audio mystery</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/hotel/style.css"><link rel="stylesheet" href="/chat-beam.bundle.css"><link rel="stylesheet" href="/journey.css"></head>
+<body>
+<main>
+<section id="intro" class="intro" aria-labelledby="title">
+<p class="eyebrow">MISTBROOK · AN AUDIO MYSTERY</p><h1 id="title">Pinewood Inn</h1>
+<div class="story">
+<p>You are a detective, called to the quiet town of Mistbrook to investigate a mysterious death at the Pinewood Inn.</p>
+<p>Last night, a guest named Jake died in an upstairs room. Three witnesses heard sounds coming from the room around the time of his death.</p>
+<p>All three are speaking honestly. Yet each has a different explanation for one of the voices.</p>
+<p>Your investigation begins at the hotel entrance. The receptionist is expecting you. Guests and staff continue their daily routines. Somewhere inside, a recording of that night is waiting to be found.</p>
+<p>Explore the rooms. Talk to people. Listen to what happens in the hallways. Replay anything you do not understand. A passing conversation may change how you interpret an earlier clue.</p>
+<p>Your task is to identify the sources of those sounds, explain the conflicting accounts, and reconstruct what happened around Jake’s death.</p>
+<p class="invitation">Push open the door.</p>
+</div>
+<div class="tutorial"><p>Wear headphones. The world stays dark.</p><p><kbd>W</kbd> / <kbd>S</kbd> or <kbd>↑</kbd> / <kbd>↓</kbd> walk · <kbd>A</kbd> / <kbd>D</kbd> or <kbd>←</kbd> / <kbd>→</kbd> turn<br><kbd>E</kbd> interact with the person, recorder or door shown at the centre<br><kbd>P</kbd> pause · hold <kbd>V</kbd> to speak</p><p>Five unsuccessful E searches end the round. Finding a person, using the recorder or operating a door does not spend a mistake. The compass shows your facing direction. Walk into the stairway to change floors. Each step is gradual. You can also use the controls inside the conversation.</p></div>
+<button id="start" class="primary">Begin investigation</button><p id="load-status" role="status" class="muted">Sound begins only after you enter.</p>
+</section>
+<section id="playfield" aria-label="The dark hotel" hidden></section>
+<div id="orientation" class="orientation" role="img" aria-label="Facing North" hidden>
+  <div class="compass" aria-hidden="true"><span class="north">N</span><span class="east">E</span><span class="south">S</span><span class="west">W</span>
+    <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="29" fill="none" stroke="currentColor" stroke-width=".6"/><g id="compass-arrow"><path d="M50 28 L59 61 L50 56 L41 61 Z" fill="currentColor"/></g></svg>
+</div><p id="facing">Facing North · 000°</p><p id="floor-label">Ground floor</p><p id="search-budget">Search mistakes 0 / 5</p>
+</div>
+<div id="interaction-prompt" class="interaction-prompt" role="status" hidden><kbd>E</kbd><span id="interaction-label">Open entrance</span><small id="interaction-bearing">Ahead</small></div>
+<div id="direction-hint" class="direction-hint" role="status" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><g id="hint-arrow"><path d="M12 3L5 11M12 3L19 11M12 3V21" fill="none" stroke="currentColor" stroke-width="1.5"/></g></svg><span id="hint-text"></span></div>
+<aside id="trail-map" class="trail-map" aria-label="Explored path" hidden><header><span>YOUR PATH</span><span id="trail-floor">GROUND FLOOR</span></header><canvas id="trail-canvas" width="360" height="300" aria-label="Only your explored route is revealed"></canvas></aside>
+<section id="chat" data-gemini-beam class="chat" aria-label="Detective conversation" hidden>
+<header class="chat-header"><div><span class="eyebrow">PINEWOOD INN</span><h2 id="speaker-title">Gemini · your companion</h2></div><div class="header-actions"><button id="notes-toggle" aria-expanded="false" aria-controls="notes">Notes <span id="note-count">0</span></button><button id="settings-toggle" aria-expanded="false" aria-controls="settings" aria-label="Open settings and movement controls">Controls</button></div></header>
+<div id="notes" class="drawer" hidden><h3>Case notes</h3><div id="note-list"></div><button id="back-guide">Discuss with Gemini</button></div>
+<div id="settings" class="drawer" hidden><div class="movement"><button data-move="forward" aria-label="Walk forward half a metre">Forward</button><button data-move="left" aria-label="Turn left thirty degrees">Turn left</button><button data-move="back" aria-label="Walk back half a metre">Back</button><button data-move="right" aria-label="Turn right thirty degrees">Turn right</button></div><div class="settings-row"><button id="pause">Pause</button><button id="restart">Restart</button><button id="stop-audio">Stop current speech</button></div><label>Volume <input id="volume" type="range" min="0" max="0.8" step="0.01" value="0.35"></label><label class="check"><input id="spoken-replies" type="checkbox" checked> Spoken Gemini replies</label></div>
+<div id="chat-log" class="chat-log" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions"></div>
+<p id="notice" class="notice" role="status"></p>
+<div id="context-actions" class="context-actions"></div>
+<div id="suggestions" class="suggestions"></div>
+<form id="chat-form"><label class="sr-only" for="message">Speak or type to your companion</label><textarea id="message" rows="1" maxlength="600" placeholder="Ask a question, or explain what you heard…"></textarea><button id="send" type="submit" aria-label="Send message">Send</button><button id="talk" type="button" aria-label="Hold to speak" aria-pressed="false">Speak</button></form>
+<div class="chat-footer"><button id="submit-case">Submit explanation</button><button id="guide">Gemini</button><span id="connection" class="muted">Connecting…</span></div>
+</section>
+<section id="ending" class="ending" aria-labelledby="ending-title" hidden><p class="eyebrow" id="ending-status">CASE EXPLAINED</p><h1 id="ending-title">Honest ears.<br>Different stories.</h1><p id="ending-text"></p><button id="play-again" class="primary">Return to the entrance</button></section>
+<aside id="debug" hidden><h3>Designer view</h3><canvas id="debug-map" width="720" height="550" aria-label="Hotel map with player and sources"></canvas><div class="debug-actions"><button id="qa-route">Walk test route</button><button id="qa-return">Walk downstairs</button></div><output id="qa-state"></output></aside>
+</main>
+<script type="module" src="/hotel/app.mjs"></script><script type="module" src="/chat-beam.bundle.mjs"></script><script src="/glitter.js"></script>
+<script type="module" src="/journey.mjs"></script></body></html>

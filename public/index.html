@@ -6,7 +6,7 @@ html[data-local-file] body{margin:0}#local-file-help{max-width:640px;margin:12vh
 <body><section id="local-file-help" hidden><h1>请从游戏入口打开</h1><p>你现在打开的是网页文件。联机游戏需要先启动本机服务。</p><p><a href="http://127.0.0.1:18771/">打开已启动的游戏</a></p><p>如果上面的入口打不开，请回到解压后的游戏包，双击“启动游戏-Mac.command”或“启动游戏-Windows.bat”，使用它自动打开的页面。</p><p>进入后点击“跳过教程，直接联机”，就可以创建或加入双人房间。</p></section><section id="opening"><iframe title="未见回声 · 序章" id="opening-frame"></iframe><button id="tutorial-entry" hidden>开始教程</button><button id="skip-tutorial" data-skip-tutorial type="button">跳过教程，直接联机</button></section>
 <main id="game" hidden>
 <header><span id="chapter">初次穿行</span><div><span id="network-indicator"></span><button id="settings-button">设置</button><button id="sound-toggle" hidden>暂停声音</button></div></header>
-<section id="settings" hidden aria-label="设置"><label>文字颜色 <input id="text-colour" type="color" value="#b7c7dc"></label><button id="reset-colour">恢复默认颜色</button><label>音量 <input id="volume" type="range" min="0" max="100" value="35"></label><p>探索时保持纯黑画面，建议佩戴耳机。</p></section>
+<section id="settings" hidden aria-label="设置"><label>文字颜色 <input id="text-colour" type="color" value="#b7c7dc"></label><button id="reset-colour">恢复默认颜色</button><label>音量 <input id="volume" type="range" min="0" max="100" value="75"></label><p>探索时保持纯黑画面，建议佩戴耳机。</p></section>
 <section id="narrative" class="passage"><p class="eyebrow" id="role-label"></p><h1 id="title">找到雨声。</h1><p id="objective">三种声音交叠。循着雨声前进。</p><p id="status" role="status" aria-live="polite"></p><button id="begin">进入声场</button><button id="skip-tutorial-active" data-skip-tutorial type="button" hidden>跳过教程，直接联机</button></section>
 <section id="lobby" hidden aria-label="第一关 · 双人房间">
   <nav class="lobby-nav" aria-label="房间选项"><button id="lobby-back" type="button" hidden>返回</button><button id="show-rules" type="button">玩法说明</button></nav>
@@ -34,7 +34,7 @@ html[data-local-file] body{margin:0}#local-file-help{max-width:640px;margin:12vh
     <p id="room-share-status" class="muted" role="status" aria-live="polite"></p><label id="room-copy-fallback" hidden>房间码（可手动复制）<input id="room-code-copy" readonly aria-label="可手动复制的房间码"></label>
     <ul id="roster" aria-label="房间里的玩家"></ul>
     <p id="role-prompt" class="muted">选择你这一局的身份。</p>
-    <div class="roles" aria-label="选择角色"><button data-role="hunter" type="button"><span>监管者</span><small>循着脚步，找到对方。</small></button><button data-role="survivor" type="button"><span>求生者</span><small>找到电机，抵达出口。</small></button></div>
+    <div class="roles" aria-label="选择角色"><button data-role="hunter" type="button"><span>监管者</span><small>循着心跳，找到对方。</small></button><button data-role="survivor" type="button"><span>求生者</span><small>听脚步避开监管，找到电机。</small></button></div>
     <p id="ready-hint" class="muted"></p><div class="scene-actions"><button id="ready" class="primary-action" type="button">准备开始</button><button id="leave-room" type="button">离开房间</button></div>
   </section>
   <p id="lobby-error" class="form-error" role="alert"></p>
@@ -51,9 +51,9 @@ html[data-local-file] body{margin:0}#local-file-help{max-width:640px;margin:12vh
 </section>
 <section id="controls" hidden aria-label="移动与交互"><div class="control-row"><button data-action="left">左转 · A</button><button data-action="forward">前进 · W</button><button data-action="right">右转 · D</button><button data-action="back">后退 · S</button><button data-action="stop">停下 · 空格</button></div><div class="control-row"><button id="door">开门 · F</button><button id="interact">查看 · E</button></div><p id="nearby"></p><p class="muted">每步前进半米，每次转身 30°。声音会随你的位置变化。</p></section>
 <section id="story-panel" hidden><details id="evidence"><summary>已发现的证据 <span id="clue-count">0 / 3</span></summary><div id="clues"></div></details><form id="accuse-form"><label>你的推理结论 <select id="suspect"><option value="porter">门卫</option><option value="mechanic">维修员</option><option value="curator">馆长</option></select></label><button id="accuse">提交推理</button></form><section aria-label="与 Gemini 的个人对话"><h2>你的调查搭档</h2><p id="chat-service">正在检查对话服务……</p><div id="chat-log" aria-live="polite"></div><form id="chat-form"><label for="chat-text">和 Gemini 讨论证据</label><textarea id="chat-text" rows="2" maxlength="1200" required placeholder="从钟绳的情况，我能推断出什么？"></textarea><button id="chat-send">询问 Gemini</button></form><p class="muted">你的消息和已发现的证据会发送给 Gemini，另一位玩家看不到对话。等待回复时仍可继续探索。</p></section></section>
-<section id="result" hidden class="passage"><p class="eyebrow">这一段穿行，结束了</p><h1 id="result-title"></h1><p id="result-body"></p><button id="next-level">进入你的个人故事</button><button id="rematch">再玩一局</button><button id="return-title" hidden>返回标题</button></section>
+<section id="result" hidden class="passage"><p class="eyebrow">这一段穿行，结束了</p><h1 id="result-title"></h1><p id="result-body"></p><button id="next-level">进入旅馆调查</button><button id="rematch">再玩一局</button><button id="return-title" hidden>返回标题</button></section>
 <div id="partner-wait" hidden role="status" aria-live="polite" aria-atomic="true"><span class="origin-wave" aria-hidden="true"></span><span id="partner-wait-label"></span></div>
-<footer><span id="progress">序章 → 教程 → 双人追逐 → 个人故事</span><span id="silent-note"></span></footer>
+<footer><span id="progress">序章 → 找雨教程 → 双人追逐 → 旅馆调查</span><span id="silent-note"></span></footer>
 </main><script>
 if(location.protocol==='file:'){
   document.documentElement.dataset.localFile='true';

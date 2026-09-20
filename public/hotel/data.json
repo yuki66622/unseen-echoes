@@ -1,0 +1,407 @@
+{
+  "catalog": {
+    "assets": {
+      "CLAIRE-INITIAL": {
+        "url": "/hotel/assets/claire-initial.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "CLAIRE-GERMAN": {
+        "url": "/hotel/assets/claire-german.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "CLAIRE-WORDS": {
+        "url": "/hotel/assets/claire-words.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "CLAIRE-FRENCH": {
+        "url": "/hotel/assets/claire-french.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "MARTIN-INITIAL": {
+        "url": "/hotel/assets/martin-initial.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "MARTIN-GERMAN": {
+        "url": "/hotel/assets/martin-german.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "MARTIN-ITALIAN": {
+        "url": "/hotel/assets/martin-italian.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "MARTIN-WORDS": {
+        "url": "/hotel/assets/martin-words.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "ELENA-INITIAL": {
+        "url": "/hotel/assets/elena-initial.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "ELENA-ITALIAN": {
+        "url": "/hotel/assets/elena-italian.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "ELENA-UPSET": {
+        "url": "/hotel/assets/elena-upset.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "ELENA-FRENCH-R2": {
+        "url": "/hotel/assets/elena-french-r2.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "DLG-02-EN-R3": {
+        "url": "/hotel/assets/dlg-02-en-r3.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "DLG-05-EN-R3": {
+        "url": "/hotel/assets/dlg-05-en-r3.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "DLG-01-EN-R4": {
+        "url": "/hotel/assets/dlg-01-en-r4.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "DLG-03-EN-R4": {
+        "url": "/hotel/assets/dlg-03-en-r4.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "DLG-04-EN-R4": {
+        "url": "/hotel/assets/dlg-04-en-r4.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "DLG-06": {
+        "url": "/hotel/assets/dlg-06.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
+      },
+      "exterior-bed": {
+        "url": "/hotel/assets/exterior-bed.mp3",
+        "kind": "ambience",
+        "loop": true,
+        "gainDb": -14
+      },
+      "upper-bed": {
+        "url": "/hotel/assets/upper-bed.mp3",
+        "kind": "ambience",
+        "loop": true,
+        "gainDb": -15
+      },
+      "step-stone": {
+        "url": "/hotel/assets/step-stone.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -8
+      },
+      "step-tile": {
+        "url": "/hotel/assets/step-tile.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -10
+      },
+      "step-wood": {
+        "url": "/hotel/assets/step-wood.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -8
+      },
+      "step-carpet": {
+        "url": "/hotel/assets/step-carpet.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -5
+      },
+      "entrance-open": {
+        "url": "/hotel/assets/entrance-open.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -6
+      },
+      "entrance-close": {
+        "url": "/hotel/assets/entrance-close.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -6
+      },
+      "door-open": {
+        "url": "/hotel/assets/door-open.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -8
+      },
+      "door-close": {
+        "url": "/hotel/assets/door-close.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -9
+      },
+      "cart": {
+        "url": "/hotel/assets/cart.mp3",
+        "kind": "ambience",
+        "loop": true,
+        "gainDb": -15
+      },
+      "dusting": {
+        "url": "/hotel/assets/dusting.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -11
+      },
+      "cart-contact": {
+        "url": "/hotel/assets/cart-contact.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -14
+      },
+      "recorder-click": {
+        "url": "/hotel/assets/recorder-click.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -3
+      },
+      "recorder-motor": {
+        "url": "/hotel/assets/recorder-motor.mp3",
+        "kind": "ambience",
+        "loop": true,
+        "gainDb": -18
+      },
+      "hotel-bed": {
+        "url": "/hotel/assets/hotel-bed.mp3",
+        "kind": "ambience",
+        "loop": true,
+        "gainDb": -12
+      },
+      "testimony-music": {
+        "url": "/hotel/assets/testimony-music.mp3",
+        "kind": "music",
+        "loop": true,
+        "gainDb": -23
+      },
+      "investigation-music": {
+        "url": "/hotel/assets/investigation-music.mp3",
+        "kind": "music",
+        "loop": true,
+        "gainDb": -20
+      },
+      "ending": {
+        "url": "/hotel/assets/ending.mp3",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": -8
+      },
+      "incident": {
+        "url": "/hotel/assets/incident.wav",
+        "kind": "evidence",
+        "loop": false,
+        "gainDb": -2
+      }
+    },
+    "ambience": [
+      {
+        "assetId": "exterior-bed",
+        "sourceId": "exterior-bed",
+        "kind": "diffuse"
+      },
+      {
+        "assetId": "hotel-bed",
+        "sourceId": "hotel-bed",
+        "kind": "diffuse"
+      },
+      {
+        "assetId": "upper-bed",
+        "sourceId": "upper-bed",
+        "kind": "diffuse"
+      },
+      {
+        "assetId": "cart",
+        "sourceId": "cart",
+        "kind": "point"
+      },
+      {
+        "assetId": "recorder-motor",
+        "sourceId": "recorder",
+        "kind": "point"
+      }
+    ]
+  },
+  "speech": {
+    "CLAIRE-INITIAL": {
+      "id": "CLAIRE-INITIAL",
+      "name": "Claire",
+      "subtitle_en": "I heard two voices. One man was speaking English. The other sounded German to me. It was a harsh, restless voice, much harder to follow. I couldn’t tell what they were arguing about.",
+      "language_code": "fr",
+      "trigger": "first_encounter"
+    },
+    "CLAIRE-GERMAN": {
+      "id": "CLAIRE-GERMAN",
+      "name": "Claire",
+      "subtitle_en": "No. It reminded me of a German visitor I once overheard. That was why I thought of German.",
+      "language_code": "fr",
+      "trigger": "Do you speak German?"
+    },
+    "CLAIRE-WORDS": {
+      "id": "CLAIRE-WORDS",
+      "name": "Claire",
+      "subtitle_en": "No, not a single word. I remember the sound, but I can’t tell you what it meant.",
+      "language_code": "fr",
+      "trigger": "Can you repeat any words from that second voice?"
+    },
+    "CLAIRE-FRENCH": {
+      "id": "CLAIRE-FRENCH",
+      "name": "Claire",
+      "subtitle_en": "I speak French. Nothing I heard sounded like French to me.",
+      "language_code": "fr",
+      "trigger": "Could it have been French?"
+    },
+    "MARTIN-INITIAL": {
+      "id": "MARTIN-INITIAL",
+      "name": "Martin",
+      "subtitle_en": "There was a man speaking English, and another voice mixed in with his. I thought the second person was Italian. The sounds came in quick, uneven bursts. Sometimes the two voices overlapped.",
+      "language_code": "de",
+      "trigger": "first_encounter"
+    },
+    "MARTIN-GERMAN": {
+      "id": "MARTIN-GERMAN",
+      "name": "Martin",
+      "subtitle_en": "German is my first language. I didn’t recognize any German words in that voice. That isn’t how I would have described it.",
+      "language_code": "de",
+      "trigger": "Another witness thought it was German."
+    },
+    "MARTIN-ITALIAN": {
+      "id": "MARTIN-ITALIAN",
+      "name": "Martin",
+      "subtitle_en": "No. I’ve heard it spoken, but I can’t understand it. Italian was my impression, not something I could translate.",
+      "language_code": "de",
+      "trigger": "Do you speak Italian?"
+    },
+    "MARTIN-WORDS": {
+      "id": "MARTIN-WORDS",
+      "name": "Martin",
+      "subtitle_en": "From the second voice? No. I couldn’t separate it into words.",
+      "language_code": "de",
+      "trigger": "Did you hear a complete sentence?"
+    },
+    "ELENA-INITIAL": {
+      "id": "ELENA-INITIAL",
+      "name": "Elena",
+      "subtitle_en": "I could make out that one man was speaking English. The other voice sounded French to me. It rose suddenly, then broke off, then started again. I remember thinking that someone was terribly upset.",
+      "language_code": "it",
+      "trigger": "first_encounter"
+    },
+    "ELENA-ITALIAN": {
+      "id": "ELENA-ITALIAN",
+      "name": "Elena",
+      "subtitle_en": "I’m Italian. I didn’t hear anything I could recognize as Italian.",
+      "language_code": "it",
+      "trigger": "Another witness thought it was Italian."
+    },
+    "ELENA-UPSET": {
+      "id": "ELENA-UPSET",
+      "name": "Elena",
+      "subtitle_en": "The sound of the voice. I didn’t understand any words. That was how I interpreted it.",
+      "language_code": "it",
+      "trigger": "What made you think the person was upset?"
+    },
+    "ELENA-FRENCH-R2": {
+      "id": "ELENA-FRENCH-R2",
+      "name": "Elena",
+      "subtitle_en": "A little. I can follow an ordinary conversation in French, but I'm not fluent. That voice reminded me of French visitors here, though I couldn't make out a single word. I may have been mistaken.",
+      "language_code": "it",
+      "trigger": "Do you speak French?"
+    },
+    "DLG-02-EN-R3": {
+      "id": "DLG-02-EN-R3",
+      "name": "Claire",
+      "subtitle_en": "Such a shame about Jake. I still can't believe he's gone.",
+      "language_code": "en",
+      "trigger": "passing_conversation"
+    },
+    "DLG-05-EN-R3": {
+      "id": "DLG-05-EN-R3",
+      "name": "Elena",
+      "subtitle_en": "Yes. Come with me?",
+      "language_code": "en",
+      "trigger": "passing_conversation"
+    },
+    "DLG-01-EN-R4": {
+      "id": "DLG-01-EN-R4",
+      "name": "Martin",
+      "subtitle_en": "The recorder is upstairs. Follow the stairs beyond the lounge.",
+      "language_code": "en",
+      "trigger": "directions"
+    },
+    "DLG-03-EN-R4": {
+      "id": "DLG-03-EN-R4",
+      "name": "Elena",
+      "subtitle_en": "He was the only zoologist in town. My son wanted to ask him so many questions.",
+      "language_code": "en",
+      "trigger": "passing_conversation"
+    },
+    "DLG-04-EN-R4": {
+      "id": "DLG-04-EN-R4",
+      "name": "Claire",
+      "subtitle_en": "Are you still going to the flower shop?",
+      "language_code": "en",
+      "trigger": "passing_conversation"
+    },
+    "DLG-06": {
+      "id": "DLG-06",
+      "name": "Cleaner",
+      "subtitle_en": "The recorder? It's in the room at the end of this hall. Watch out for the cart.",
+      "language_code": "en",
+      "trigger": "directions"
+    }
+  },
+  "language_knowledge": {
+    "Claire": {
+      "native": "French",
+      "understands": "English and everyday Italian",
+      "does_not_understand": "German"
+    },
+    "Martin": {
+      "native": "German",
+      "understands": "English",
+      "does_not_understand": "Italian"
+    },
+    "Elena": {
+      "native": "Italian",
+      "understands": "English and everyday French",
+      "french_fluency": "limited; cannot identify words in incident recording"
+    }
+  },
+  "revision": "hotel-v1"
+}

@@ -1,0 +1,230 @@
+[
+  {
+    "id": "CLAIRE-INITIAL",
+    "source": "claire-initial.mp3",
+    "file": "claire-initial.mp3",
+    "sha256": "197601d93f0631ba19706a113b3b2a90ac01d9688335c025c63e74ca6c0f9967"
+  },
+  {
+    "id": "CLAIRE-GERMAN",
+    "source": "claire-german.mp3",
+    "file": "claire-german.mp3",
+    "sha256": "9f31d78a8091790629a3e22531b1d08f5cc321e13f8cdcbd69a0e3f6b0d1fce0"
+  },
+  {
+    "id": "CLAIRE-WORDS",
+    "source": "claire-words.mp3",
+    "file": "claire-words.mp3",
+    "sha256": "738d12dc13470f63190f3eb6755ae2744493db0ca11fb92aa845194225228acd"
+  },
+  {
+    "id": "CLAIRE-FRENCH",
+    "source": "claire-french.mp3",
+    "file": "claire-french.mp3",
+    "sha256": "690ab7e573cd857374bb71562b8ab37a9943e29c95856d70eadc6a34799d502f"
+  },
+  {
+    "id": "MARTIN-INITIAL",
+    "source": "martin-initial.mp3",
+    "file": "martin-initial.mp3",
+    "sha256": "54d331a3113cc2250dadf78eb09fe5ab11a30b75f1d306aae85543b4cd802908"
+  },
+  {
+    "id": "MARTIN-GERMAN",
+    "source": "martin-german.mp3",
+    "file": "martin-german.mp3",
+    "sha256": "7714e91fc22109f6b3473dd791e65fd15ac1ec3335781d81fb34ba9e2fce1a9d"
+  },
+  {
+    "id": "MARTIN-ITALIAN",
+    "source": "martin-italian.mp3",
+    "file": "martin-italian.mp3",
+    "sha256": "b00266d37e398b76007bfd31dba11e57f176ac5db36940e3ad264d5d08d46bd8"
+  },
+  {
+    "id": "MARTIN-WORDS",
+    "source": "martin-words.mp3",
+    "file": "martin-words.mp3",
+    "sha256": "df309fabd0b0948256be2af4a6fdd268842a0596148ac96de0e11a0e770c6457"
+  },
+  {
+    "id": "ELENA-INITIAL",
+    "source": "elena-initial.mp3",
+    "file": "elena-initial.mp3",
+    "sha256": "5a4a950521b2487828f74a47d92ee12b0aa73b4487d4997e0b3ae40b7e9d42d9"
+  },
+  {
+    "id": "ELENA-ITALIAN",
+    "source": "elena-italian.mp3",
+    "file": "elena-italian.mp3",
+    "sha256": "21477c697490a95252e559689c23b1fafa3c979a10f452e80bc7d1d91658baa9"
+  },
+  {
+    "id": "ELENA-UPSET",
+    "source": "elena-upset.mp3",
+    "file": "elena-upset.mp3",
+    "sha256": "e7e7c1959e6b2e2f1b6a3418a1542ed4dbf4c070881810a100936891bd8fdc22"
+  },
+  {
+    "id": "ELENA-FRENCH-R2",
+    "source": "elena-french-r2.mp3",
+    "file": "elena-french-r2.mp3",
+    "sha256": "dd2ada97ced6c8d6c7428bc3a0e2563194854be57a3c39a00e3d8127bf6bb199"
+  },
+  {
+    "id": "DLG-02-EN-R3",
+    "source": "dlg-02-en-r3.mp3",
+    "file": "dlg-02-en-r3.mp3",
+    "sha256": "471f52498cb3bc15b0c80431260fa268ecb2ed1ae30353223c202b93a57f48be"
+  },
+  {
+    "id": "DLG-05-EN-R3",
+    "source": "dlg-05-en-r3.mp3",
+    "file": "dlg-05-en-r3.mp3",
+    "sha256": "cee0931a2d1b3ee3d8f487a4819d7707c17b637b740e601195ace4550b2646f8"
+  },
+  {
+    "id": "DLG-01-EN-R4",
+    "source": "dlg-01-en-r4.mp3",
+    "file": "dlg-01-en-r4.mp3",
+    "sha256": "0f9927d120d7987d66c9b8c738e1597df91a3c84dc157b3c435ed9cf0e23d9e0"
+  },
+  {
+    "id": "DLG-03-EN-R4",
+    "source": "dlg-03-en-r4.mp3",
+    "file": "dlg-03-en-r4.mp3",
+    "sha256": "606564ad328c935e9e4c914de1263791a41aba3394bf6cb8244f68a0f8c53650"
+  },
+  {
+    "id": "DLG-04-EN-R4",
+    "source": "dlg-04-en-r4.mp3",
+    "file": "dlg-04-en-r4.mp3",
+    "sha256": "3c3e972ee0ebc73afe5c4dbb386b271f48774ff50caa918d557e42d4d9d75cee"
+  },
+  {
+    "id": "DLG-06",
+    "source": "dlg-06.mp3",
+    "file": "dlg-06.mp3",
+    "sha256": "8cc4954e79c1430c1554762637054602ef83798100bc6503ab4747bfacc29427"
+  },
+  {
+    "id": "exterior-bed",
+    "source": "amb-01.mp3",
+    "file": "exterior-bed.mp3",
+    "sha256": "97b3eee82762917294b588bbf3b0903eecb33bb700a8b6ae1dcf49bf32e0bbf2"
+  },
+  {
+    "id": "upper-bed",
+    "source": "amb-03.mp3",
+    "file": "upper-bed.mp3",
+    "sha256": "03580fc616b3ec70bcdec69cff2945f1fae4812da15afc802525ddcd58b65383"
+  },
+  {
+    "id": "step-stone",
+    "source": "ft-01.mp3",
+    "file": "step-stone.mp3",
+    "sha256": "20509cd410588120342be7e755ec1d37119def8ea934f82c9153232264325a78"
+  },
+  {
+    "id": "step-tile",
+    "source": "ft-02.mp3",
+    "file": "step-tile.mp3",
+    "sha256": "fccd0a649fffceab707c155d1badb59cdaebf6ad252cb1e384d5467e65d17f8a"
+  },
+  {
+    "id": "step-wood",
+    "source": "ft-03.mp3",
+    "file": "step-wood.mp3",
+    "sha256": "7290ff19c0403e6a70e2029bec1de131791f3df30ec86ad78e66973e57534c03"
+  },
+  {
+    "id": "step-carpet",
+    "source": "ft-04.mp3",
+    "file": "step-carpet.mp3",
+    "sha256": "6533b41377ba9e42996b2e58a8b6d7d48b784599159edfc1f9d739fb51b0ad9f"
+  },
+  {
+    "id": "entrance-open",
+    "source": "door-01.mp3",
+    "file": "entrance-open.mp3",
+    "sha256": "15581692ab1ddb49149690d02ff1aaec3fee13159ac7fc495f71517888b33b61"
+  },
+  {
+    "id": "entrance-close",
+    "source": "door-02.mp3",
+    "file": "entrance-close.mp3",
+    "sha256": "fb0fb1abcb53e0d0d62c7390936678aff9af6c941cfdc46495008f63477028c0"
+  },
+  {
+    "id": "door-open",
+    "source": "door-03.mp3",
+    "file": "door-open.mp3",
+    "sha256": "e663a23d43ce1ccae867e868bfe0a288757ea1b46049921e18bf48f7bc5e020b"
+  },
+  {
+    "id": "door-close",
+    "source": "door-04.mp3",
+    "file": "door-close.mp3",
+    "sha256": "e587270933b22912d1c761a46fbc9f682c53f752848e65857684898bcc03a0f7"
+  },
+  {
+    "id": "cart",
+    "source": "clean-01.mp3",
+    "file": "cart.mp3",
+    "sha256": "b0dd08374b3358c797c20b30abe1aeaf3a2d7ab2fd4e52a1eb5287e23dfb9511"
+  },
+  {
+    "id": "dusting",
+    "source": "clean-02.mp3",
+    "file": "dusting.mp3",
+    "sha256": "940e54783c4d8b1d93e03a9bea85054e0f5af95e79de974544d53b9712e50c95"
+  },
+  {
+    "id": "cart-contact",
+    "source": "clean-03.mp3",
+    "file": "cart-contact.mp3",
+    "sha256": "8397e359b6178e99f157f632cfc29a7dfbb1160d2bc43c351cd8898a089f7a6d"
+  },
+  {
+    "id": "recorder-click",
+    "source": "rec-01.mp3",
+    "file": "recorder-click.mp3",
+    "sha256": "2d3b4e86bac34e16df935f1fbad90da5587f7ffa86f8c9a0eec0f2997cb2bfd3"
+  },
+  {
+    "id": "recorder-motor",
+    "source": "rec-02.mp3",
+    "file": "recorder-motor.mp3",
+    "sha256": "bc35e4720395f62732b65ceb2ad65f37a578cbf89ddbfe856510bba15b3c8d4e"
+  },
+  {
+    "id": "hotel-bed",
+    "source": "hotel-ambience.mp3",
+    "file": "hotel-bed.mp3",
+    "sha256": "702d7d23a1843ceca5e365c16a8560756d4a4978c22e7b68319df2abbd8eac76"
+  },
+  {
+    "id": "testimony-music",
+    "source": "testimony.mp3",
+    "file": "testimony-music.mp3",
+    "sha256": "c02c6479c051d946c5f39c5a697f3758de622ccf8dc02317b808ea947e797af2"
+  },
+  {
+    "id": "investigation-music",
+    "source": "investigation.mp3",
+    "file": "investigation-music.mp3",
+    "sha256": "65ddfdf2e979b20c14e298b69ad7d0514f0a2186ec9b142c48b0d30f01265fd2"
+  },
+  {
+    "id": "ending",
+    "source": "case-end.mp3",
+    "file": "ending.mp3",
+    "sha256": "82b88f517a53348611725b97c089b4a6783956f046411f306f0f50df0bc04d99"
+  },
+  {
+    "id": "incident",
+    "source": "incident.wav",
+    "file": "incident.wav",
+    "sha256": "c3f8674d3259c98b737257157e7229792cf7571c0643223e84464fee0b7250f6"
+  }
+]

@@ -1,0 +1,294 @@
+{
+  "tutorial/index.html": {
+    "source": "sound-hunt-prototype/index.html",
+    "sha256": "4813b1b0d8c4bbb9a0c1c6cf8472e907ba708ff0aec6564259b635521d22e36b"
+  },
+  "tutorial/style.css": {
+    "source": "sound-hunt-prototype/style.css",
+    "sha256": "8fad0a4e34ff452fc338055d4b5c641f5d1d02bc3a6a9358d163bad4739263b4"
+  },
+  "tutorial/blind.css": {
+    "source": "sound-hunt-prototype/blind.css",
+    "sha256": "4fe10937fb47b78d1ca3e593e834cdf50510565147da7c8a4eae763fc0d1e4d7"
+  },
+  "tutorial/glitter.js": {
+    "source": "sound-hunt-prototype/glitter.js",
+    "sha256": "7e6e82df17b7d0f216060570be79877969f2f4afb3fad7f27bb0461096327fa9"
+  },
+  "tutorial/chat-beam.bundle.mjs": {
+    "source": "sound-hunt-prototype/chat-beam.bundle.mjs",
+    "sha256": "63bd917226700c2b28effcdb03db28193ebd75aee2fb0d1febbc00a25c412c1d"
+  },
+  "tutorial/chat-beam.bundle.css": {
+    "source": "sound-hunt-prototype/chat-beam.bundle.css",
+    "sha256": "ccf14217390b1b0c0f672b8873cfd56862d58640c57aec8ce5b5a0775a116038"
+  },
+  "tutorial/app.mjs": {
+    "source": "sound-hunt-prototype/app.mjs",
+    "sha256": "71804ae3ce80b1a7727d158f6174a85316496465d4e4744688b981196f10d08a"
+  },
+  "tutorial/world.mjs": {
+    "source": "sound-hunt-prototype/world.mjs",
+    "sha256": "9a2af484d7694348e696c02186dac76de364d08a72c01dae4bb75c77207a160f"
+  },
+  "tutorial/room-layout.mjs": {
+    "source": "sound-hunt-prototype/room-layout.mjs",
+    "sha256": "1262bca14a6ceec6f0dfeb01fec67338d387de35b59e91371de6dd6297290439"
+  },
+  "tutorial/sound-engine.mjs": {
+    "source": "sound-hunt-prototype/sound-engine.mjs",
+    "sha256": "50a91eb9edb14c3a324484d036a7202229a5fe0ae6c5f989d26e4866a514e2c6"
+  },
+  "tutorial/sound-catalog.mjs": {
+    "source": "sound-hunt-prototype/sound-catalog.mjs",
+    "sha256": "3b4e8174d8ddb4030247b23b70e1012c7017fdc8582c0c14781a4fa1449aecc0"
+  },
+  "tutorial/voice-input.mjs": {
+    "source": "sound-hunt-prototype/voice-input.mjs",
+    "sha256": "3600f0c1a0b28c032f4ac10b5bf03dd9ea400e9d1f1ff2c88c809d66d122c1ee"
+  },
+  "tutorial/voice-capture-worklet.js": {
+    "source": "sound-hunt-prototype/voice-capture-worklet.js",
+    "sha256": "6be5722df2ec3f5ef97028c53c7b0a72f609f15d84a5bc616b44821a3546b279"
+  },
+  "tutorial/voice-commands.mjs": {
+    "source": "sound-hunt-prototype/voice-commands.mjs",
+    "sha256": "0b5ff3399a036c6cdb2b3339bc4ac9e45c8a57c8c1223de960f2e55298c8a7f6"
+  },
+  "tutorial/voice-plan.mjs": {
+    "source": "sound-hunt-prototype/voice-plan.mjs",
+    "sha256": "1f6e84f0c1f859c6c5d0f2248d626394698a8d89eb7fbbe9169e348bfcddef3b"
+  },
+  "tutorial/voice-output.mjs": {
+    "source": "sound-hunt-prototype/voice-output.mjs",
+    "sha256": "d6207f885d7635b118ccff9ca54abc64ade66c9d06a4f2400d4e50ebd491932f"
+  },
+  "tutorial/movement.mjs": {
+    "source": "sound-hunt-prototype/movement.mjs",
+    "sha256": "41c6f757e716d1ea746d194f911b15abf9d80c216770a1eeac94e9930d9288af"
+  },
+  "hotel/index.html": {
+    "source": "sound-hunt-prototype/hotel/index.html",
+    "sha256": "3c1800c88c349aa77d92175e5da06816b9c739816c143ede205b9f6a5c68c5c7"
+  },
+  "hotel/style.css": {
+    "source": "sound-hunt-prototype/hotel/style.css",
+    "sha256": "61517d24b5cd7a8486c39a9800894622c88259d3335cfbdd3b0874b58bcd0f02"
+  },
+  "hotel/app.mjs": {
+    "source": "sound-hunt-prototype/hotel/app.mjs",
+    "sha256": "a0c66dfecb8f344f061de398574e5cae0a07ed7e8681879be3f2541e782cd17a"
+  },
+  "hotel/world.mjs": {
+    "source": "sound-hunt-prototype/hotel/world.mjs",
+    "sha256": "e3a8290945abf895f402e616c5e99a3777c0f267a857260002cf7cbd437de93e"
+  },
+  "hotel/audio.mjs": {
+    "source": "sound-hunt-prototype/hotel/audio.mjs",
+    "sha256": "eb1d2f09d76eb11690f974a27742e358d0d555ca71733601248744444aa6852f"
+  },
+  "hotel/acoustics.mjs": {
+    "source": "sound-hunt-prototype/hotel/acoustics.mjs",
+    "sha256": "2a2ae03464c71c638267d438287b14401ec26d9405f90735bc092e7220ed3ffe"
+  },
+  "hotel/navigation-hint.mjs": {
+    "source": "sound-hunt-prototype/hotel/navigation-hint.mjs",
+    "sha256": "ec96bebcb58606ba88d34ea49a0fb2bab1f3b8a070520d9e22c77218f6988bea"
+  },
+  "hotel/data.json": {
+    "source": "sound-hunt-prototype/hotel/data.json",
+    "sha256": "741b09155705683f6f8ce87595559d8abd26648edd5d96fc66fb8ba6ccf5e30c"
+  },
+  "hotel/voice-input.mjs": {
+    "source": "sound-hunt-prototype/voice-input.mjs",
+    "sha256": "3600f0c1a0b28c032f4ac10b5bf03dd9ea400e9d1f1ff2c88c809d66d122c1ee"
+  },
+  "hotel/voice-capture-worklet.js": {
+    "source": "sound-hunt-prototype/voice-capture-worklet.js",
+    "sha256": "6be5722df2ec3f5ef97028c53c7b0a72f609f15d84a5bc616b44821a3546b279"
+  },
+  "chat-beam.bundle.mjs": {
+    "source": "sound-hunt-prototype/chat-beam.bundle.mjs",
+    "sha256": "63bd917226700c2b28effcdb03db28193ebd75aee2fb0d1febbc00a25c412c1d"
+  },
+  "chat-beam.bundle.css": {
+    "source": "sound-hunt-prototype/chat-beam.bundle.css",
+    "sha256": "ccf14217390b1b0c0f672b8873cfd56862d58640c57aec8ce5b5a0775a116038"
+  },
+  "glitter.js": {
+    "source": "sound-hunt-prototype/glitter.js",
+    "sha256": "7e6e82df17b7d0f216060570be79877969f2f4afb3fad7f27bb0461096327fa9"
+  },
+  "hotel/assets/claire-initial.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/claire-initial.mp3",
+    "sha256": "197601d93f0631ba19706a113b3b2a90ac01d9688335c025c63e74ca6c0f9967"
+  },
+  "hotel/assets/claire-german.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/claire-german.mp3",
+    "sha256": "9f31d78a8091790629a3e22531b1d08f5cc321e13f8cdcbd69a0e3f6b0d1fce0"
+  },
+  "hotel/assets/claire-words.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/claire-words.mp3",
+    "sha256": "738d12dc13470f63190f3eb6755ae2744493db0ca11fb92aa845194225228acd"
+  },
+  "hotel/assets/claire-french.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/claire-french.mp3",
+    "sha256": "690ab7e573cd857374bb71562b8ab37a9943e29c95856d70eadc6a34799d502f"
+  },
+  "hotel/assets/martin-initial.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/martin-initial.mp3",
+    "sha256": "54d331a3113cc2250dadf78eb09fe5ab11a30b75f1d306aae85543b4cd802908"
+  },
+  "hotel/assets/martin-german.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/martin-german.mp3",
+    "sha256": "7714e91fc22109f6b3473dd791e65fd15ac1ec3335781d81fb34ba9e2fce1a9d"
+  },
+  "hotel/assets/martin-italian.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/martin-italian.mp3",
+    "sha256": "b00266d37e398b76007bfd31dba11e57f176ac5db36940e3ad264d5d08d46bd8"
+  },
+  "hotel/assets/martin-words.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/martin-words.mp3",
+    "sha256": "df309fabd0b0948256be2af4a6fdd268842a0596148ac96de0e11a0e770c6457"
+  },
+  "hotel/assets/elena-initial.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/elena-initial.mp3",
+    "sha256": "5a4a950521b2487828f74a47d92ee12b0aa73b4487d4997e0b3ae40b7e9d42d9"
+  },
+  "hotel/assets/elena-italian.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/elena-italian.mp3",
+    "sha256": "21477c697490a95252e559689c23b1fafa3c979a10f452e80bc7d1d91658baa9"
+  },
+  "hotel/assets/elena-upset.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/elena-upset.mp3",
+    "sha256": "e7e7c1959e6b2e2f1b6a3418a1542ed4dbf4c070881810a100936891bd8fdc22"
+  },
+  "hotel/assets/elena-french-r2.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/elena-french-r2.mp3",
+    "sha256": "dd2ada97ced6c8d6c7428bc3a0e2563194854be57a3c39a00e3d8127bf6bb199"
+  },
+  "hotel/assets/dlg-02-en-r3.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/dlg-02-en-r3.mp3",
+    "sha256": "471f52498cb3bc15b0c80431260fa268ecb2ed1ae30353223c202b93a57f48be"
+  },
+  "hotel/assets/dlg-05-en-r3.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/dlg-05-en-r3.mp3",
+    "sha256": "cee0931a2d1b3ee3d8f487a4819d7707c17b637b740e601195ace4550b2646f8"
+  },
+  "hotel/assets/dlg-01-en-r4.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/dlg-01-en-r4.mp3",
+    "sha256": "0f9927d120d7987d66c9b8c738e1597df91a3c84dc157b3c435ed9cf0e23d9e0"
+  },
+  "hotel/assets/dlg-03-en-r4.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/dlg-03-en-r4.mp3",
+    "sha256": "606564ad328c935e9e4c914de1263791a41aba3394bf6cb8244f68a0f8c53650"
+  },
+  "hotel/assets/dlg-04-en-r4.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/dlg-04-en-r4.mp3",
+    "sha256": "3c3e972ee0ebc73afe5c4dbb386b271f48774ff50caa918d557e42d4d9d75cee"
+  },
+  "hotel/assets/dlg-06.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/dlg-06.mp3",
+    "sha256": "8cc4954e79c1430c1554762637054602ef83798100bc6503ab4747bfacc29427"
+  },
+  "hotel/assets/exterior-bed.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/exterior-bed.mp3",
+    "sha256": "97b3eee82762917294b588bbf3b0903eecb33bb700a8b6ae1dcf49bf32e0bbf2"
+  },
+  "hotel/assets/upper-bed.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/upper-bed.mp3",
+    "sha256": "03580fc616b3ec70bcdec69cff2945f1fae4812da15afc802525ddcd58b65383"
+  },
+  "hotel/assets/step-stone.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/step-stone.mp3",
+    "sha256": "20509cd410588120342be7e755ec1d37119def8ea934f82c9153232264325a78"
+  },
+  "hotel/assets/step-tile.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/step-tile.mp3",
+    "sha256": "fccd0a649fffceab707c155d1badb59cdaebf6ad252cb1e384d5467e65d17f8a"
+  },
+  "hotel/assets/step-wood.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/step-wood.mp3",
+    "sha256": "7290ff19c0403e6a70e2029bec1de131791f3df30ec86ad78e66973e57534c03"
+  },
+  "hotel/assets/step-carpet.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/step-carpet.mp3",
+    "sha256": "6533b41377ba9e42996b2e58a8b6d7d48b784599159edfc1f9d739fb51b0ad9f"
+  },
+  "hotel/assets/entrance-open.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/entrance-open.mp3",
+    "sha256": "15581692ab1ddb49149690d02ff1aaec3fee13159ac7fc495f71517888b33b61"
+  },
+  "hotel/assets/entrance-close.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/entrance-close.mp3",
+    "sha256": "fb0fb1abcb53e0d0d62c7390936678aff9af6c941cfdc46495008f63477028c0"
+  },
+  "hotel/assets/door-open.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/door-open.mp3",
+    "sha256": "e663a23d43ce1ccae867e868bfe0a288757ea1b46049921e18bf48f7bc5e020b"
+  },
+  "hotel/assets/door-close.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/door-close.mp3",
+    "sha256": "e587270933b22912d1c761a46fbc9f682c53f752848e65857684898bcc03a0f7"
+  },
+  "hotel/assets/cart.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/cart.mp3",
+    "sha256": "b0dd08374b3358c797c20b30abe1aeaf3a2d7ab2fd4e52a1eb5287e23dfb9511"
+  },
+  "hotel/assets/dusting.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/dusting.mp3",
+    "sha256": "940e54783c4d8b1d93e03a9bea85054e0f5af95e79de974544d53b9712e50c95"
+  },
+  "hotel/assets/cart-contact.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/cart-contact.mp3",
+    "sha256": "8397e359b6178e99f157f632cfc29a7dfbb1160d2bc43c351cd8898a089f7a6d"
+  },
+  "hotel/assets/recorder-click.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/recorder-click.mp3",
+    "sha256": "2d3b4e86bac34e16df935f1fbad90da5587f7ffa86f8c9a0eec0f2997cb2bfd3"
+  },
+  "hotel/assets/recorder-motor.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/recorder-motor.mp3",
+    "sha256": "bc35e4720395f62732b65ceb2ad65f37a578cbf89ddbfe856510bba15b3c8d4e"
+  },
+  "hotel/assets/hotel-bed.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/hotel-bed.mp3",
+    "sha256": "702d7d23a1843ceca5e365c16a8560756d4a4978c22e7b68319df2abbd8eac76"
+  },
+  "hotel/assets/testimony-music.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/testimony-music.mp3",
+    "sha256": "c02c6479c051d946c5f39c5a697f3758de622ccf8dc02317b808ea947e797af2"
+  },
+  "hotel/assets/investigation-music.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/investigation-music.mp3",
+    "sha256": "65ddfdf2e979b20c14e298b69ad7d0514f0a2186ec9b142c48b0d30f01265fd2"
+  },
+  "hotel/assets/ending.mp3": {
+    "source": "sound-hunt-prototype/hotel/assets/ending.mp3",
+    "sha256": "82b88f517a53348611725b97c089b4a6783956f046411f306f0f50df0bc04d99"
+  },
+  "hotel/assets/incident.wav": {
+    "source": "sound-hunt-prototype/hotel/assets/incident.wav",
+    "sha256": "c3f8674d3259c98b737257157e7229792cf7571c0643223e84464fee0b7250f6"
+  },
+  "licenses/CHAT_BEAM_NOTICES.txt": {
+    "source": "sound-hunt-prototype/CHAT_BEAM_NOTICES.txt",
+    "sha256": "8b366e2d42a859eeceeee25476de413e18573401decef80a613f268857a66131"
+  },
+  "licenses/CURSOR_SOURCE.md": {
+    "source": "sound-hunt-prototype/CURSOR_SOURCE.md",
+    "sha256": "ba53b45386ad5bf198b673b250520dbc524a9975a0397d469deb3c2b541159d6"
+  },
+  "licenses/EDGECHAT_AUDIO_SOURCES.md": {
+    "source": "sound-hunt-prototype/EDGECHAT_AUDIO_SOURCES.md",
+    "sha256": "16c6d66b3203aeb90877f66aae2e5631481d09b15f87eedcd088c5b876699f23"
+  },
+  "licenses/hotel-assets.json": {
+    "source": "sound-hunt-prototype/hotel/ASSET_PROVENANCE.json",
+    "sha256": "bc00050593e73bcee0fb98d822a107ce4ed033bf4f6272fa1241b3ce7ce7e0e7"
+  },
+  "nebula-source.js": {
+    "source": "game-ui-concepts/2026-09-20/atmosphere-opening/unseen-atmospheres.html",
+    "sha256": "3742f37335b5832d97623da5faa3361792bc81c2073bc7a1acb31ea72db51586"
+  }
+}

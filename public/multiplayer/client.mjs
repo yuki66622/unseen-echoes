@@ -74,7 +74,7 @@ const lobby=new LobbyFlow({
   create:name=>{const data=crypto.getRandomValues(new Uint32Array(1))[0];return room.call('createRoom',{code:data.toString(36).toUpperCase().padStart(6,'0').slice(-6),mode:'chase',name});},
   join:(code,name)=>room.call('joinRoom',{code,name}),
   role:role=>room.call('selectRole',{role}),
-  ready:ready=>room.call('setReady',{ready}),
+  ready:async ready=>{if(ready)await audio.prepareChase();return room.call('setReady',{ready});},
   leave:()=>room.call('leaveRoom',{}),
   retry:()=>void connectLobby(true),
 });
@@ -116,6 +116,7 @@ function setPhase(next){
   show('opening',phase==='opening');show('game',phase!=='opening');
   show('lobby',phase==='lobby');show('narrative',!['lobby','chase-result','story-result'].includes(phase));
   show('controls',active());show('story-panel',phase==='story');
+  show('door',phase!=='chase');
   show('result',phase.endsWith('-result'));show('begin',phase.endsWith('-ready'));
   show('skip-tutorial-active',['tutorial-ready','tutorial'].includes(phase));
   show('sound-toggle',active());
@@ -197,7 +198,7 @@ function onRoom(next){
     const nextIds=new Set((g.audiblePlayers||[]).map(p=>p.id));
     for(const id of remoteSamples.keys())if(!nextIds.has(id))remoteSamples.delete(id);
     for(const p of g.audiblePlayers||[])remoteSamples.set(p.id,{from:previous?.game?.audiblePlayers?.find(x=>x.id===p.id)||p,at:performance.now()});
-    $('title').textContent=g.role==='hunter'?'循着脚步声，找到求生者。':'找到老式电机，设法逃脱。';
+    $('title').textContent=g.role==='hunter'?'循着心跳声，找到求生者。':'找到老式电机，设法逃脱。';
     $('role-label').textContent=`${roleLabel(g.role)} · 剩余 ${Math.ceil(g.remainingSeconds)} 秒${g.headstartSeconds>0?` · 求生者先行 ${Math.ceil(g.headstartSeconds)} 秒`:''}`;
     $('objective').textContent=localizeMessage(g.objective,'循着声音，完成你的目标。');
     if(g.notice&&g.notice!==previous?.game?.notice)say(g.notice);
@@ -250,7 +251,7 @@ function act(action){
 }
 function useDoor(){
   if(!canAct())return;
-  if(phase==='chase')return void networkInput('door','toggle');
+  if(phase==='chase')return say('这里没有门。找到电机后，到雨声处按 E 逃脱。');
   motion=null;
   if(!isNearDoor(pose))return say('请先靠近门。');
   if(local.doorOpen&&occupiesDoor(pose))return say('请先离开门口，再关门。');
@@ -274,15 +275,11 @@ function renderStory(){
   $('accuse').disabled=view.clues.length<3;
 }
 async function enterStory(){
-  if(enteringStory||['story-ready','story','story-result'].includes(phase))return;
-  enteringStory=true;$('next-level').disabled=true;
-  try{
-  if(room?.ready)try{await room.call('leaveRoom',{});}catch{/* Personal story does not depend on room connectivity. */}
-  room?.disconnect();room=null;roomState=null;resetLocal('story');story=createStory();history=[];chatAbort?.abort();chatBusy=false;$('chat-log').replaceChildren();sessionSet('unseen-checkpoint','story');
-  setPhase('story-ready');say('接下来的调查，由你独自完成。');
-  try{config=await fetchWithTimeout('/api/detective/config',{},8000,r=>r.json());$('chat-service').textContent=config.configured?'Gemini 已配置，你的对话不会展示给另一位玩家。':'对话服务尚未配置；你仍可继续探索、收集线索和推理。';}
-  catch{$('chat-service').textContent='对话服务暂时离线，你仍可继续探索和推理。';}
-  }finally{enteringStory=false;$('next-level').disabled=false;}
+  if(enteringStory)return;
+  enteringStory=true;stopSound();motion=null;pending=null;
+  if(room?.ready)try{await room.call('leaveRoom',{});}catch{}
+  room?.disconnect();room=null;roomState=null;
+  sessionSet('unseen-checkpoint','hotel');navigateChapter('/hotel/');
 }
 function appendChat(speaker,text){const p=document.createElement('p'),strong=document.createElement('strong');strong.textContent=`${speaker}: `;p.append(strong,document.createTextNode(text));$('chat-log').append(p);$('chat-log').scrollTop=$('chat-log').scrollHeight;}
 async function chat(event){
@@ -301,6 +298,7 @@ async function chat(event){
   finally{clearTimeout(timeout);if(generation===epoch){chatBusy=false;$('chat-send').disabled=false;$('chat-send').textContent='询问 Gemini';}}
 }
 function frame(now){
+  if(phase==='opening')refreshOpening?.();
   frameCount++;
   if(canAct()){
     let current=phase==='chase'?pending||remoteMotion:motion;
@@ -317,7 +315,8 @@ function frame(now){
       if(near&&doorArmed){audio.playCue('door',DOOR.center);doorArmed=false;}
       if(distance(pose,DOOR.center)>DOOR.rearmRadius)doorArmed=true;
     }
-    const label=near?(currentDoor()?'前方的门已打开。':'你已靠近一扇关着的门。'):'聆听下一个声源，辨认方位。';
+    const label=phase==='chase'?(near?'雨声就在这里。找到电机后，按 E 逃脱。':'空旷场地，循声辨认方位。'):
+      near?(currentDoor()?'前方的门已打开。':'你已靠近一扇关着的门。'):'聆听下一个声源，辨认方位。';
     if($('nearby').textContent!==label)$('nearby').textContent=label;
     $('door').disabled=!near;$('door').textContent=currentDoor()?'关门 · F':'开门 · F';
     $('interact').textContent=phase==='chase'&&roomState?.game?.role==='hunter'?'尝试抓捕 · E':'查看 · E';
@@ -325,18 +324,23 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 
-let openingDocument=null,openingObserver=null;
+let openingDocument=null,refreshOpening=null;
 function connectOpening(){
   const doc=$('opening-frame').contentDocument;if(!doc)return;
   const root=doc.getElementById('unseen-echoes-opening');if(!root||openingDocument===doc)return;
-  openingDocument=doc;openingObserver?.disconnect();
+  openingDocument=doc;
   doc.documentElement.style.background='#000';doc.body.style.cssText='margin:0;background:#000';
-  const refresh=()=>show('tutorial-entry',root.dataset.scene==='tutorial'&&root.dataset.transitioning==='false');
-  openingObserver=new MutationObserver(refresh);openingObserver.observe(root,{attributes:true});refresh();
+  // Read the two opening flags in the existing render loop. Some embedded
+  // browsers cannot pass iframe nodes into MutationObserver across realms.
+  refreshOpening=()=>{
+    const hidden=!(root.dataset.scene==='tutorial'&&root.dataset.transitioning==='false');
+    if($('tutorial-entry').hidden!==hidden)$('tutorial-entry').hidden=hidden;
+  };
+  refreshOpening();
 }
 $('opening-frame').addEventListener('load',connectOpening);
 connectOpening();
-$('tutorial-entry').addEventListener('click',()=>{resetLocal('tutorial');setPhase('tutorial-ready');say('');});
+$('tutorial-entry').addEventListener('click',()=>navigateChapter('/tutorial/'));
 document.querySelectorAll('[data-skip-tutorial]').forEach(button=>button.addEventListener('click',()=>{
   if(!['opening','tutorial-ready','tutorial'].includes(phase))return;
   void enterLobby({skipRules:true});
@@ -406,6 +410,10 @@ if(qa)window.__unseen={
   input:networkInput,reconnect:()=>room?.reconnect(),
 };
 requestAnimationFrame(frame);
-const checkpoint=sessionGet('unseen-checkpoint');
+function navigateChapter(path){const url=new URL(path,location.origin);if(silent)url.searchParams.set('silent','1');location.assign(url);}
+const requestedChapter=params.get('chapter');
+if(requestedChapter==='title')sessionRemove('unseen-checkpoint');
+const checkpoint=requestedChapter==='lobby'?'lobby':sessionGet('unseen-checkpoint');
 if(checkpoint==='lobby'||/^[A-Za-z0-9]{6}$/.test(params.get('room')||''))void enterLobby({skipRules:true});
-else if(checkpoint==='story')void enterStory();
+else if(checkpoint==='story'||checkpoint==='hotel')void enterStory();
+else if(checkpoint==='tutorial')navigateChapter('/tutorial/');

@@ -1,0 +1,47 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const fs=require('node:fs');const assert=require('node:assert/strict');
+const base=process.env.GAME_SITE_URL||'http://127.0.0.1:18786';
+const report={base,mode:'headless muted browser; no microphone; live provider requests explicitly noted',checks:[],errors:[]};
+const check=(name,data={})=>{report.checks.push({name,...data});console.log('PASS '+name);};
+const out=process.env.QA_OUTPUT||'validation';fs.mkdirSync(out,{recursive:true});
+(async()=>{
+ const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--mute-audio']});
+ const context=await browser.newContext({viewport:{width:1280,height:850},reducedMotion:'reduce',permissions:[]});
+ try{
+  const page=await context.newPage();page.on('pageerror',e=>report.errors.push(e.message));
+  page.on('response',r=>{if(r.status()>=400&&!r.url().includes('/api/'))report.errors.push(r.status()+' '+new URL(r.url()).pathname);});
+  await page.goto(base+'/?chapter=title&silent=1&qa=1');
+  const opening=page.frameLocator('#opening-frame');
+  await opening.locator('#unseen-echoes-opening[data-renderer="webgl2"]').waitFor({timeout:15000});
+  await page.screenshot({path:out+'/opening.png'});check('Nebula Dark renders in the real opening');
+  await opening.locator('#ue-next').click();await opening.locator('#unseen-echoes-opening[data-step="2"][data-transitioning="false"]').waitFor({timeout:10000});
+  await opening.locator('#ue-skip').click();await page.locator('#tutorial-entry').waitFor();await page.locator('#tutorial-entry').click();
+  await page.waitForURL('**/tutorial/**');await page.locator('#start').click();await page.locator('body.has-entered').waitFor();
+  const before=await page.locator('#coords').textContent();await page.keyboard.press('w');await page.waitForTimeout(650);const after=await page.locator('#coords').textContent();assert.notEqual(after,before);
+  await page.locator('#environment-orb').waitFor();await page.screenshot({path:out+'/tutorial.png'});check('opening enters current tutorial, audio loads and W moves player',{before,after});
+  await page.getByRole('link',{name:'跳过教程',exact:true}).click();await page.waitForURL('**/?**chapter=lobby**');await page.locator('#player-name').waitFor();
+  check('tutorial skip reaches the real multiplayer naming flow');
+  const hotel=await context.newPage();hotel.on('pageerror',e=>report.errors.push('hotel: '+e.message));
+  hotel.on('response',r=>{if(r.status()>=400&&!r.url().includes('/api/'))report.errors.push(r.status()+' '+new URL(r.url()).pathname);});
+  await hotel.goto(base+'/hotel/?silent=1&debug=1');await hotel.locator('#start').click();
+  await hotel.locator('#chat').waitFor();await hotel.waitForFunction(()=>{try{return JSON.parse(document.getElementById('qa-state').textContent).audio.loaded>=38;}catch{return false;}},{},{timeout:20000}).catch(()=>{});
+  await hotel.screenshot({path:out+'/hotel.png'});
+  const initial=await hotel.locator('#qa-state').textContent();check('hotel loads and begins with packaged audio',{state:JSON.parse(initial).audio});
+  await hotel.locator('#qa-route').click();
+  await hotel.waitForFunction(()=>{try{const s=JSON.parse(document.getElementById('qa-state').textContent);return s.recordingHeard&&!s.routeBusy;}catch{return false;}},{},{timeout:240000,polling:250});
+  const solvedRoute=JSON.parse(await hotel.locator('#qa-state').textContent());
+  for(const id of ['MARTIN-INITIAL','CLAIRE-INITIAL','ELENA-INITIAL'])assert.ok(solvedRoute.collected.includes(id));
+  assert.equal(solvedRoute.player.floor,1);check('hotel physically walks both floors, gathers all initial testimony and completes incident recording');
+  await hotel.locator('#settings-toggle').click();await hotel.locator('#spoken-replies').uncheck();await hotel.locator('#settings-toggle').click();
+  await hotel.locator('#message').fill('The witnesses were lying.');await hotel.locator('#submit-case').click();
+  await hotel.waitForFunction(()=>document.getElementById('notice').textContent.includes('does not yet fit'),{},{timeout:50000});
+  check('live Gemini rejects an incorrect explanation and keeps investigation open');
+  await hotel.locator('#message').fill('One voice was an English-speaking human. The other was an ape making nonverbal animal sounds, not speaking another language. All three witnesses were honest, but they guessed languages from unfamiliar sounds without recognizing any actual words, so their interpretations were mistaken.');await hotel.locator('#submit-case').click();
+  await hotel.locator('#ending').waitFor({timeout:50000});assert.equal(await hotel.locator('#ending-status').textContent(),'CASE EXPLAINED');check('live Gemini accepts a complete explanation only after evidence collection');
+  await hotel.screenshot({path:out+'/hotel-ending.png'});await hotel.locator('#play-again').click();await hotel.waitForFunction(()=>{try{const s=JSON.parse(document.getElementById('qa-state').textContent);return s.player.floor===0&&!s.recordingHeard&&s.collected.length===0;}catch{return false;}});check('hotel restart resets evidence and returns to entrance');
+  await hotel.getByRole('link',{name:'返回标题',exact:true}).click();await hotel.waitForURL('**/?**chapter=title**');check('hotel returns to the opening without an automatic redirect loop');
+  await page.setViewportSize({width:390,height:844});await page.goto(base+'/tutorial/?silent=1');assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));check('tutorial fits a narrow viewport');
+  await hotel.setViewportSize({width:390,height:844});await hotel.goto(base+'/hotel/?silent=1');assert.ok(await hotel.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));check('hotel intro fits a narrow viewport');
+  assert.deepEqual(report.errors,[]);check('no page errors or missing static resources');
+ }catch(e){report.failure=e.stack;throw e;}finally{fs.writeFileSync(out+'/integrated-browser.json',JSON.stringify(report,null,2));await browser.close();}
+})().catch(e=>{console.error(e.stack);process.exitCode=1;});

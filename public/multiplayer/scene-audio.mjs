@@ -1,5 +1,5 @@
 import { MultiplayerAudio } from './player-audio.mjs';
-import { ChaseAudio } from './chase-audio.mjs';
+import { ChaseAudio, CHASE_DEFAULT_VOLUME } from './chase-audio.mjs';
 
 // Tutorials and the solo story retain their authored room and recordings.
 export class SceneAudio {
@@ -7,7 +7,9 @@ export class SceneAudio {
     this.local = new MultiplayerAudio(options);
     this.chase = new ChaseAudio(options);
     this.current = this.local;
+    this.setVolume(CHASE_DEFAULT_VOLUME);
   }
+  prepareChase() { return this.chase.prepare(); }
   start(snapshot) {
     const next = snapshot?.roundId ? this.chase : this.local;
     if (next !== this.current) this.current.pause();

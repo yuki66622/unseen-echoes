@@ -3,5 +3,9 @@ dist/
 .wrangler/
 .sites-runtime/
 .env*
+.dev.vars*
+!.dev.vars.example
+validation/
+__pycache__/
 *.tar.gz
 *.log

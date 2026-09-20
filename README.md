@@ -1,15 +1,64 @@
-# 未见回声 · 云端入口
+# 未见回声 · Unseen Echoes
 
-固定 HTTPS 入口，玩家无需安装程序或启动本机服务。公开入口使用六位房间码邀请；对局由现有 SpacetimeDB 数据库判定，个人调查在各自浏览器内运行。
+声音探索游戏：Nebula Dark 序章 → 找雨教程 → 双人追逐 → Pinewood Inn 个人调查。
 
-`public/` 仅包含经过白名单同步的游戏客户端、声音和许可文本。`src/worker.mjs` 只转发当前数据库的实时订阅、公开身份查询和临时身份交换。不会转发站点 Cookie、托管凭据，不能作为通用 HTTP/SQL/管理代理。云端 Gemini 尚未配置，界面明确提示，调查与双人追逐不受影响。
+**[打开游戏](https://unseen-echoes-play.yuki6666.chatgpt.site)**
 
-开发：Node 24，`npm ci --ignore-scripts`、`npm run build`、`npm test`，`npm run dev` 仅监听本机 18776。工作区中的上游游戏更新后运行 `../sync_cloud.py` 重新同步，再构建。云端源码本身独立，不依赖上级目录完成构建。
+玩家打开同一个网址即可游玩。双人关卡先填写名字，再创建房间并复制邀请链接；双方选择不同角色，准备后开局。追逐结束，各自进入旅馆调查，证据与个人对话互不共享。
 
-发布使用 `.openai/hosting.json` 中既有 Sites 项目，先保存并推送准确源码，再打包与发布对应版本。不要提交密钥、浏览器身份、管理配置、原始日志或本机路径。
+## 当前游戏
 
-回退时恢复上一份已保存的云端版本，不删除对局数据库。暂停发布的条件：首次连接失败率上升、无法建立同源 WebSocket、双人流程或刷新恢复回归。此时保留客户端的同一身份，允许受限的官方直连备用路径。
+| 章节 | 玩法 |
+|---|---|
+| 序章 | 原 Nebula Dark 星云背景与中文叙事 |
+| 找雨教程 | 雨、鸟鸣和火声的空间定位；中央粒子、Gemini 文字/短语音与回复光效 |
+| 双人追逐 | 8×8 米无物理墙体的场地；监管者听方向心跳，求生者听移动脚步；找到电机后循雨声到出口按 E 离开 |
+| 旅馆调查 | 两层空间、门与楼梯、三位证人的录音、事件录音、个人 Gemini 对话与推理判定 |
 
-网络恢复覆盖同标签刷新、浏览器返回缓存页、离线后重新联网及关闭的底层连接。主动关闭标签后新开仍可能成为新玩家，不能承诺永久恢复旧房间；未验证朋友实际网络前不宣称其已恢复。所有浏览器 QA 使用静音模式。
+W/S 前后移动，A/D 转向，E 交互；教程与旅馆可用 F 操作门。按 P 暂停，语音关卡可按住 V 录音。声音从主动开始后播放；后台/暂停会停止。语音输入最长 12 秒。
 
-协议依据：[Cloudflare WebSockets](https://developers.cloudflare.com/workers/runtime-apis/websockets/)、[SpacetimeDB TypeScript 客户端](https://spacetimedb.com/docs/clients/typescript/)。第三方文本保留在 `public/licenses/`。
+## 本地运行
+
+需要 Node.js 24。运行 `npm ci`，复制 `.dev.vars.example` 为 `.dev.vars`，配置已有 Gemini/ElevenLabs 密钥及随机的 `GAME_SESSION_SECRET`。这些值只在服务端使用，不能写进 public 或提交。
+
+```sh
+npm run build
+npm run dev
+```
+
+本地入口为 http://127.0.0.1:18776/ 。联机端点在 `connection.json`，默认使用当前既有 Maincloud。个人关卡不把证据或对话提交到多人数据库。
+
+缺少 Gemini 时，录音、移动与探索仍可运行，但自由对话和提交解释不可用；不能把定时案件回顾当作玩家推理成功。缺少 ElevenLabs 时保留文字回复和已有录音。动态服务调用使用配置账号的额度，本项目不自动购买服务。
+
+## 源码与检查
+
+| 目录 | 内容 |
+|---|---|
+| public/ | 玩家客户端、已选音频与许可 |
+| src/ | Cloudflare Worker、教程和旅馆对话服务 |
+| spacetimedb/ | 与客户端匹配的权威追逐规则 |
+| tests/ | Worker、服务契约及错误边界检查 |
+
+前端与 API 由 Cloudflare Workers 兼容运行时托管；联机订阅通过受限同源网关进入 SpacetimeDB。两个单人关卡使用独立 API 路径，服务器分别执行相应规则与角色记忆。案件判定使用单独的模型请求；没有完成初始证言与事件录音时不能通过。
+
+```sh
+npm test
+cd spacetimedb
+npm ci
+npm test
+npm run typecheck
+```
+
+`verify-browser.cjs` 使用 Playwright 和静音 Chrome，可通过 `PLAYWRIGHT_MODULE`、`CHROME_PATH`、`GAME_SITE_URL` 指定环境。它会以虚构答案调用真实已配置的 Gemini。所有自动试玩禁止开启扬声器与麦克风。验证结果及范围见 [VALIDATION.md](VALIDATION.md)。
+
+## 发布与后续同步
+
+复用 `.openai/hosting.json` 中的既有 Sites 项目。构建成功后提交准确源码、推送对应版本，再保存构建产物并发布。GitHub 为独立私有源码备份，推送 GitHub 本身不会触发 Sites 部署。
+
+追逐规则变化时，先验证 `spacetimedb/` 与 `public/multiplayer/` 的同一快照，再配对发布。数据库更新坚持 `--delete-data=never`，不删除房间或重建身份。
+
+这里是整合后的独立运行仓库。`import_game.py`、`apply_release_bridges.py` 仅供原多任务工作区明确刷新快照时使用，普通构建不依赖上游。不要运行旧父目录 `sync_cloud.py`：它不包含完整章节，会覆盖衔接。后续上游改动必须先比较快照再有选择地合并。
+
+回退时恢复上一份 Sites 版本；若规则也变化，配对恢复对应规则源码，保留数据库数据。多人身份保存在当前浏览器标签会话；不同设备或全新会话不保证自动恢复同一角色。
+
+第三方代码与录音按 `public/licenses/` 中各自的许可与来源使用，不把整个素材集合声明为统一开源许可。数据库源码、本地配置和后端隐藏答案不会作为静态网页公开。

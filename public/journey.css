@@ -1,0 +1,7 @@
+:root{--journey-ink:#b7c7dc;--journey-line:#354251}
+.journey-nav{position:fixed;z-index:30;left:28px;right:28px;top:16px;display:flex;align-items:center;gap:24px;color:var(--journey-ink);font:14px/1.6 -apple-system,"PingFang SC",sans-serif;pointer-events:none}.journey-nav span{margin-right:auto}.journey-nav a{pointer-events:auto;padding:10px 0;color:inherit;text-decoration:none;border-bottom:1px solid transparent}.journey-nav a:hover{border-color:currentColor}.journey-nav a:focus-visible,.journey-continue:focus-visible,.journey-finish:focus-visible{outline:1px solid currentColor;outline-offset:5px}
+.journey-continue{position:fixed;z-index:30;left:50%;top:40%;transform:translate(-50%,-50%);padding:16px 24px;color:var(--journey-ink);background:#000;border-bottom:1px solid var(--journey-line);font:16px/1.6 -apple-system,"PingFang SC",sans-serif;text-decoration:none;text-align:center}.journey-continue[hidden]{display:none!important}.journey-finish{display:block;margin:25px auto 0;width:max-content;color:var(--journey-ink);font:14px/1.6 -apple-system,"PingFang SC",sans-serif;text-underline-offset:6px}
+body:not(.has-entered)>main{padding-top:68px}html[data-chapter="hotel"] .intro{padding-top:55px}
+@media(max-width:580px){.journey-nav{left:16px;right:16px;top:8px;font-size:14px;gap:14px}.journey-nav span{font-size:12px;max-width:42%}.journey-continue{width:max-content;max-width:80vw;padding:16px}}
+
+html[data-chapter="hotel"] .journey-nav{right:auto}html[data-chapter="hotel"] .journey-nav span{display:none}

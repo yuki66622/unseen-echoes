@@ -1,57 +1,71 @@
-# 未见回声 · Unseen Echoes
+# Unseen Echoes
 
-声音探索游戏：Nebula Dark 序章 → 找雨教程 → 双人追逐 → Pinewood Inn 个人调查 → Gemini 新世界。
+An atmospheric game about finding your way through sound. Wake in an unfamiliar space, choose a door, and discover what waits beyond it.
 
-**[打开游戏](https://unseen-echoes-play.yuki6666.chatgpt.site)**
+**[Play the game](https://unseen-echoes-play.yuki6666.chatgpt.site)**
 
-玩家打开同一个网址即可游玩。双人关卡先填写名字，再创建房间并复制邀请链接；双方选择不同角色，准备后开局。双方同意重开时回到原房间，重新选择角色和准备。追逐结束，各自进入旅馆调查，证据与个人对话互不共享。
+## The journey
 
-## 当前游戏
-
-| 章节 | 玩法 |
+| Chapter | Experience |
 |---|---|
-| 序章 | Nebula Dark 星云背景与中英文叙事 |
-| 找雨教程 | 雨、鸟鸣和火声的空间定位；左侧声音球、Gemini 文字/短语音与回复光效 |
-| 双人追逐 | 8×8 米无物理墙体的场地；监管者听方向心跳，求生者听移动脚步；找到电机后按提示寻找出口 |
-| 旅馆调查 | 两层空间、门与楼梯、三位证人的录音、事件录音、个人 Gemini 对话与推理判定 |
+| Opening | A dark, star-filled introduction with a one-time piano score. |
+| Find the Rain | Learn spatial listening by following rain among birds and fire. |
+| The Chase | Two players choose hunter and survivor in an open 8 × 8 m arena. Follow heartbeats, avoid footsteps, and find a way out. This chapter can be skipped. |
+| Pinewood Inn | Open a letter, explore two floors, question three witnesses, and explain an unsettling recording with Gemini. |
+| Another Door | Describe a new world. Gemini creates a validated, bilingual four-room setting using the existing sound library. |
 
-教程以外，每位玩家每局有 5 次 E 交互尝试，成功交互也计次；重开恢复。追逐第五次若未成功抓捕或逃脱，则由对手获胜。旅馆第五次成功的证词或录音可继续播放，之后仍可讨论和提交推理，但不能再执行第六次交互。
+For multiplayer, enter a name, create a room, and share its six-character code. Choose different roles and ready up. A rematch requires both players to agree and choose roles again. Hotel evidence and conversations remain individual.
 
-↑/↓ 前后移动，←/→ 转向，E 交互；教程与旅馆可用 F 操作门。按 P 暂停，语音关卡可按住 V 录音。所有非游玩页面以指定轻雨作背景，首次播放需要用户点击；游玩时切换关卡声场，后台暂停。语音输入最长 12 秒。
+## Controls and presentation
 
-各章节沿用开场的 Nebula Dark 风格，开场叙事为在架空空间醒来、面前有许多扇门。点击画面或按 Enter/Space 进入下一句。教程不设逐项教学，使用左侧声音球及下方按键表，Gemini 默认折叠。每个游戏保留左侧声音球与按键，地图居中，开局就显示完整地图，叠加自己的位置和路径，右侧保留指南针。教程隐藏全部声源；追逐隐藏电机和其他玩家；旅馆显示完整房间、门、楼梯、人物、推车和录音机，抵达楼上即显示整层。旅馆先拆开信封阅读案件，再进入调查；支持相对方向提示和可随时接管的短程导航协助。上楼使用用户指定音频的前 3 秒，上楼动作同为 3 秒，下楼保留原声。
+| Key | Action |
+|---|---|
+| Up / Down | Move forward / backward |
+| Left / Right | Turn |
+| E | Confirm or interact |
+| F | Open or close a door where available |
+| P | Pause local controls and audio |
+| V | Hold to speak in chapters with voice input |
+| Esc | Leave input or stop assisted movement |
 
-追逐开局与游戏中低音量循环 Epic Dark BGM；结束时停止场景声并播放一次 Powerful Witch 片段。监管者心跳随靠近明显增强，保留平滑过渡。出口的文字使用“电机声音”，实际出口音频按用户确认保留原样。
+Each game keeps the sound-reactive orb and applicable controls on the left, a complete map in the centre, and a compass on the right. The tutorial and generated worlds hide sound-source markers; the chase hides the motor and other player. The hotel reveals rooms, doors, stairs and investigation landmarks.
 
-右上角可随时切换中英文，位置、已输入文字与游戏进度不重置；所有英文采用 Times New Roman。开场标题放大，引言停留4秒，点击立即继续。旅馆采用透明星尘信封，Martin 欢迎语音与方向说明依次播放；已经询问的证人问题不重复显示。
+Switch between English and Chinese at the top right without resetting progress or typed text. English uses Times New Roman. Opening text advances on click; the first tagline also stays visible for four seconds. Tutorial Gemini chat starts collapsed. Previously asked witness questions disappear until replay.
 
-追逐支持跳过直达旅馆；监管者只冻结3秒，抓捕范围1.25m、电机与出口1.5m。对局中的指定呼吸音每20秒播放一次，结算和离开停止。
+Every chapter after the tutorial allows **five E attempts per round**, including successful interactions. A successful fifth attempt counts; a sixth is rejected. The hunter has a **three-second head start delay**, a 1.25 m capture radius, and the survivor has a 1.5 m interaction radius. Multiplayer time continues while local sound is paused.
 
-旅馆结尾可生成新世界：简短描述后，Gemini 返回双语四房间方案，程序校验后才允许进入。使用现有雨、鸟、火音库，不生成新音效或执行模型代码。方向键、F开门、5次E尝试、声音球、完整地图、指南针、暂停及重玩沿用当前规则。最近12个世界保存在当前浏览器，不能跨设备共享。每个运行实例对每位访问者每小时最多接收8次生成请求；这不是跨实例持久计费上限。
+## Sound
 
-## 本地运行
+The opening piano begins two seconds after audio activation, fades in and out over three seconds, and plays once per tab journey. Rain stays at 10% underneath, returns to normal after the piece ends, and stops with the piano when tutorial play begins. Later non-playing screens use gentle rain.
 
-需要 Node.js 24。运行 `npm ci`，复制 `.dev.vars.example` 为 `.dev.vars`，配置已有 Gemini/ElevenLabs 密钥及随机的 `GAME_SESSION_SECRET`。这些值只在服务端使用，不能写进 public 或提交。
+The chase uses quiet Epic Dark background music, a breathing clip every 20 seconds, stronger heartbeat changes with distance, and a single Powerful Witch ending cue. The hotel includes its English welcome and a dedicated three-second stair recording. Browser playback requires a player gesture; voice input is limited to 12 seconds.
+
+Generated worlds reuse the existing rain, bird and fire recordings. Gemini does not create audio or executable code. The latest 12 worlds are saved in the current browser, without cross-device synchronization.
+
+## Run locally
+
+Use Node.js 24. Install dependencies, copy `.dev.vars.example` to `.dev.vars`, and configure your existing Gemini and ElevenLabs credentials plus a random `GAME_SESSION_SECRET`. Keep these values out of source control and `public/`.
 
 ```sh
+npm ci
 npm run build
 npm run dev
 ```
 
-本地入口为 http://127.0.0.1:18776/ 。联机端点在 `connection.json`，默认使用当前既有 Maincloud。个人关卡不把证据或对话提交到多人数据库。
+Open `http://127.0.0.1:18776/`. Multiplayer settings are in `connection.json` and currently point to the existing Maincloud service. Personal evidence and conversations are not stored in the multiplayer database.
 
-缺少 Gemini 时，录音、移动与探索仍可运行，但自由对话和提交解释不可用；不能把定时案件回顾当作玩家推理成功。缺少 ElevenLabs 时保留文字回复和已有录音。动态服务调用使用配置账号的额度，本项目不自动购买服务。
+Without Gemini, recorded audio and exploration still work, but free-form conversation, explanation judging and world generation are unavailable. Without ElevenLabs, text replies and existing recordings remain available. Provider calls use the configured accounts and quotas; no automatic purchases are made. World generation accepts at most eight requests per visitor per hour within each running service instance; this is not a global billing cap.
 
-## 源码与检查
+## Project structure and validation
 
-| 目录 | 内容 |
+| Path | Purpose |
 |---|---|
-| public/ | 玩家客户端、已选音频与许可 |
-| src/ | Cloudflare Worker、教程和旅馆对话服务 |
-| spacetimedb/ | 与客户端匹配的权威追逐规则 |
-| tests/ | Worker、服务契约、旅馆移动／导航／路径图及错误边界检查 |
+| `public/` | Game client, selected audio and asset notices |
+| `src/` | Worker, chapter APIs and validated world generation |
+| `spacetimedb/` | Authoritative multiplayer rules |
+| `tests/` | Service, gameplay, navigation and audio checks |
 
-前端与 API 由 Cloudflare Workers 兼容运行时托管；联机订阅通过受限同源网关进入 SpacetimeDB。两个单人关卡使用独立 API 路径，服务器分别执行相应规则与角色记忆。案件判定使用单独的模型请求；没有完成初始证言与事件录音时不能通过。
+The client and APIs use a Cloudflare Workers-compatible runtime. Multiplayer subscriptions pass through a restricted same-origin gateway to SpacetimeDB. Each personal chapter has a separate API. Hotel explanations require the initial testimony and incident recording; a timed case review is distinct from a successful player explanation.
 
 ```sh
 npm test
@@ -61,18 +75,16 @@ npm test
 npm run typecheck
 ```
 
-`verify-languages.cjs` 检查中英文状态、四种屏幕尺寸和共享布局；`verify-world-live.cjs` 检查大标题、跳过追逐及一次真实新世界生成；`verify-layout.cjs` 保留早期布局基线；`verify-map-stairs.cjs` 实走两层地图、3 秒上楼和双人音频生命周期；`verify-rounds.cjs` 检查重开重选角色、五次机会和无重复操作按钮；`verify-hotel-entry.cjs` 检查游戏模块加载延迟时，信封仍可阅读，进入按钮就绪后一次点击即可进入；`verify-ui.cjs` 检查开场快进、按键、信封、样式与明确模拟的失败重试；`verify-chapters.cjs` 运行双人章节衔接；`verify-browser.cjs` 完成真实旅馆调查。均使用 Playwright 和静音 Chrome，可通过 `PLAYWRIGHT_MODULE`、`CHROME_PATH`、`GAME_SITE_URL` 指定环境。完整旅馆验证会以虚构答案调用真实已配置的 Gemini。所有自动试玩禁止开启扬声器与麦克风。验证结果及范围见 [VALIDATION.md](VALIDATION.md)。
+The latest release passed 166 integrated checks and 44 multiplayer-rule checks. Browser verification covers bilingual layouts, chapter transitions, hotel investigation, real two-player capture, five-attempt outcomes, saved generated worlds, and audio lifecycles. Automated browsers are headless and muted, with no microphone permission. Some live integration scripts invoke configured providers; reuse captured responses for repeated rendering checks. See [VALIDATION.md](VALIDATION.md) for evidence and limits.
 
-## 发布与后续同步
+## Deployment and maintenance
 
-复用 `.openai/hosting.json` 中的既有 Sites 项目。构建成功后提交准确源码、推送对应版本，再保存构建产物并发布。GitHub 为公开源码仓库，推送 GitHub 本身不会触发 Sites 部署。
+Reuse the Sites project in `.openai/hosting.json`. Build, commit and push the exact source before saving and deploying its matching archive. This GitHub repository is public; a GitHub push alone does not deploy the Site.
 
-追逐规则变化时，先验证 `spacetimedb/` 与 `public/multiplayer/` 的同一快照，再配对发布。数据库更新坚持 `--delete-data=never`，不删除房间或重建身份。
+Publish multiplayer rule changes together with the matching client. Preserve database data with `--delete-data=never`. Roll back to a matching Site/rules pair if needed. Browser session identity is not guaranteed to transfer across devices or new sessions.
 
-这里是整合后的独立运行仓库。`import_game.py`、`apply_release_bridges.py` 是最初整合时的历史工具，普通构建不依赖上游；重新全量运行会覆盖目前的统一主题、按键、信封和云端适配。不要运行旧父目录 `sync_cloud.py`：它不包含完整章节，会覆盖衔接。后续上游改动必须先比较 `upstream-snapshot.json`、最新旅馆的 `hotel-snapshot.json` 与 `PROJECT_NOTES.md`，再有选择地合并。
+This is a standalone integrated repository. The historical import scripts are not required for normal builds and can overwrite current chapter adaptations. Merge upstream changes selectively using `upstream-snapshot.json`, `hotel-snapshot.json` and `PROJECT_NOTES.md`.
 
-回退时恢复上一份 Sites 版本；若规则也变化，配对恢复对应规则源码，保留数据库数据。多人身份保存在当前浏览器标签会话；不同设备或全新会话不保证自动恢复同一角色。
+## Credits and asset rights
 
-第三方代码与录音按 `public/licenses/` 中各自的许可与来源使用，不把整个素材集合声明为统一开源许可。数据库源码、本地配置和后端答案不会作为静态网页返回；公开 GitHub 源码中可以查看案件答案。密钥与本地配置不进入仓库。
-
-Opening audio: the supplied solo piano plays once, after a two-second delay, with three-second fades and quiet rain underneath. Finishing restores rain; entering tutorial stops menu audio and later pages never restart the piano in the same tab journey.
+Third-party code and recordings retain their individual terms and provenance in [public/licenses/](public/licenses/) and [AUDIO_PROVENANCE.md](AUDIO_PROVENANCE.md). The complete asset collection is not offered under one blanket open-source license. Backend answers are visible in this public source repository but are not served as static browser assets. Credentials and local configuration are excluded.

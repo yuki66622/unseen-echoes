@@ -1,0 +1,90 @@
+<div id="unseen-echoes-opening" aria-label="未见回声 · 序章" lang="zh-CN">
+  <div class="ue-game">
+    <header class="ue-header"><span id="ue-chapter"></span><button id="ue-skip" type="button" hidden>跳过序章</button></header>
+    <main class="ue-stage">
+      <div class="ue-passage" id="ue-passage" aria-live="polite" aria-atomic="true">
+        <p class="ue-eyebrow" id="ue-eyebrow" hidden></p>
+        <h1 id="ue-heading">未见回声</h1>
+        <p class="ue-body" id="ue-body" hidden></p>
+        <div class="ue-action"><button id="ue-next" type="button">进入</button></div>
+      </div>
+    </main>
+    <footer class="ue-footer"><button id="ue-back" type="button" hidden>返回</button><span id="ue-footer-note"></span><button id="ue-replay" type="button" hidden>返回标题</button></footer>
+  </div>
+</div>
+<style>
+#unseen-echoes-opening{--ue-ink:#b7c7dc;--ue-dim:#8494a9;--ue-line:#354251;font:16px/1.7 -apple-system,"PingFang SC","Helvetica Neue",sans-serif;color:var(--ue-ink);-webkit-font-smoothing:antialiased}
+#unseen-echoes-opening *{box-sizing:border-box}
+#unseen-echoes-opening [hidden]{display:none!important}
+#unseen-echoes-opening .ue-game{background:#000;min-height:620px;display:flex;flex-direction:column;padding:30px 44px}
+#unseen-echoes-opening .ue-header,#unseen-echoes-opening .ue-footer{display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:44px;font-size:12px;letter-spacing:.05em;color:var(--ue-dim)}
+#unseen-echoes-opening .ue-header{min-height:44px}
+#unseen-echoes-opening .ue-stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:420px;text-align:center;padding:35px 0 55px}
+#unseen-echoes-opening .ue-passage{width:100%;opacity:1;transition:opacity .85s ease}
+#unseen-echoes-opening .ue-passage.ue-faded{opacity:0;pointer-events:none}
+#unseen-echoes-opening .ue-eyebrow{font-size:12px;font-weight:400;letter-spacing:.23em;color:var(--ue-dim);margin:0 0 30px}
+#unseen-echoes-opening h1{color:var(--ue-ink);font-family:inherit;font-size:38px;font-weight:400;letter-spacing:.07em;line-height:1.5;margin:0 auto;max-width:790px;white-space:pre-line;text-wrap:balance}
+#unseen-echoes-opening[data-scene="tagline"] h1{font-size:28px;letter-spacing:.02em}
+#unseen-echoes-opening[data-scene="story"] h1{font-size:25px;letter-spacing:.025em;max-width:690px;line-height:1.8}
+#unseen-echoes-opening[data-scene="tutorial"] h1{font-size:32px;letter-spacing:.025em}
+#unseen-echoes-opening .ue-body{font-size:17px;font-weight:400;line-height:1.9;letter-spacing:.015em;white-space:pre-line;color:var(--ue-dim);max-width:660px;margin:24px auto 0;text-wrap:balance}
+#unseen-echoes-opening button{background:transparent;border:0;border-radius:0;border-bottom:1px solid var(--ue-line);color:var(--ue-ink);font:inherit;font-size:14px;letter-spacing:.06em;min-height:44px;padding:8px 2px;cursor:pointer}
+#unseen-echoes-opening button:hover{border-bottom-color:var(--ue-ink)}
+#unseen-echoes-opening button:focus-visible{outline:1px solid var(--ue-ink);outline-offset:6px}
+#unseen-echoes-opening button:disabled{cursor:default}
+#unseen-echoes-opening .ue-action{margin-top:46px;min-height:44px}
+#unseen-echoes-opening .ue-action button{min-width:114px;border-bottom-color:#6b7b8f}
+#unseen-echoes-opening .ue-header button,#unseen-echoes-opening .ue-footer button{font-size:12px;color:var(--ue-dim)}
+#unseen-echoes-opening #ue-footer-note{margin:auto;text-align:center}
+@media(max-width:580px){#unseen-echoes-opening .ue-game{padding:22px;min-height:600px}#unseen-echoes-opening .ue-stage{min-height:430px;padding:30px 0}#unseen-echoes-opening h1{font-size:31px}#unseen-echoes-opening[data-scene="tagline"] h1{font-size:24px}#unseen-echoes-opening[data-scene="story"] h1{font-size:22px}#unseen-echoes-opening .ue-body{font-size:16px}#unseen-echoes-opening .ue-header,#unseen-echoes-opening .ue-footer{gap:16px;flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){#unseen-echoes-opening .ue-passage{transition:none}}
+</style>
+<script>
+(()=>{
+ 'use strict';
+ const root=document.getElementById('unseen-echoes-opening');
+ const $=id=>root.querySelector('#'+id),passage=$('ue-passage'),heading=$('ue-heading'),body=$('ue-body'),eyebrow=$('ue-eyebrow'),next=$('ue-next'),skip=$('ue-skip'),back=$('ue-back'),replay=$('ue-replay'),note=$('ue-footer-note');
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+ const scenes=[
+  {kind:'title',heading:'未见回声',button:'进入'},
+  {kind:'tagline',heading:'循着声音，走入未知。'},
+  {kind:'story',heading:'你在一座没有尽头的\n中转站醒来。',body:'没有时刻表，也没有终点。'},
+  {kind:'story',heading:'每一扇门后，\n都是一个看似寻常的世界。',body:'可有些事情，已经不对了。'},
+  {kind:'story',heading:'你能听见别人听不见的声音。',body:'层层声响中，你能辨出其中一道。\n循声而去，一个世界便向你打开。'},
+  {kind:'story',heading:'你可以从那里带回一些东西。',body:'一件物品，一段声音。\n有时候，是一个人。'},
+  {kind:'story',heading:'终有一天，在从未到过的世界里，\n你会听见一个熟悉的声音。',body:'那个人，早已在你离开的世界里死去。'},
+  {kind:'tutorial',eyebrow:'初次穿行',heading:'找到雨声。',body:'第一扇门后，三种声音交叠。\n从杂声中，辨认雨声。',note:'建议佩戴耳机。'}
+ ];
+ let index=0,busy=false,token=0,fadeTimer=0,autoTimer=0,raf1=0,raf2=0,autoDue=0,autoRemaining=0;
+ function clearTimers(){clearTimeout(fadeTimer);clearTimeout(autoTimer);cancelAnimationFrame(raf1);cancelAnimationFrame(raf2);autoDue=autoRemaining=0;}
+ function scheduleTagline(ms){autoRemaining=ms;if(document.hidden)return;autoDue=performance.now()+ms;autoTimer=setTimeout(()=>go(2),ms);}
+ function render(){
+  const scene=scenes[index];root.dataset.scene=scene.kind;root.dataset.step=String(index);
+  heading.textContent=scene.heading;body.textContent=scene.body||'';body.hidden=!scene.body;eyebrow.textContent=scene.eyebrow||'';eyebrow.hidden=!scene.eyebrow;
+  next.hidden=scene.kind==='tagline'||scene.kind==='tutorial';next.textContent=scene.button||'继续';next.disabled=busy;
+  skip.hidden=index===0||scene.kind==='tutorial';back.hidden=index<2||scene.kind==='tutorial';replay.hidden=scene.kind!=='tutorial';note.textContent=scene.note||'';
+  $('ue-chapter').textContent='';
+ }
+ function focusPrimary(){if(!next.hidden)next.focus({preventScroll:true});else if(!skip.hidden)skip.focus({preventScroll:true});else replay.focus({preventScroll:true});}
+ function go(target){
+  if(target<0||target>=scenes.length)return;
+  clearTimers();const generation=++token;busy=true;root.dataset.transitioning='true';next.disabled=true;passage.classList.add('ue-faded');
+  const delay=reduced.matches?0:850;
+  fadeTimer=setTimeout(()=>{
+   if(generation!==token)return;index=target;render();
+   raf1=requestAnimationFrame(()=>{raf2=requestAnimationFrame(()=>{
+    if(generation!==token)return;passage.classList.remove('ue-faded');
+    fadeTimer=setTimeout(()=>{if(generation!==token)return;busy=false;root.dataset.transitioning='false';next.disabled=false;focusPrimary();if(index===1)scheduleTagline(3400);},delay);
+   });});
+  },delay);
+ }
+ next.addEventListener('click',()=>{if(!busy)go(index+1);});
+ skip.addEventListener('click',()=>go(scenes.length-1));
+ back.addEventListener('click',()=>{if(!busy)go(Math.max(0,index-1));});
+ replay.addEventListener('click',()=>go(0));
+ root.addEventListener('keydown',event=>{if(event.key!=='Enter'||event.repeat||event.target.tagName==='BUTTON')return;event.preventDefault();if(!busy&&!next.hidden)next.click();});
+ document.addEventListener('visibilitychange',()=>{if(index!==1||busy)return;if(document.hidden){clearTimeout(autoTimer);autoRemaining=Math.max(0,autoDue-performance.now());}else scheduleTagline(autoRemaining);});
+ root.openingDiagnostics=()=>({index,kind:scenes[index].kind,busy,heading:heading.textContent,background:getComputedStyle(root.querySelector('.ue-game')).backgroundColor});
+ root.dataset.transitioning='false';render();
+})();
+</script>

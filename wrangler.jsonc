@@ -1,0 +1,7 @@
+{
+  "name":"unseen-echoes-cloud-local",
+  "main":"dist/server/index.js",
+  "compatibility_date":"2026-09-01",
+  "assets":{"directory":"./dist/client","binding":"ASSETS","run_worker_first":true},
+  "observability":{"enabled":false}
+}

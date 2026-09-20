@@ -72,3 +72,15 @@ Yuki 明确要求：各模块统一为开场介绍的风格；开场文字更快
 ### Latest opening-audio and label direction
 
 Use the supplied `Solo_Piano,_3_4,_Aba_Form._Minor_Key,_Early-romantic_Harmonic_Idiom,_Melancho....mp3` once before tutorial entry. After player activation wait two seconds, then fade in over three seconds and fade out over the last three seconds. Keep rain at 10% underneath, restore normal rain after the score ends if still on the opening, and cancel both menu tracks when actual tutorial loading begins. Never replay the score later in that tab journey. Preserve all non-playing-page rain behaviour after the opening. Tutorial top-left chapter label is “找到雨声”, English “Find the rain”.
+
+### Lobby wording simplification
+
+Remove the player-facing connection-check panel and its client initialization. Keep the normal connection status and reconnect action. In the room-choice screen, remove the duplicate chapter eyebrow and replace its heading with the single fixed English title “Chase and Run”; preserve the top-left chapter label.
+
+Opening title restored to its original 38px desktop / 31px narrow-screen size. English is the default, including browsers carrying the legacy automatic Chinese preference; later explicit choices persist under the updated preference key.
+
+Typography scale unified: chapter titles 32px desktop / 28px mobile, secondary display 24px / 22px, body 16px, controls 14px, supporting labels 12px. Opening title retains original 38px / 31px. Hotel envelope headline no longer grows to 56px, caption matches body, lobby names/role labels match body, and compressed hotel labels never shrink below 12px.
+
+Refreshing the opening explicitly starts a new music journey and permits the piano again; regular chapter navigation or returning to title does not replay it. A restored browser-back page resumes menu rain while preserving the spent piano flag. This supersedes the prior no-replay-on-refresh rule.
+
+Hotel navigation includes Skip case before reading and during investigation, linking directly to the generated-world page and preserving existing language/audio navigation rules.

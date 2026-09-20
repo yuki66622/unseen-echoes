@@ -17,6 +17,7 @@ if(isTutorial){
   set('unseen-checkpoint','tutorial');
 }else{
   set('unseen-checkpoint','hotel');
+  const skip=document.createElement('a');skip.id='skip-investigation';skip.href=nextURL('/world/');skip.textContent='跳过推理';nav.append(skip);
   const ending=document.getElementById('ending');
   const finishLink=document.createElement('a');finishLink.className='journey-finish';finishLink.id='next-world';finishLink.textContent='生成新世界';finishLink.href=nextURL('/world/');finishLink.onclick=()=>{try{sessionStorage.removeItem('unseen-checkpoint');}catch{}};ending.append(finishLink);
   // Avoid treating a timed review as a player-submitted correct explanation.

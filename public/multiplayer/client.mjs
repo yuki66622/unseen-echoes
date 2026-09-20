@@ -9,7 +9,6 @@ import {DOOR,isNearDoor,occupiesDoor,hasLineOfSight,distance} from '../room-layo
 import {createStory,inspectStory,storyView,accuseStory,STORY_INTRO,STORY_SOURCES} from './solo-story.mjs';
 import {localizeMessage,roleLabel,outcomeLabel} from './i18n.mjs';
 import {LobbyFlow} from './lobby-flow.mjs';
-import {ConnectionCheck} from './connection-check.mjs';
 import {fetchWithTimeout} from './request.mjs';
 
 const $=id=>document.getElementById(id), show=(id,yes)=>$(id).hidden=!yes;
@@ -27,11 +26,6 @@ let remoteSamples=new Map(),lastRender='',rttSamples=[],statusMessage='',frameCo
 let voiceWarning='';
 let soundOperation=0,enteringStory=false;
 let networkState={state:'connecting'};
-new ConnectionCheck({
-  getConfig:()=>fetchWithTimeout('/api/detective/config',{},8000,response=>{if(!response.ok)throw Error();return response.json();}),
-  getToken:()=>room?.token,
-  getNetworkState:()=>networkState,
-});
 // Dot Matrix Origin Wave, adapted for this game's waiting UI (no React runtime).
 // Upstream provenance and custom product-use license: provenance/THIRD_PARTY_NOTICES.md.
 const waitIndicator=$('partner-wait'),waitLabel=$('partner-wait-label');
@@ -153,7 +147,6 @@ async function connectLobby(retry=false){
       if(!configLoading)configLoading=fetchWithTimeout('/api/detective/config',{},8000,r=>{if(!r.ok)throw Error('游戏入口暂时无法连接，请稍后重试。');return r.json();}).finally(()=>{configLoading=null;});
       config=await configLoading;
       lobby.setInviteBase(config.hosting==='cloud'?location.origin:null);
-      $('client-build').textContent=`联机版本 ${config.clientBuild||'旧版本'}`;
     }
     if(!room){
       room=new RoomConnection(config,onRoom,(message,details={})=>{

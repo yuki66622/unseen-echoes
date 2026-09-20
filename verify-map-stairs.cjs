@@ -6,7 +6,7 @@ const pass=name=>{report.checks.push(name);console.log('PASS '+name);};
 (async()=>{
  const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--mute-audio']});
  try{
-  const context=await browser.newContext({viewport:{width:1280,height:850},permissions:[],storageState:{cookies:[],origins:[{origin:new URL(base).origin,localStorage:[{name:'unseen-language',value:'en'}]}]},reducedMotion:'reduce'});
+  const context=await browser.newContext({viewport:{width:1280,height:850},permissions:[],storageState:{cookies:[],origins:[{origin:new URL(base).origin,localStorage:[{name:'unseen-language-v2',value:'en'}]}]},reducedMotion:'reduce'});
   const page=await context.newPage();page.on('pageerror',e=>report.errors.push(e.message));
   page.on('response',r=>{if(r.status()>=400&&!r.url().includes('/api/'))report.errors.push(`${r.status()} ${new URL(r.url()).pathname}`);});
   await page.goto(base+'/hotel/?silent=1&debug=1');await page.locator('#case-envelope').click();await page.locator('#start').click();await page.locator('#chat').waitFor();
@@ -38,7 +38,7 @@ const pass=name=>{report.checks.push(name);console.log('PASS '+name);};
   await page.screenshot({path:out+'/hotel-upper.png'});assert.deepEqual(upper.audio.errors,[]);pass('arrival shows the full upper floor, stairs and recorder immediately');
   await page.goto(base+'/tutorial/?silent=1');await page.locator('#start').click();await page.locator('body.has-entered').waitFor();
   await page.locator('#trail-map[data-revealed="true"]').waitFor();await page.locator('#orientation').waitFor();assert.equal(await page.locator('#chat-toggle').getAttribute('aria-expanded'),'false');pass('tutorial shows its source-free map and compass with Gemini collapsed');
-  const other=await browser.newContext({viewport:{width:1280,height:850},permissions:[],storageState:{cookies:[],origins:[{origin:new URL(base).origin,localStorage:[{name:'unseen-language',value:'en'}]}]},reducedMotion:'reduce'}),b=await other.newPage();
+  const other=await browser.newContext({viewport:{width:1280,height:850},permissions:[],storageState:{cookies:[],origins:[{origin:new URL(base).origin,localStorage:[{name:'unseen-language-v2',value:'en'}]}]},reducedMotion:'reduce'}),b=await other.newPage();
   for(const [p,name]of [[page,'Map A'],[b,'Map B']]){await p.goto(base+'/?chapter=lobby&silent=1&qa=1');await p.locator('#player-name').fill(name);await p.locator('#profile-form button').click();}
   await page.locator('#create-room').click();await page.locator('#active-code').waitFor();const code=(await page.locator('#active-code').textContent()).trim();
   await b.locator('#show-join').click();await b.locator('#room-code').fill(code);await b.locator('#join-room').click();

@@ -11,7 +11,7 @@ An atmospheric game about finding your way through sound. Wake in an unfamiliar 
 | Opening | A dark, star-filled introduction with a one-time piano score. |
 | Find the Rain | Learn spatial listening by following rain among birds and fire. |
 | The Chase | Two players choose hunter and survivor in an open 8 × 8 m arena. Follow heartbeats, avoid footsteps, and find a way out. This chapter can be skipped. |
-| Pinewood Inn | Open a letter, explore two floors, question three witnesses, and explain an unsettling recording with Gemini. |
+| Pinewood Inn | Open a letter, explore two floors, question three witnesses, and explain an unsettling recording with Gemini. Skip the case at any time to continue. |
 | Another Door | Describe a new world. Gemini creates a validated, bilingual four-room setting using the existing sound library. |
 
 For multiplayer, enter a name, create a room, and share its six-character code. Choose different roles and ready up. A rematch requires both players to agree and choose roles again. Hotel evidence and conversations remain individual.
@@ -30,13 +30,13 @@ For multiplayer, enter a name, create a room, and share its six-character code. 
 
 Each game keeps the sound-reactive orb and applicable controls on the left, a complete map in the centre, and a compass on the right. The tutorial and generated worlds hide sound-source markers; the chase hides the motor and other player. The hotel reveals rooms, doors, stairs and investigation landmarks.
 
-Switch between English and Chinese at the top right without resetting progress or typed text. English uses Times New Roman. Opening text advances on click; the first tagline also stays visible for four seconds. Tutorial Gemini chat starts collapsed. Previously asked witness questions disappear until replay.
+English is the default. Switch between English and Chinese at the top right without resetting progress or typed text. English uses Times New Roman. Opening text advances on click; the first tagline also stays visible for four seconds. Tutorial Gemini chat starts collapsed. Previously asked witness questions disappear until replay.
 
 Every chapter after the tutorial allows **five E attempts per round**, including successful interactions. A successful fifth attempt counts; a sixth is rejected. The hunter has a **three-second head start delay**, a 1.25 m capture radius, and the survivor has a 1.5 m interaction radius. Multiplayer time continues while local sound is paused.
 
 ## Sound
 
-The opening piano begins two seconds after audio activation, fades in and out over three seconds, and plays once per tab journey. Rain stays at 10% underneath, returns to normal after the piece ends, and stops with the piano when tutorial play begins. Later non-playing screens use gentle rain.
+The opening piano begins two seconds after audio activation, fades in and out over three seconds, and plays once per journey. Refreshing the opening starts a fresh journey. Rain stays at 10% underneath, returns to normal after the piece ends, and stops with the piano when tutorial play begins. Later non-playing screens use gentle rain.
 
 The chase uses quiet Epic Dark background music, a breathing clip every 20 seconds, stronger heartbeat changes with distance, and a single Powerful Witch ending cue. The hotel includes its English welcome and a dedicated three-second stair recording. Browser playback requires a player gesture; voice input is limited to 12 seconds.
 

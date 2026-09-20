@@ -78,3 +78,13 @@ The latest user direction supersedes earlier snapshots: every game retains the o
 The source copies of original supplied music remain unchanged. The opening piano uses a two-second activation delay and three-second volume envelopes, with menu rain at 10% of its normal level underneath. Natural completion restores rain; departure cancels pending playback and later chapters cannot replay the score in that tab's journey. The tutorial chapter label is “找到雨声” / “Find the rain”.
 
 Five additional real-media browser checks passed for the 20.7735-second piano: two-second start delay, natural three-second fades, normal rain restoration at the actual track end, no replay after reload/return, stop on tutorial entry, and cancellation when leaving during the delay. These checks used the original encoded file with Chrome output muted; no test audio was heard on the user's computer.
+
+## Lobby simplification, typography and opening refresh
+
+The room-choice screen now has one fixed “Chase and Run” title and no connection-check panel in either language. The normal reconnect action remains. A real room was created and left successfully after removing the diagnostic element references. English is now the default, including legacy automatic Chinese preferences; subsequent explicit language choices persist.
+
+Opening title sizing is restored to 38px desktop / 31px narrow screens. Chapter titles use 32px / 28px, with restrained secondary titles and 16px body text; envelope typography no longer rises to 56px. Short-screen supporting text no longer falls below 12px. Seven rendered language/layout checks passed again across all four viewports, without overlapping panels or page errors.
+
+Refreshing the opening starts a fresh piano playback, superseding the earlier no-replay-on-refresh check. Returning normally from another chapter still keeps the score finished. Browser-back restoration reactivates menu rain without replaying the piano. All audio checks remain headless and muted.
+
+Additional checks passed: room-choice and envelope headings both render at 32px, the envelope caption at 16px; mobile Skip case avoids the language switch and reaches the new-world page both before reading and during play. Five actual-media checks confirm delayed playback, natural fades, rain restoration, refreshed opening replay, chapter stop and cancellation.

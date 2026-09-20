@@ -1,4 +1,7 @@
 export const entries=[
+ ['已连接服务器，正在同步房间…','Connected. Syncing the room…'],['已连接服务器，正在同步房间……','Connected. Syncing the room…'],['已连接服务器，正在同步房间...','Connected. Syncing the room…'],
+ ['跳过推理','Skip case'],
+ ['尚未连上联机服务，请重新连接。','The game service is not connected. Please reconnect.'],
  ['找到雨声','Find the rain'],
  ['生成新世界','Create a new world'],['新世界','New world'],['跳过追逐','Skip chase'],['追捕开始。','The chase begins.'],
  ['另一扇门。','Another door.'],['描述新世界','Describe a new world'],['你想去怎样的世界？','What kind of world awaits you?'],

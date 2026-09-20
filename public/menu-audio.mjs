@@ -5,9 +5,10 @@ if(window.top===window){
  const storageGet=key=>{try{return sessionStorage.getItem(key);}catch{return null;}};
  const storageSet=key=>{try{sessionStorage.setItem(key,'1');}catch{}};
  const openingPage=location.pathname==='/'&&(!params.get('chapter')||params.get('chapter')==='title');
+ const freshOpening=openingPage&&performance.getEntriesByType('navigation')[0]?.type==='reload';
  const score=openingPage?new Audio('/assets/opening-piano.mp3'):null;
  if(score){score.preload='auto';score.muted=silent;score.volume=0;}
- let unlocked=storageGet('unseen-audio-unlocked')==='1',scoreDone=!openingPage||storageGet('unseen-opening-score-played')==='1',scoreStarted=false,scorePending=false,delayUntil=0,delayTimer=0,mixTimer=0,disposed=false;
+ let unlocked=storageGet('unseen-audio-unlocked')==='1',scoreDone=!openingPage||(!freshOpening&&storageGet('unseen-opening-score-played')==='1'),scoreStarted=false,scorePending=false,delayUntil=0,delayTimer=0,mixTimer=0,disposed=false;
  if(!openingPage)storageSet('unseen-opening-score-played');
  function menu(){
   if(root.dataset.uiChapter==='tutorial')return !document.getElementById('victory')?.hidden||(!document.body.classList.contains('has-entered')&&document.body.dataset.audioStarting!=='true');
@@ -50,6 +51,7 @@ if(window.top===window){
  const observer=new MutationObserver(sync);observer.observe(document.body,{attributes:true,attributeFilter:['class','data-phase','data-audio-starting']});
  for(const id of ['intro','ending','victory']){const el=document.getElementById(id);if(el)observer.observe(el,{attributes:true,attributeFilter:['hidden']});}
  document.addEventListener('visibilitychange',sync);document.getElementById('volume')?.addEventListener('input',volume);
+ addEventListener('pageshow',event=>{if(event.persisted){disposed=false;sync();}});
  addEventListener('pagehide',()=>{disposed=true;audio.pause();if(score&&!scoreDone)finishScore();clearTimeout(delayTimer);clearInterval(mixTimer);});
  if(params.get('qa')==='1'||params.get('debug')==='1')window.__menuAudio={state:()=>({source:new URL(audio.src).pathname,loop:audio.loop,paused:audio.paused,currentTime:audio.currentTime,duration:Number.isFinite(audio.duration)?audio.duration:null,volume:audio.volume,muted:audio.muted,menu:menu(),unlocked,score:score?{source:new URL(score.src).pathname,paused:score.paused,currentTime:score.currentTime,duration:Number.isFinite(score.duration)?score.duration:null,volume:score.volume,started:scoreStarted,done:scoreDone,status:root.dataset.openingScore,gain:Number(root.dataset.openingScoreGain)}:null})};
  sync();

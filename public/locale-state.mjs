@@ -1,9 +1,10 @@
-const KEY='unseen-language';
+// Reset the legacy automatic Chinese default once; explicit new choices persist.
+const KEY='unseen-language-v2';
 const valid=value=>value==='en'||value==='zh';
 function initial(){
   try{const value=new URLSearchParams(globalThis.location?.search||'').get('lang');if(valid(value))return value;}catch{}
   try{const value=globalThis.localStorage?.getItem(KEY);if(valid(value))return value;}catch{}
-  return 'zh';
+  return 'en';
 }
 let language=initial();
 export const getLanguage=()=>language;

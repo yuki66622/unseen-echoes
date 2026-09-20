@@ -5,7 +5,7 @@
 .unseen-ui #play-panel .key-legend dl{margin:12px 0 0}
 .unseen-ui #play-panel .key-legend dl>div{gap:10px;margin:7px 0}
 .unseen-ui #play-panel .key-legend dt{width:42px;flex-shrink:0}
-.unseen-ui #play-panel .key-legend :is(kbd,dd){font-size:13px;line-height:1.6}
+.unseen-ui #play-panel .key-legend :is(kbd,dd){font-size:14px;line-height:1.6}
 .unseen-ui .trail-map,.unseen-ui[data-ui-chapter=hotel] .trail-map,.unseen-ui[data-ui-chapter=tutorial] .trail-map{top:var(--map-center,44vh);left:50%;right:auto;transform:translate(-50%,-50%);width:min(440px,calc(100vw - 500px),var(--map-max-width,440px))}
 .unseen-ui[data-ui-chapter=tutorial] body.has-entered .lower-panel{max-width:min(850px,calc(100vw - 450px))}
 .unseen-ui[data-ui-chapter=hotel] #chat.chat{width:min(780px,calc(100vw - 450px))}
@@ -48,27 +48,27 @@
  .unseen-ui #play-panel{top:68px;width:146px}
  .unseen-ui #play-panel #environment-orb{width:90px;height:80px;margin:auto}
  .unseen-ui #play-panel .key-legend dl>div{margin:3px 0}
- .unseen-ui #play-panel .key-legend :is(kbd,dd){font-size:11px;line-height:1.35}
+ .unseen-ui #play-panel .key-legend :is(kbd,dd){font-size:12px;line-height:1.35}
  .unseen-ui .trail-map,.unseen-ui[data-ui-chapter=hotel] .trail-map,.unseen-ui[data-ui-chapter=tutorial] .trail-map{top:228px}
 }
 @media(max-height:650px){
  .unseen-ui[data-ui-chapter=hotel] #chat.chat{padding:8px 10px}
  .unseen-ui[data-ui-chapter=hotel] #chat .chat-header{gap:8px;padding-bottom:4px}
  .unseen-ui[data-ui-chapter=hotel] #chat .chat-header .eyebrow{display:none}
- .unseen-ui[data-ui-chapter=hotel] #chat .chat-header h2{font-size:12px;line-height:1.4;margin:0}
+ .unseen-ui[data-ui-chapter=hotel] #chat .chat-header h2{font-size:14px;line-height:1.4;margin:0}
  .unseen-ui[data-ui-chapter=hotel] #chat .header-actions{gap:4px;flex-shrink:0}
- .unseen-ui[data-ui-chapter=hotel] #chat .header-actions button{font-size:11px;white-space:nowrap;padding:4px}
+ .unseen-ui[data-ui-chapter=hotel] #chat .header-actions button{font-size:12px;white-space:nowrap;padding:4px}
  .unseen-ui[data-ui-chapter=hotel] #chat .chat-log{min-height:0}
- .unseen-ui[data-ui-chapter=hotel] #chat .message{font-size:12px;line-height:1.4;padding:4px 0}
- .unseen-ui[data-ui-chapter=hotel] #chat .message-label{font-size:9px;margin-bottom:2px}
- .unseen-ui[data-ui-chapter=hotel] #chat .notice{font-size:11px;margin:3px 0;min-height:0;max-height:30px;overflow:auto}
+ .unseen-ui[data-ui-chapter=hotel] #chat .message{font-size:14px;line-height:1.4;padding:4px 0}
+ .unseen-ui[data-ui-chapter=hotel] #chat .message-label{font-size:12px;margin-bottom:2px}
+ .unseen-ui[data-ui-chapter=hotel] #chat .notice{font-size:12px;margin:3px 0;min-height:0;max-height:30px;overflow:auto}
  .unseen-ui[data-ui-chapter=hotel] #chat form{padding-top:4px;gap:5px}
- .unseen-ui[data-ui-chapter=hotel] #chat form button{font-size:11px;min-height:32px;padding:4px 6px}
+ .unseen-ui[data-ui-chapter=hotel] #chat form button{font-size:12px;min-height:32px;padding:4px 6px}
  .unseen-ui[data-ui-chapter=hotel] #chat textarea{min-height:32px;height:32px;padding:4px 2px}
  .unseen-ui[data-ui-chapter=hotel] #chat .chat-footer{margin-top:4px;gap:6px}
- .unseen-ui[data-ui-chapter=hotel] #chat .chat-footer button{font-size:10px;white-space:nowrap}
- .unseen-ui[data-ui-chapter=hotel] #chat #connection{font-size:9px}
- .unseen-ui[data-ui-chapter=hotel] .trail-map header{font-size:9px;letter-spacing:0}
+ .unseen-ui[data-ui-chapter=hotel] #chat .chat-footer button{font-size:12px;white-space:nowrap}
+ .unseen-ui[data-ui-chapter=hotel] #chat #connection{font-size:12px}
+ .unseen-ui[data-ui-chapter=hotel] .trail-map header{font-size:12px;letter-spacing:0}
 }
 
 .unseen-ui #game>header .header-tools{display:flex;align-items:center;justify-content:flex-end;gap:16px;flex-wrap:wrap}

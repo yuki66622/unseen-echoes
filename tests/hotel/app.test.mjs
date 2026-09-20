@@ -129,6 +129,18 @@ function harness({ speechSeconds = 0 } = {}) {
 const reply = (actions = [], extra = {}) => ({ text: 'A test request', reply: 'Understood.', speechText: '', role: 'guide', clipId: '', verdict: 'none', actions, ...extra });
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `${a} != ${b}`);
 
+test('upstairs plays the dedicated clip once, without layered wood steps, and pause freezes ascent', async () => {
+  const h=harness();await h.begin();h.place({x:16,y:8.05,floor:0,heading:0});
+  h.key('ArrowUp');await h.tick(10);assert.equal(h.api.state.stairs?.to,1);
+  const playedAt=h.played.length,progress=h.api.state.stairs.progress;
+  h.api.pause();await h.tick(80);assert.equal(h.api.state.stairs.progress,progress);
+  h.api.pause();await h.tick(70);assert.equal(h.api.state.player.floor,1);
+  assert.equal(h.api.state.stairs,null);
+  const clips=h.played.filter(p=>p.id==='stairs-up');assert.equal(clips.length,1);
+  assert.equal(clips[0].local,true);assert.equal(clips[0].group,'stairs');
+  assert.ok(h.played.slice(playedAt).every(p=>p.id!=='step-wood'));
+});
+
 test('real app route collects all witnesses with long dialogue, recorder, and returns downstairs', async () => {
   const h = harness({ speechSeconds: 8 });
   assert.equal(h.played.length, 0, 'No audio starts before entry');

@@ -4,7 +4,7 @@ export const CHASE_MASTER_HEADROOM = 0.8;
 export const CHASE_PEAK_LIMIT = 0.8;
 export const CHASE_DEFAULT_VOLUME = 0.75;
 export const CHASE_MIX = Object.freeze({ background: 0.25, motor: 1.5, rain: 0.45,
-  entry: 0.8, heartbeat: 0.85, ownStep: 0.3, remoteStep: 0.85, door: 0.8, victory: 0.8 });
+  ending: 0.8, heartbeat: 1.2, ownStep: 0.3, remoteStep: 0.85, door: 0.8 });
 export const HEARTBEAT_FADE_SECONDS = 0.2;
 export const FOOTSTEP_OFFSET_SECONDS = 0.75;
 export const FOOTSTEP_DURATION_SECONDS = 0.35;
@@ -14,7 +14,6 @@ const STEP_DISTANCE = 0.45;
 const REMOTE_STEP_DISTANCE = 0.35;
 const MAX_STEP_GAP_MS = 1000;
 const MAX_STEP_JUMP = 0.8;
-const ENTRY_STORAGE = 'unseen/chase-audio/entered-rounds';
 const FINISH_STORAGE = 'unseen/chase-audio/finished-rounds';
 const clamp = value => Math.max(0, Math.min(1, value));
 const nowMs = () => globalThis.performance?.now() ?? Date.now();
@@ -23,7 +22,7 @@ const validPose = pose => Number.isFinite(pose?.x) && Number.isFinite(pose?.y)
 const copyPose = pose => ({ x: pose.x, y: pose.y, heading: pose.heading ?? 0 });
 
 export const CHASE_ASSETS = Object.freeze({
-  entry: { label: '女巫与狂风 · 入场', path: './assets/chase/entry.mp3', targetRms: 0.14 },
+  ending: { label: '女巫与狂风 · 结束', path: './assets/chase/entry.mp3', targetRms: 0.14 },
   heartbeat: { label: '求生者心跳 · 监管者聆听', path: './assets/chase/heartbeat.mp3', targetRms: 0.13 },
   background: { label: '暗黑鼓乐与弦乐 · 背景', path: './assets/chase/background.mp3', targetRms: 0.10 },
   door: { label: '出口录音', path: './assets/chase/door.mp3', targetRms: null, maxGain: 1 },
@@ -32,6 +31,9 @@ export const CHASE_ASSETS = Object.freeze({
   motor: { label: '老式电机', path: './assets/chase/motor.mp3', targetRms: 0.12 },
   rain: { label: '出口雨声', path: '../assets/edgechat/rain-light.m4a', targetRms: 0.07, maxSeconds: 12, maxGain: 16 },
 });
+
+// Expand distance contrast without changing the server's audibility boundary.
+export const heartbeatLevel = intensity => Number.isFinite(intensity) ? clamp(intensity) ** 2 * CHASE_MIX.heartbeat : 0;
 
 function setGain(parameter, value, time, seconds = 0) {
   const previous = parameter.value;
@@ -157,11 +159,11 @@ export class ChaseAudio {
     this.context = null; this.master = null; this.initPromise = null;
     this.buffers = new Map(); this.assetDetails = {}; this.footstepBuffer = null;
     this.voices = new Set(); this.tracker = new ChaseStepTracker();
-    this.enteredRounds = rememberedRounds(ENTRY_STORAGE); this.finishedRounds = rememberedRounds(FINISH_STORAGE);
+    this.finishedRounds = rememberedRounds(FINISH_STORAGE);
     this.operation = 0; this.running = false; this.enabled = false; this.mode = 'idle';
     this.roundId = null; this.snapshot = null; this.listener = { x: 2, y: 1, heading: 0 };
     this.heartbeatTarget = 0; this.heartbeatVoice = null; this.lastDoorSeq = 0; this.lastError = null;
-    this.counters = { entry: 0, door: 0, hunterWin: 0, footstepsSelf: 0, footstepsRemote: 0,
+    this.counters = { ending: 0, door: 0, hunterWin: 0, footstepsSelf: 0, footstepsRemote: 0,
       background: 0, heartbeat: 0, anchors: 0, escape: 0 };
   }
 
@@ -305,7 +307,6 @@ export class ChaseAudio {
     this._stopVoices(); this.enabled = true;
     this.roundId = snapshot.roundId; this.snapshot = snapshot; this.listener = copyPose(snapshot.self);
     this.lastDoorSeq = Number.isSafeInteger(snapshot.doorEvent?.seq) ? snapshot.doorEvent.seq : 0;
-    const playEntry = !this.enteredRounds.has(snapshot.roundId);
     try {
       await this._init();
       if (operation !== this.operation) return false;
@@ -328,10 +329,6 @@ export class ChaseAudio {
           position: validPose(current.heartbeatSource) ? current.heartbeatSource : current.self });
         this.heartbeatVoice.panner.rolloffFactor = 0; // The server already supplies distance attenuation.
         this.counters.heartbeat++;
-      }
-      if (playEntry) {
-        this._voice('entry', { level: CHASE_MIX.entry }); this.counters.entry++;
-        this.enteredRounds.add(snapshot.roundId); persistRounds(ENTRY_STORAGE, this.enteredRounds);
       }
       this._masterLevel(); this.update(current);
       return true;
@@ -361,7 +358,7 @@ export class ChaseAudio {
       ? clamp(snapshot.heartbeatIntensity) : 0;
     if (target !== this.heartbeatTarget) {
       this.heartbeatTarget = target;
-      if (this.heartbeatVoice) setGain(this.heartbeatVoice.gain.gain, target * CHASE_MIX.heartbeat,
+      if (this.heartbeatVoice) setGain(this.heartbeatVoice.gain.gain, heartbeatLevel(target),
         this.context.currentTime, HEARTBEAT_FADE_SECONDS);
     }
     if (opened && validPose(event)) {
@@ -391,7 +388,7 @@ export class ChaseAudio {
     const enabled = this.enabled;
     const operation = ++this.operation;
     this.enabled = false; this._stopVoices();
-    const resultId = snapshot.winner === 'hunter' ? 'hunter-win' : snapshot.outcome === 'escaped' ? 'door' : null;
+    const resultId = snapshot.outcome ? 'ending' : null;
     if (!enabled || !playVictory || !resultId) return false;
     try {
       await this._init();
@@ -399,8 +396,8 @@ export class ChaseAudio {
       await this.context.resume();
       if (operation !== this.operation) return false;
       this.enabled = true; this.running = true; this.mode = 'victory';
-      this._voice(resultId, { level: CHASE_MIX.victory });
-      this.counters[resultId === 'hunter-win' ? 'hunterWin' : 'escape']++;
+      this._voice(resultId, { level: CHASE_MIX.ending });
+      this.counters.ending++;
       this._masterLevel();
       return true;
     } catch (error) {

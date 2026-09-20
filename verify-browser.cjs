@@ -15,7 +15,7 @@ const out=process.env.QA_OUTPUT||'validation';fs.mkdirSync(out,{recursive:true})
   await opening.locator('#unseen-echoes-opening[data-renderer="webgl2"]').waitFor({timeout:15000});
   await page.screenshot({path:out+'/opening.png'});check('Nebula Dark renders in the real opening');
   await opening.locator('#ue-next').click();await opening.locator('#unseen-echoes-opening[data-step="2"][data-transitioning="false"]').waitFor({timeout:10000});
-  await opening.locator('#ue-skip').click();await page.locator('#tutorial-entry').waitFor();await page.locator('#tutorial-entry').click();
+  await opening.locator('#ue-skip').click();await opening.locator('#tutorial-entry').waitFor();await opening.locator('#tutorial-entry').click();
   await page.waitForURL('**/tutorial/**');await page.locator('#start').click();await page.locator('body.has-entered').waitFor();
   const before=await page.locator('#coords').textContent();await page.keyboard.press('ArrowUp');await page.waitForTimeout(650);const after=await page.locator('#coords').textContent();assert.notEqual(after,before);
   await page.locator('#environment-orb').waitFor();await page.screenshot({path:out+'/tutorial.png'});check('opening enters current tutorial, audio loads and ArrowUp moves player',{before,after});

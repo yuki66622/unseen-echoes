@@ -112,7 +112,6 @@ html.unseen-ui {
 .unseen-ui[data-ui-chapter=multiplayer] body[data-phase=opening] main { padding: 0; max-width: none; }
 .unseen-ui[data-ui-chapter=multiplayer] #opening { min-height: 100dvh; }
 .unseen-ui[data-ui-chapter=multiplayer] #opening-frame { min-height: 0; height: 100dvh; }
-.unseen-ui[data-ui-chapter=multiplayer] #tutorial-entry { position: absolute; left: 50%; bottom: 15vh; transform: translateX(-50%); margin: 0; }
 .unseen-ui[data-ui-chapter=multiplayer] :is(.lobby-scene h1,.passage h1,.room-scene h1) { font-size: clamp(28px,3.4vw,38px); font-weight: 400; letter-spacing: .05em; }
 .unseen-ui[data-ui-chapter=multiplayer] .scene-body { font-size: 17px; }
 .unseen-ui[data-ui-chapter=multiplayer] :is(.member-label,.member-state,.connection-strip,.connection-help,.roles button small,#role-prompt,#ready-hint,#room-share-status,.single-form label,.lobby-nav button,.rule-pagination,.rule-pagination button,.quiet-action) { font-size: 14px; }
@@ -218,7 +217,7 @@ html.unseen-ui {
   .unseen-ui .key-legend { left: 24px; top: 22%; }
   .unseen-ui .key-legend dl>div { gap: 8px; }
   .unseen-ui .key-legend dd { font-size: 12px; }
-  .unseen-ui[data-ui-chapter=tutorial] .dark-field #intro { margin-left: 180px; }
+  .unseen-ui[data-ui-chapter=tutorial] .dark-field #intro { margin-inline: auto; }
 }
 @media(max-width:600px) {
   .unseen-ui .key-legend,.unseen-ui[data-ui-chapter=tutorial] body.has-entered .key-legend { left: 20px; top: 88px; }

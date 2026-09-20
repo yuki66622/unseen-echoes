@@ -12,17 +12,17 @@
 <g id="sources"></g><g id="player"><circle r="23" fill="#bfccd9" fill-opacity=".065"/><path d="M0 -14L10 10L0 5L-10 10Z" fill="#e0e7ec"/></g></svg>
 <div class="room-bottomline"><span>三角形是你 · <span id="room-position">房间外</span></span><output id="coords" aria-label="玩家坐标">2.0, 1.0 m</output></div></section></div>
 <section class="dark-field" aria-label="黑暗中的声场">
-<div id="intro"><span class="eyebrow">初次穿行</span><h2>找到雨声。</h2><button id="start" class="primary">进入声场</button><p class="small">戴上耳机，听见方向。</p></div>
+<div id="intro"><span class="eyebrow">初次穿行</span><h2>找到雨声。</h2><button id="start" class="primary" disabled>进入声场</button><p class="small">戴上耳机，听见方向。</p></div>
 <div id="victory" hidden><span class="eyebrow">你找到了。</span><h2>雨声就在这里。</h2><p>黑暗没有消失，但你已经听见了答案。</p><div class="result"><span>确认次数</span><strong id="attempts">1</strong></div><button id="again" class="primary">再来一局</button></div>
 </section>
 <section class="lower-panel" aria-label="探索与对话">
 <div id="exploring" hidden><div class="play-controls"><div id="movement" class="movement" hidden><button data-action="left" aria-label="左转30度">左转</button><button data-action="forward" aria-label="前进半米">前进</button><button data-action="back" aria-label="后退半米">后退</button><button data-action="right" aria-label="右转30度">右转</button></div><button id="door-toggle" disabled>开门 · F</button><button id="confirm" disabled>确认 · E</button></div><p id="keys" class="small" hidden></p></div>
 <p id="status" role="status">准备好后进入黑暗，寻找雨声。</p>
 <div id="door-control" hidden><strong id="door-state"></strong><p id="door-hint"></p></div>
-<section id="voice-control" data-gemini-beam class="voice-control" aria-label="和搭档聊天" hidden>
-<div class="voice-title"><strong>Gemini</strong><span id="voice-provider" class="screen-reader-only">Gemini</span><div class="chat-header-actions"><button id="chat-toggle" type="button" aria-label="收起 Gemini 对话" aria-controls="chat-body" aria-expanded="true">收起</button><details class="chat-options"><summary aria-label="对话设置">设置</summary><div class="chat-options-panel"><label class="voice-switch"><input id="voice-output-enabled" type="checkbox" checked>语音回复</label><button id="pause" hidden>暂停声音</button><button id="reset" hidden>新的一局</button></div></details></div></div>
+<section id="voice-control" data-gemini-beam class="voice-control is-collapsed" aria-label="和搭档聊天" hidden>
+<div class="voice-title"><strong>Gemini</strong><span id="voice-provider" class="screen-reader-only">Gemini</span><div class="chat-header-actions"><button id="chat-toggle" type="button" aria-label="展开 Gemini 对话" aria-controls="chat-body" aria-expanded="false">展开</button><details class="chat-options"><summary aria-label="对话设置">设置</summary><div class="chat-options-panel"><label class="voice-switch"><input id="voice-output-enabled" type="checkbox" checked>语音回复</label><button id="pause" hidden>暂停声音</button><button id="reset" hidden>新的一局</button></div></details></div></div>
 <p id="chat-collapsed-status" role="status" hidden></p>
-<div id="chat-body">
+<div id="chat-body" hidden>
 <div id="wrong-feedback" class="wrong-feedback" role="alert" hidden><strong>上次找错了 · 请继续寻找</strong><p id="wrong-message"></p></div>
 <div id="chat-log" class="chat-log" role="log" aria-label="对话记录" aria-live="polite"><p class="chat-empty">听见了什么，随时告诉我。</p></div>
 <p id="voice-result" class="screen-reader-only" role="status"></p><p id="voice-reply" class="voice-reply" role="status"></p>

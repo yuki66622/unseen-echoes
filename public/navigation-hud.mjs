@@ -2,7 +2,7 @@ import {TrailMap} from './hotel/trail-map.mjs';
 
 // A shared view of the player's own pose, never another player's location.
 export class NavigationHUD {
-  constructor({map = false, label = ''} = {}) {
+  constructor({map = false, scene = 'chase', label = '', walls = [], door = null} = {}) {
     this.orientation = document.createElement('div');
     this.orientation.className = 'orientation'; this.orientation.id = 'orientation';
     this.orientation.hidden = true; this.orientation.setAttribute('role','img');
@@ -12,16 +12,16 @@ export class NavigationHUD {
     const host=document.querySelector('main')||document.body;
     host.append(this.orientation);
     if(map) {
-      this.budget=document.createElement('p');this.budget.id='search-budget';this.budget.hidden=true;this.orientation.append(this.budget);
+      if(scene==='chase'){this.budget=document.createElement('p');this.budget.id='search-budget';this.budget.hidden=true;this.orientation.append(this.budget);}
       this.mapHost = document.createElement('aside'); this.mapHost.className = 'trail-map'; this.mapHost.id = 'trail-map'; this.mapHost.hidden = true;
-      this.mapHost.setAttribute('aria-label','已探索的路径');
-      this.mapHost.innerHTML = '<header><span>YOUR PATH</span><span>追逐</span></header><canvas id="trail-canvas" width="880" height="734" aria-label="只显示你走过的路径"></canvas>';
+      this.mapHost.setAttribute('aria-label','完整场地地图');
+      this.mapHost.innerHTML = `<header><span>MAP</span><span>${scene==='tutorial'?'初次穿行':'追逐'}</span></header><canvas id="trail-canvas" width="880" height="734" aria-label="完整场地与自己所在位置，隐藏声源和对手"></canvas>`;
       host.append(this.mapHost);
-      this.trail = new TrailMap(this.mapHost.querySelector('canvas'),{walls:[],bounds:{width:8,height:8,north:8}});
+      this.trail = new TrailMap(this.mapHost.querySelector('canvas'),{scene,walls,door,bounds:{width:8,height:8,north:8}});
     }
     this.roundKey = null; this.lastMapFrame = 0;
   }
-  update({player,active=false,paused=false,roundKey,attemptsRemaining} = {}) {
+  update({player,active=false,paused=false,roundKey,attemptsRemaining,doorOpen=false} = {}) {
     this.orientation.hidden = !active;
     if(this.mapHost)this.mapHost.hidden = !active;
     if(!active||!player)return;
@@ -35,7 +35,7 @@ export class NavigationHUD {
       if(roundKey!==this.roundKey){this.roundKey=roundKey;this.trail.reset();this.lastMapFrame=0;}
       const now=performance.now();
       if(now-this.lastMapFrame>=50){
-        this.trail.update({player:{...player,floor:0},paused,elapsed:now/1000});this.lastMapFrame=now;
+        this.trail.update({player:{...player,floor:0},doors:{main:doorOpen?1:0},paused,elapsed:now/1000});this.lastMapFrame=now;
         this.mapHost.dataset.revealed=String(this.trail.getStats().markerVisible);
       }
     }

@@ -1,6 +1,7 @@
 /** Deterministic, metre-based navigation for the two-floor Pinewood Inn. */
 export const PLAYER_RADIUS = 0.18;
 export const STAIR_DURATION = 2.6;
+export const STAIR_ASCENT_DURATION = 3;
 const MOVE_SPEED = 1.6;
 const DOOR_DURATION = 0.7;
 const DOOR_PASSABLE = 0.92;
@@ -22,7 +23,7 @@ export const WALLS = Object.freeze([
   segment(1, 14, 8, 14, 9.3), segment(1, 14, 10.7, 14, 12),
 ]);
 
-const DOORS = Object.freeze({
+export const DOORS = Object.freeze({
   entrance: { floor: 0, x: 5, y: 0, wall: segment(0, 4.3, 0, 5.7, 0) },
   lounge: { floor: 0, x: 10, y: 4.6, wall: segment(0, 10, 3.9, 10, 5.3) },
   recording: { floor: 1, x: 3, y: 8, wall: segment(1, 2.3, 8, 3.7, 8) },
@@ -189,7 +190,7 @@ function materialAt(player) {
 function footstep(state, events, material = materialAt(state.player)) {
   const position = pose(state.player);
   if (state.stairs) position.elevation = 3.2 * (state.stairs.from + (state.stairs.to - state.stairs.from) * state.stairs.progress);
-  events.push({ type: 'footstep', material, position });
+  events.push({ type: 'footstep', material, position, ...(state.stairs ? { stairTo: state.stairs.to } : {}) });
 }
 
 function maybeStartStairs(state, previous, events) {
@@ -211,7 +212,7 @@ function maybeStartStairs(state, previous, events) {
 
 function updateStairs(state, dt, events) {
   const stairs = state.stairs;
-  stairs.progress = Math.min(1, stairs.progress + dt / STAIR_DURATION);
+  stairs.progress = Math.min(1, stairs.progress + dt / (stairs.to === 1 ? STAIR_ASCENT_DURATION : STAIR_DURATION));
   // Audio interpolates these same endpoint snapshots by progress. Keep the
   // physical listener on exactly that path throughout the storey transition.
   const t = stairs.progress;

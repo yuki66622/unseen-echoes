@@ -7,13 +7,14 @@
         <p class="ue-eyebrow" id="ue-eyebrow" hidden></p>
         <h1 id="ue-heading">未见回声</h1>
         <p class="ue-body" id="ue-body" hidden></p>
-        <div class="ue-action"><button id="ue-next" type="button">进入</button></div>
+        <div class="ue-action"><button id="ue-next" type="button">进入</button><button id="tutorial-entry" type="button" hidden>开始教程</button></div>
       </div>
     </main>
-    <footer class="ue-footer"><button id="ue-back" type="button" hidden>返回</button><span id="ue-footer-note"></span><button id="ue-replay" type="button" hidden>返回标题</button></footer>
+    <footer class="ue-footer"><button id="ue-back" type="button" hidden>返回</button><span id="ue-footer-note"></span><div class="ue-footer-actions"><button id="ue-replay" type="button" hidden>返回标题</button><button id="skip-tutorial" type="button">跳过教程，直接联机</button></div></footer>
   </div>
 </div>
 <style>
+html,body{margin:0;background:#000}
 #unseen-echoes-opening{--ue-ink:#b7c7dc;--ue-dim:#8494a9;--ue-line:#354251;font:16px/1.7 -apple-system,"PingFang SC","Helvetica Neue",sans-serif;color:var(--ue-ink);-webkit-font-smoothing:antialiased}
 #unseen-echoes-opening *{box-sizing:border-box}
 #unseen-echoes-opening [hidden]{display:none!important}
@@ -36,9 +37,13 @@
 #unseen-echoes-opening .ue-action{margin-top:46px;min-height:44px}
 #unseen-echoes-opening .ue-action button{min-width:114px;border-bottom-color:#6b7b8f}
 #unseen-echoes-opening .ue-header button,#unseen-echoes-opening .ue-footer button{font-size:12px;color:var(--ue-dim)}
-#unseen-echoes-opening #ue-footer-note{margin:auto;text-align:center}
+#unseen-echoes-opening .ue-footer{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+#unseen-echoes-opening #ue-back{grid-column:1;justify-self:start}
+#unseen-echoes-opening #ue-footer-note{grid-column:2;margin:0;text-align:center}
+#unseen-echoes-opening .ue-footer-actions{grid-column:3;display:flex;justify-content:flex-end;align-items:center;gap:24px}
 @media(max-width:580px){#unseen-echoes-opening .ue-game{padding:22px;min-height:600px}#unseen-echoes-opening .ue-stage{min-height:430px;padding:30px 0}#unseen-echoes-opening h1{font-size:31px}#unseen-echoes-opening[data-scene="tagline"] h1{font-size:24px}#unseen-echoes-opening[data-scene="story"] h1{font-size:22px}#unseen-echoes-opening .ue-body{font-size:16px}#unseen-echoes-opening .ue-header,#unseen-echoes-opening .ue-footer{gap:16px;flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){#unseen-echoes-opening .ue-passage{transition:none}}
+@media(max-width:650px){#unseen-echoes-opening .ue-footer{display:flex;flex-direction:column;justify-content:center;gap:8px}#unseen-echoes-opening #ue-footer-note{order:-1}#unseen-echoes-opening .ue-footer-actions{justify-content:center;flex-wrap:wrap;gap:12px}#unseen-echoes-opening .ue-footer button{font-size:12px}}
 </style>
 <script>
 (()=>{
@@ -49,7 +54,7 @@
  const scenes=[
   {kind:'title',heading:'未见回声',button:'进入'},
   {kind:'tagline',heading:'循着声音，走入未知。'},
-  {kind:'story',heading:'你在一座没有尽头的\n中转站醒来。',body:'没有时刻表，也没有终点。'},
+  {kind:'story',heading:'你在一个架空的空间醒来。',body:'面前，立着许多扇门。'},
   {kind:'story',heading:'每一扇门后，\n都是一个看似寻常的世界。',body:'可有些事情，已经不对了。'},
   {kind:'story',heading:'你能听见别人听不见的声音。',body:'层层声响中，你能辨出其中一道。\n循声而去，一个世界便向你打开。'},
   {kind:'story',heading:'你可以从那里带回一些东西。',body:'一件物品，一段声音。\n有时候，是一个人。'},
@@ -63,12 +68,13 @@
   const scene=scenes[index];root.dataset.scene=scene.kind;root.dataset.step=String(index);
   heading.textContent=scene.heading;body.textContent=scene.body||'';body.hidden=!scene.body;eyebrow.textContent=scene.eyebrow||'';eyebrow.hidden=!scene.eyebrow;
   next.hidden=scene.kind==='tutorial';next.textContent=scene.button||'继续';next.disabled=busy;
+  $('tutorial-entry').hidden=scene.kind!=='tutorial';$('tutorial-entry').disabled=busy;
   skip.hidden=index===0||scene.kind==='tutorial';back.hidden=index<2||scene.kind==='tutorial';replay.hidden=scene.kind!=='tutorial';note.textContent=scene.note||'';
   $('ue-chapter').textContent='';
   root.querySelector('.ue-stage').dataset.clickable=String(scene.kind!=='tutorial');
   if(!scene.note)note.textContent=index>0?'点击画面继续':'';
  }
- function focusPrimary(){if(!next.hidden)next.focus({preventScroll:true});else if(!skip.hidden)skip.focus({preventScroll:true});else replay.focus({preventScroll:true});}
+ function focusPrimary(){if(!next.hidden)next.focus({preventScroll:true});else if(!skip.hidden)skip.focus({preventScroll:true});else $('tutorial-entry').focus({preventScroll:true});}
  function go(target){
   if(target<0||target>=scenes.length)return;
   clearTimers();const generation=++token;busy=true;root.dataset.transitioning='true';next.disabled=true;passage.classList.add('ue-faded');
@@ -77,7 +83,7 @@
    if(generation!==token)return;index=target;render();
    raf1=requestAnimationFrame(()=>{raf2=requestAnimationFrame(()=>{
     if(generation!==token)return;passage.classList.remove('ue-faded');
-    fadeTimer=setTimeout(()=>{if(generation!==token)return;busy=false;root.dataset.transitioning='false';next.disabled=false;focusPrimary();if(index===1)scheduleTagline(1200);},delay);
+    fadeTimer=setTimeout(()=>{if(generation!==token)return;busy=false;root.dataset.transitioning='false';next.disabled=false;$('tutorial-entry').disabled=false;focusPrimary();if(index===1)scheduleTagline(1200);},delay);
    });});
   },delay);
  }
@@ -85,6 +91,9 @@
  skip.addEventListener('click',()=>go(scenes.length-1));
  back.addEventListener('click',()=>{if(!busy)go(Math.max(0,index-1));});
  replay.addEventListener('click',()=>go(0));
+ function navigate(path){const url=new URL(path,location.origin);if(new URLSearchParams(window.parent.location.search).get('silent')==='1')url.searchParams.set('silent','1');window.top.location.assign(url);}
+ $('tutorial-entry').addEventListener('click',()=>{if(!busy)navigate('/tutorial/');});
+ $('skip-tutorial').addEventListener('click',()=>navigate('/?chapter=lobby'));
  root.querySelector('.ue-stage').addEventListener('click',event=>{if(event.target.closest('button,a,input,textarea,select,summary')||busy||index===scenes.length-1)return;go(index+1);});
  root.addEventListener('keydown',event=>{if(!['Enter',' '].includes(event.key)||event.repeat||event.target.closest('button,a,input,textarea,select,summary'))return;event.preventDefault();if(!busy&&!next.hidden)next.click();});
  document.addEventListener('visibilitychange',()=>{if(index!==1||busy)return;if(document.hidden){clearTimeout(autoTimer);autoRemaining=Math.max(0,autoDue-performance.now());}else scheduleTagline(autoRemaining);});

@@ -29,8 +29,9 @@
   .unseen-ui .compass { width: 76px; height: 76px; }
   .unseen-ui .orientation p { margin-top: 4px; }
   .unseen-ui .orientation #floor-label { display: none; }
-  .unseen-ui .trail-map,.unseen-ui[data-ui-chapter=hotel] .trail-map { top: 200px; right: auto; left: 50%; width: min(360px,calc(100vw - 40px),max(100px,calc((50dvh - 220px)*1.2))); }
+  .unseen-ui .trail-map,.unseen-ui[data-ui-chapter=hotel] .trail-map { top: 200px; right: auto; left: 50%; width: min(360px,calc(100vw - 32px),max(100px,calc((50dvh - 170px)*1.2))); }
   .unseen-ui .trail-map header,.unseen-ui[data-ui-chapter=hotel] .trail-map header { font-size: 10px; }
+  .unseen-ui[data-ui-chapter=tutorial] .trail-map { top: 340px; width: min(340px,calc(100vw - 32px),max(100px,calc((100dvh - 500px)*1.2))); }
   .unseen-ui body[data-phase=chase] #game>header { gap: 12px; }
   .unseen-ui body[data-phase=chase] #narrative { top: 51%; }
   .unseen-ui body[data-phase=chase] #narrative .eyebrow { display: none; }
@@ -41,11 +42,17 @@
   .unseen-ui .orientation,.unseen-ui[data-ui-chapter=hotel] .orientation { top: 60px; right: 12px; width: 105px; }
   .unseen-ui .compass { width: 64px; height: 64px; }
   .unseen-ui .trail-map,.unseen-ui[data-ui-chapter=hotel] .trail-map { top: 70px; width: min(180px,calc(100vw - 210px)); }
+  .unseen-ui[data-ui-chapter=tutorial] .trail-map { top: 200px; left: auto; right: 16px; transform: none; width: min(180px,calc(100vw - 190px)); }
   .unseen-ui body[data-phase=chase] #narrative { top: 43%; }
 }
 @media(max-height:650px) and (min-width:651px) {
-  .unseen-ui .orientation { top: 18px; }
+  .unseen-ui .orientation { top: 72px; }
   .unseen-ui .compass { width: 76px; height: 76px; }
   .unseen-ui .trail-map { top: 20px; width: min(280px,calc((100dvh - 290px)*1.2)); }
   .unseen-ui body[data-phase=chase] #narrative { top: 42%; }
+  .unseen-ui[data-ui-chapter=tutorial] body.has-entered .key-legend { top: 68px; }
+  .unseen-ui[data-ui-chapter=tutorial] .key-legend dl { margin-top: 6px; }
+  .unseen-ui[data-ui-chapter=tutorial] .key-legend dl>div { margin: 2px 0; }
+  .unseen-ui[data-ui-chapter=tutorial] .key-legend dd { line-height: 1.5; }
+  .unseen-ui[data-ui-chapter=tutorial] .key-legend kbd { font-size: 12px; line-height: 1.5; }
 }

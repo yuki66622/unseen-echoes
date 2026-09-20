@@ -1,6 +1,6 @@
 # Integration validation · 2026-09-20
 
-Release scope: unified Nebula Dark opening and chapters, current sound-hunt tutorial, square-open-v2 multiplayer chase and Pinewood Inn revision 3. Latest hotel navigation was selectively merged while preserving cloud voice routes, shared theme and the new envelope briefing. The chase map and audio are unchanged; rematch and interaction budgets are updated in the paired multiplayer service.
+Release scope: unified Nebula Dark opening and chapters, current sound-hunt tutorial, square-open-v2 multiplayer chase and Pinewood Inn revision 3. Latest hotel navigation was selectively merged while preserving cloud voice routes, shared theme and the new envelope briefing. Current map, audio and layout checks are recorded below; earlier validation sections describe their historical snapshots. Rematch and interaction budgets remain in the paired multiplayer service.
 
 ## UI and latest investigation update
 
@@ -48,3 +48,17 @@ Eight actual muted browser checks passed against the isolated local database: fi
 ### Entry readiness follow-up
 
 Production confirmed all four multiplayer checks, then exposed a race between the independently loaded letter and game modules: the entry click occurred while its handler was still null, with the original load-status unchanged. The letter and entry buttons now remain disabled until their respective handlers are ready. `verify-hotel-entry.cjs` deliberately holds the game module, verifies that the letter is readable and entry unavailable, then releases it and enters with one click. This check failed against the prior build and passes against the updated build (three browser assertions, no page errors). All 22 hotel application tests also pass. Final live results belong to the outer release ledger.
+
+### Complete map and upstairs audio
+
+The user's latest direction replaces explored-path masking with a complete floor plan at entry. Map checks now verify distant walls and landmarks before movement, complete upper-floor geometry on arrival, private opponent/motor exclusion, pause/reset and separate personal paths across floors. The new upstairs PCM clip contains exactly 144,000 frames at 48 kHz (3.000 seconds). An application check verifies one dedicated ascent clip, pause/resume and no layered wood footsteps.
+
+`verify-map-stairs.cjs` passed seven real muted browser checks: full ground floor without walking, arrow-key ascent with a decoded 3-second clip and pause/resume, complete upper floor and recorder, tutorial map without sound sources plus compass and collapsed Gemini, both chase maps visible before exploration with no opponent activity leakage, real Epic/witch playback lifecycle and stronger heartbeat on approach, and no page errors/missing assets. The level has 39 packaged media assets after this addition. No live provider generation or microphone input is part of this check.
+
+### Final audio and responsive layout checks
+
+- All 140 Worker, hotel, map and chase-audio tests pass. The tutorial map test verifies actual room walls, door changes and exclusion of every supplied sound source. Audio tests cover entry, every result type, pause races, mute, role restrictions and ending deduplication.
+- Ten actual rendered checks cover opening and active tutorial at 1440×900, 1024×768, 390×844, 844×390 and 320×568. Text/CTA/footer alignment and map/compass/keys/chat separation are asserted; Gemini starts collapsed. The original iframe/parent button overlap and mobile map/key overlap were reproduced before repair.
+- Eight chapter UI checks pass, including arrow movement, collapsed Gemini, complete tutorial map, explicit mocked retry, envelope entry and no page errors/missing resources.
+- A real two-player approach changed heartbeat gain from 0.080658 to 1.193279. Both clients decoded the 30-second Epic loop at gain 0.25, never played the witch clip at entry, then stopped scene loops and played the 6.68-second witch recording once on capture. Final output gain stayed zero throughout.
+- Current evidence is in ignored validation/final-polish/ and validation/ui-unified/. These are muted implementation checks, not a subjective headphone audition. No real model-generation request was needed for this update. Final deployment identifiers and live checks belong in the outer integration release record.

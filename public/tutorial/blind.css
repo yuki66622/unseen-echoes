@@ -9,7 +9,7 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid
 @media(max-width:620px){main{padding:15px}.dark-field{min-height:26vh}.dark-field h2{font-size:31px}.header-actions>span{display:none}.voice-control{padding:12px}.voice-text-row{flex-wrap:wrap}.voice-text-row input{flex-basis:calc(100% - 65px)}.voice-talk{margin-left:auto}.movement button,.play-controls>button{min-width:48px;padding:8px 10px}.chat-log{max-height:180px}.play-controls{gap:5px}.movement{gap:5px}}
 
 /* Once the tutorial is over, only the conversation remains visible. */
-body.has-entered header,body.has-entered #exploring,body.has-entered #status,body.has-entered #keys,body.has-entered .volume,body.has-entered #voice-help{display:none!important}
+body.has-entered main>header,body.has-entered #exploring,body.has-entered #status,body.has-entered #keys,body.has-entered .volume,body.has-entered #voice-help{display:none!important}
 body.has-entered main{min-height:100dvh;display:flex;flex-direction:column;box-sizing:border-box;padding-top:0}
 body.has-entered .dark-field{flex:1;min-height:35vh;padding:0}
 body.has-entered .lower-panel{width:100%;border:0;padding-top:0;margin:0 auto}
@@ -22,3 +22,4 @@ body.has-entered #victory{display:none!important}
 #chat-toggle{font:inherit;font-size:10px;color:#9caaa0;padding:4px;background:none;border:0;border-radius:3px;cursor:pointer}
 #chat-collapsed-status{font-size:11px;line-height:1.6;color:#a6b1aa;margin:8px 0 0}
 .voice-control.is-collapsed{padding-top:10px;padding-bottom:10px}
+.unseen-ui #environment-orb{z-index:0}

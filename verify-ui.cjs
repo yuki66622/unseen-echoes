@@ -25,19 +25,20 @@ const pass=name=>{report.checks.push(name);console.log('PASS '+name);};
   await opening.locator('#ue-next').press('Enter');await opening.locator('[data-step="3"][data-transitioning="false"]').waitFor();
   await opening.locator('#ue-next').press('Space');await opening.locator('[data-step="4"][data-transitioning="false"]').waitFor();
   pass('opening keyboard Enter and Space advance one passage');await page.emulateMedia({reducedMotion:'reduce'});
-  await opening.locator('#ue-skip').click();await page.locator('#tutorial-entry').click();await page.waitForURL('**/tutorial/**');
+  await opening.locator('#ue-skip').click();await opening.locator('#tutorial-entry').click();await page.waitForURL('**/tutorial/**');
   await page.locator('html[data-nebula="ready"]').waitFor();
   await page.screenshot({path:out+'/02-tutorial-entry.png'});
-  assert.equal(await page.locator('.key-legend').count(),1);assert.equal(await page.locator('#trail-map').count(),0);
+  assert.equal(await page.locator('.key-legend').count(),1);assert.equal(await page.locator('#trail-map').count(),1);
   assert.doesNotMatch(await page.locator('body').innerText(),/W\s*\/\s*S|A\s*\/\s*D/);
   await page.locator('#start').click();await page.locator('body.has-entered').waitFor();
   const pos=await page.locator('#coords').textContent();await page.keyboard.press('ArrowUp');await page.waitForFunction(()=>document.getElementById('map').dataset.moving==='false');
   const moved=await page.locator('#coords').textContent();assert.notEqual(pos,moved);
   await page.keyboard.press('w');await page.waitForTimeout(650);assert.equal(await page.locator('#coords').textContent(),moved);
-  assert.equal(await page.locator('#orientation').isVisible(),true);pass('tutorial arrows move; WASD does not; only the left legend teaches controls, with a compass and no map');
+  assert.equal(await page.locator('#orientation').isVisible(),true);assert.equal(await page.locator('#chat-toggle').getAttribute('aria-expanded'),'false');assert.equal(await page.locator('#chat-body').isVisible(),false);await page.locator('#trail-map[data-revealed="true"]').waitFor();pass('tutorial arrows move, compass and complete source-free map are visible, and Gemini starts collapsed');
   await page.screenshot({path:out+'/03-tutorial-play.png'});
   const palette=await page.locator('#voice-text-send').evaluate(el=>{const s=getComputedStyle(el);return {font:s.fontFamily,radius:s.borderRadius,color:s.color,bg:s.backgroundColor};});
   assert.equal(palette.radius,'0px');assert.equal(palette.bg,'rgba(0, 0, 0, 0)');
+  await page.locator('#chat-toggle').click();
   // Recovery test is explicitly mocked; the separate provider check uses real Gemini.
   let sent=0;
   await page.route('**/api/tutorial/interpret',async route=>{

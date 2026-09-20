@@ -303,7 +303,6 @@ async function chat(event){
   finally{clearTimeout(timeout);if(generation===epoch){chatBusy=false;$('chat-send').disabled=false;$('chat-send').textContent='询问 Gemini';}}
 }
 function frame(now){
-  if(phase==='opening')refreshOpening?.();
   frameCount++;
   navigationHud.update({player:pose,active:phase==='chase',paused,roundKey:roundId,attemptsRemaining:roomState?.game?.attemptsRemaining});
   if(canAct()){
@@ -325,23 +324,6 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 
-let openingDocument=null,refreshOpening=null;
-function connectOpening(){
-  const doc=$('opening-frame').contentDocument;if(!doc)return;
-  const root=doc.getElementById('unseen-echoes-opening');if(!root||openingDocument===doc)return;
-  openingDocument=doc;
-  doc.documentElement.style.background='#000';doc.body.style.cssText='margin:0;background:#000';
-  // Read the two opening flags in the existing render loop. Some embedded
-  // browsers cannot pass iframe nodes into MutationObserver across realms.
-  refreshOpening=()=>{
-    const hidden=!(root.dataset.scene==='tutorial'&&root.dataset.transitioning==='false');
-    if($('tutorial-entry').hidden!==hidden)$('tutorial-entry').hidden=hidden;
-  };
-  refreshOpening();
-}
-$('opening-frame').addEventListener('load',connectOpening);
-connectOpening();
-$('tutorial-entry').addEventListener('click',()=>navigateChapter('/tutorial/'));
 document.querySelectorAll('[data-skip-tutorial]').forEach(button=>button.addEventListener('click',()=>{
   if(!['opening','tutorial-ready','tutorial'].includes(phase))return;
   void enterLobby({skipRules:true});

@@ -139,6 +139,12 @@
         "loop": false,
         "gainDb": -8
       },
+      "stairs-up": {
+        "url": "/hotel/assets/stairs-up.wav",
+        "kind": "effect",
+        "loop": false,
+        "gainDb": 0
+      },
       "step-carpet": {
         "url": "/hotel/assets/step-carpet.mp3",
         "kind": "effect",

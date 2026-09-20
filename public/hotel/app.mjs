@@ -319,11 +319,11 @@ async function restart(){
 }
 function handleEvents(events){
   for(const event of events){
-    if(event.type==='footstep')void audio.play('step-'+event.material,{position:event.position,kind:'effect',group:'steps'});
+    if(event.type==='footstep'&&event.stairTo!==1)void audio.play('step-'+event.material,{position:event.position,kind:'effect',group:'steps'});
     if(event.type==='door-near'){void audio.play('door-cue',{position:event.position,kind:'effect',group:'cues'});notice('A doorway is within reach.');}
     if(event.type==='door'){void audio.play((event.id==='entrance'?'entrance-':'door-')+(event.open?'open':'close'),{position:event.position,kind:'effect',group:'doors'});notice(event.open?'The door opens.':'The door closes.');}
     if(event.type==='collision'){stopAssistance();notice('A wall or closed door is in front of you.');}
-    if(event.type==='stairs-start'){cancelRequest();notice(event.to===1?'Climbing the stairs…':'Walking downstairs…');}
+    if(event.type==='stairs-start'){cancelRequest();notice(event.to===1?'Climbing the stairs…':'Walking downstairs…');if(event.to===1){audio.stopGroup('steps');audio.stopGroup('stairs');void audio.play('stairs-up',{kind:'effect',group:'stairs',local:true});}}
     if(event.type==='stairs-end'){if(event.floor===1&&state.phase==='testimony')state.phase='investigation';notice(event.floor===1?'You reach the upstairs landing.':'You return to the lounge.');}
     if(event.type==='region'&&event.region==='lobby'&&!welcomed){welcomed=true;log('Martin','Good afternoon, Detective. We’ve been expecting you.');if(!foreground)void playClip('DLG-01-EN-R4',{sourceId:'martin'});}
   }

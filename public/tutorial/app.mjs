@@ -17,7 +17,7 @@ const randomSeed=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 const specifiedSeed=params.get('seed');
 const initialSeed=specifiedSeed!==null&&/^\d+$/.test(specifiedSeed)?Number(specifiedSeed)>>>0:randomSeed();
 let game=createGame(initialSeed), starting=false, paused=false, operation=0;
-const navigationHud=new NavigationHUD({label:'初次穿行'});
+const navigationHud=new NavigationHUD({map:true,scene:'tutorial',label:'初次穿行',walls:WALLS.map(w=>({floor:0,x1:w.a.x,y1:w.a.y,x2:w.b.x,y2:w.b.y})),door:DOOR});
 const orbHost=document.createElement('div');orbHost.id='environment-orb';orbHost.hidden=true;orbHost.setAttribute('aria-hidden','true');document.body.append(orbHost);
 const environmentOrb=mountEnvironmentOrb(orbHost,{readState:()=>game.stage==='explore'&&!starting&&!paused
   ?audio.getEnvironmentVisualState():{active:false,rms:0,proximity:0}});
@@ -26,7 +26,7 @@ let voiceReady=false,voiceState='idle',voiceMessage='正在检查语音服务…
 const seenVoiceRequests=new Set();
 let motionTrace=[];
 let dialogue=[],semanticMode=false,speechReady=false,tutorialSeen=false;
-let chatExpanded=true,chatUnread=false;
+let chatExpanded=false,chatUnread=false;
 const show=(id,on)=>$(id).toggleAttribute('hidden',!on);
 const say=message=>{$('status').textContent=message;};
 const point=p=>({x:40+p.x*55,y:480-p.y*55});
@@ -273,7 +273,7 @@ function render(){
   $('step-find').className=game.stage==='explore'?'current':game.stage==='won'?'done':'';
   $('step-confirm').className=game.stage==='won'?'current':'';
   $('attempts').textContent=game.attempts;
-  navigationHud.update({player:game.player,active:game.stage==='explore',paused,roundKey:game});
+  navigationHud.update({player:game.player,active:game.stage==='explore',paused,roundKey:game,doorOpen:game.doorOpen});
   $('coords').value=`${game.player.x.toFixed(1)}, ${game.player.y.toFixed(1)} m`;
   $('map').dataset.moving=String(Boolean(motion.active));
   const p=point(game.player);

@@ -10,9 +10,11 @@ const pose = player => ({ x: player.x, y: player.y, floor: player.floor, heading
 
 /** A north-up memory of walking, never a preview of the unexplored floor. */
 export class TrailMap {
-  constructor(canvas) {
+  constructor(canvas, { walls = WALLS, bounds = { width: 18, height: 15, north: 12 } } = {}) {
     if (!canvas?.getContext) throw new TypeError('TrailMap requires a canvas.');
     this.canvas = canvas;
+    this.walls = walls;
+    this.bounds = bounds;
     this.context = canvas.getContext('2d');
     if (!this.context) throw new Error('A two-dimensional canvas is unavailable.');
     this.reset();
@@ -94,11 +96,11 @@ export class TrailMap {
     // Both floors share the same world scale and north direction. No floor
     // outline, label, source, furnishing or other undiscovered marker is drawn.
     const padding = Math.min(width, height) * 0.04;
-    const scale = Math.min((width - padding * 2) / 18, (height - padding * 2) / 15);
-    const offsetX = (width - 18 * scale) / 2;
-    const offsetY = (height - 15 * scale) / 2;
+    const scale = Math.min((width - padding * 2) / this.bounds.width, (height - padding * 2) / this.bounds.height);
+    const offsetX = (width - this.bounds.width * scale) / 2;
+    const offsetY = (height - this.bounds.height * scale) / 2;
     const X = x => offsetX + x * scale;
-    const Y = y => offsetY + (12 - y) * scale;
+    const Y = y => offsetY + (this.bounds.north - y) * scale;
     const pixelScale = Math.min(width / 360, height / 300);
 
     context.beginPath();
@@ -119,10 +121,10 @@ export class TrailMap {
     context.lineCap = 'round';
     context.lineJoin = 'round';
     context.globalAlpha = opacity * 0.48;
-    context.strokeStyle = '#7c9589';
+    context.strokeStyle = '#7f94af';
     context.lineWidth = Math.max(1, 1.2 * pixelScale);
     context.beginPath();
-    for (const wall of WALLS) {
+    for (const wall of this.walls) {
       if (wall.floor !== this.activeFloor) continue;
       context.moveTo(X(wall.x1), Y(wall.y1));
       context.lineTo(X(wall.x2), Y(wall.y2));
@@ -130,8 +132,8 @@ export class TrailMap {
     context.stroke();
 
     context.globalAlpha = opacity * 0.62;
-    context.strokeStyle = '#a6cdbb';
-    context.shadowColor = '#6ca78e';
+    context.strokeStyle = '#b7c7dc';
+    context.shadowColor = '#859fbe';
     context.shadowBlur = 5 * pixelScale;
     context.lineWidth = Math.max(1, 1.5 * pixelScale);
     context.beginPath();
@@ -152,7 +154,7 @@ export class TrailMap {
       const forward = { x: Math.sin(heading), y: Math.cos(heading) };
       const right = { x: Math.cos(heading), y: -Math.sin(heading) };
       context.globalAlpha = opacity * 0.95;
-      context.fillStyle = '#d2e4d7';
+      context.fillStyle = '#d3dfee';
       context.shadowBlur = 3 * pixelScale;
       context.beginPath();
       context.moveTo(X(p.x + forward.x * 0.3), Y(p.y + forward.y * 0.3));

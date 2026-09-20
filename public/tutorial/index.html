@@ -1,5 +1,5 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>循声 · 黑暗中的对话</title><link rel="icon" href="data:,"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="blind.css"><link rel="stylesheet" href="chat-beam.bundle.css?v=environment-music-v4"><link rel="stylesheet" href="/journey.css"></head>
-<body><main>
+<!doctype html><html lang="zh-CN" class="unseen-ui" data-ui-chapter="tutorial"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>循声 · 黑暗中的对话</title><link rel="icon" href="data:,"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="blind.css"><link rel="stylesheet" href="chat-beam.bundle.css?v=environment-music-v4"><link rel="stylesheet" href="/journey.css"><link rel="stylesheet" href="/theme.css"><link rel="stylesheet" href="/navigation.css"></head>
+<body><aside class="key-legend" aria-label="按键"><p class="eyebrow">按键</p><dl><div><dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd>前进 / 后退</dd></div><div><dt><kbd>←</kbd><kbd>→</kbd></dt><dd>向左 / 向右转</dd></div><div><dt><kbd>F</kbd></dt><dd>开关门</dd></div><div><dt><kbd>E</kbd></dt><dd>确认 / 交互</dd></div><div><dt><kbd>P</kbd></dt><dd>暂停</dd></div><div><dt><kbd>V</kbd></dt><dd>按住说话</dd></div><div><dt><kbd>Esc</kbd></dt><dd>退出输入 / 停下</dd></div></dl></aside><main>
 <header><div><span class="eyebrow">FOLLOW THE SOUND</span><h1>循声</h1></div><div class="header-actions"><span id="mode">戴上耳机，听见方向。</span></div></header>
 <div class="diagnostics" hidden><ol><li id="step-listen"></li><li id="step-find"></li><li id="step-confirm"></li></ol><section class="chamber" aria-label="房间俯视图"><div class="room-topline"><span>8 × 8 m</span><label><input id="help" type="checkbox">位置辅助</label></div>
 <svg id="map" viewBox="0 0 520 520" role="img" aria-label="房间俯视图，三角形代表你和朝向；声源默认隐藏">
@@ -12,11 +12,11 @@
 <g id="sources"></g><g id="player"><circle r="23" fill="#bfccd9" fill-opacity=".065"/><path d="M0 -14L10 10L0 5L-10 10Z" fill="#e0e7ec"/></g></svg>
 <div class="room-bottomline"><span>三角形是你 · <span id="room-position">房间外</span></span><output id="coords" aria-label="玩家坐标">2.0, 1.0 m</output></div></section></div>
 <section class="dark-field" aria-label="黑暗中的声场">
-<div id="intro"><span class="eyebrow">在黑暗里，找到雨声。</span><h2>看不见。<br>但你听得见。</h2><p>雨、鸟鸣、篝火，都在你身边。<br>进入后，中央星尘随环境声变化。<br>W / S 前后 · A / D 转身 · F 开关门 · E 确认<br>P 暂停 · 按住 V 说话 · Esc 退出输入并停止动作</p><button id="start" class="primary">进入黑暗</button><p class="small">声音只在你开始后播放。建议戴耳机。</p></div>
+<div id="intro"><span class="eyebrow">初次穿行</span><h2>找到雨声。</h2><button id="start" class="primary">进入声场</button><p class="small">戴上耳机，听见方向。</p></div>
 <div id="victory" hidden><span class="eyebrow">你找到了。</span><h2>雨声就在这里。</h2><p>黑暗没有消失，但你已经听见了答案。</p><div class="result"><span>确认次数</span><strong id="attempts">1</strong></div><button id="again" class="primary">再来一局</button></div>
 </section>
 <section class="lower-panel" aria-label="探索与对话">
-<div id="exploring" hidden><div class="play-controls"><div id="movement" class="movement" hidden><button data-action="left" aria-label="左转30度">左转</button><button data-action="forward" aria-label="前进半米">前进</button><button data-action="back" aria-label="后退半米">后退</button><button data-action="right" aria-label="右转30度">右转</button></div><button id="door-toggle" disabled>开门 · F</button><button id="confirm" disabled>确认 · E</button></div><p id="keys" class="small" hidden>W / S 前后 · A / D 转身 · F 门 · E 确认 · 每步半米</p></div>
+<div id="exploring" hidden><div class="play-controls"><div id="movement" class="movement" hidden><button data-action="left" aria-label="左转30度">左转</button><button data-action="forward" aria-label="前进半米">前进</button><button data-action="back" aria-label="后退半米">后退</button><button data-action="right" aria-label="右转30度">右转</button></div><button id="door-toggle" disabled>开门 · F</button><button id="confirm" disabled>确认 · E</button></div><p id="keys" class="small" hidden></p></div>
 <p id="status" role="status">准备好后进入黑暗，寻找雨声。</p>
 <div id="door-control" hidden><strong id="door-state"></strong><p id="door-hint"></p></div>
 <section id="voice-control" data-gemini-beam class="voice-control" aria-label="和搭档聊天" hidden>
@@ -27,9 +27,9 @@
 <div id="chat-log" class="chat-log" role="log" aria-label="对话记录" aria-live="polite"><p class="chat-empty">听见了什么，随时告诉我。</p></div>
 <p id="voice-result" class="screen-reader-only" role="status"></p><p id="voice-reply" class="voice-reply" role="status"></p>
 <form id="voice-text-form"><label class="screen-reader-only" for="voice-text">想说的话</label><div id="voice-text-entry" class="voice-text-row"><input id="voice-text" maxlength="600" autocomplete="off" placeholder="说说你听见了什么…"><button id="voice-text-send" type="submit">发送</button><button id="voice-talk" type="button" class="voice-talk" aria-pressed="false" aria-describedby="voice-help" disabled>按住说话 · V</button></div></form>
-<div class="conversation-status"><p id="voice-status" role="status">正在连接搭档…</p><p id="speech-status" role="status"></p></div><p id="voice-help" class="small">按住 V 说话，也可以打字。</p><details class="privacy-note"><summary>语音与隐私</summary><p id="voice-privacy" class="voice-privacy">正在检查识别方式。</p></details><button id="voice-retry" hidden>重新连接</button>
+<div class="conversation-status"><p id="voice-status" role="status">正在连接搭档…</p><p id="speech-status" role="status"></p></div><p id="voice-help" class="small" hidden></p><details class="privacy-note"><summary>语音与隐私</summary><p id="voice-privacy" class="voice-privacy">正在检查识别方式。</p></details><button id="voice-retry" hidden>重新连接</button>
 </div>
 </section>
 <div class="volume"><label for="volume">音量</label><input id="volume" type="range" min="0" max="100" value="35"><output id="volume-value">35%</output></div>
 </section>
-</main><script src="glitter.js?v=cf8afa3" defer onload="document.getElementById('glitterCanvas')?.setAttribute('aria-hidden','true')"></script><script type="module" src="app.mjs?v=environment-music-v4"></script><script type="module" src="chat-beam.bundle.mjs?v=environment-music-v4"></script><script type="module" src="/journey.mjs"></script></body></html>
+</main><script src="glitter.js?v=cf8afa3" defer onload="document.getElementById('glitterCanvas')?.setAttribute('aria-hidden','true')"></script><script type="module" src="app.mjs?v=environment-music-v4"></script><script type="module" src="chat-beam.bundle.mjs?v=environment-music-v4"></script><script type="module" src="/journey.mjs"></script><script type="module" src="/theme.mjs"></script></body></html>

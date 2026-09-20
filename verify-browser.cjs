@@ -17,13 +17,13 @@ const out=process.env.QA_OUTPUT||'validation';fs.mkdirSync(out,{recursive:true})
   await opening.locator('#ue-next').click();await opening.locator('#unseen-echoes-opening[data-step="2"][data-transitioning="false"]').waitFor({timeout:10000});
   await opening.locator('#ue-skip').click();await page.locator('#tutorial-entry').waitFor();await page.locator('#tutorial-entry').click();
   await page.waitForURL('**/tutorial/**');await page.locator('#start').click();await page.locator('body.has-entered').waitFor();
-  const before=await page.locator('#coords').textContent();await page.keyboard.press('w');await page.waitForTimeout(650);const after=await page.locator('#coords').textContent();assert.notEqual(after,before);
-  await page.locator('#environment-orb').waitFor();await page.screenshot({path:out+'/tutorial.png'});check('opening enters current tutorial, audio loads and W moves player',{before,after});
+  const before=await page.locator('#coords').textContent();await page.keyboard.press('ArrowUp');await page.waitForTimeout(650);const after=await page.locator('#coords').textContent();assert.notEqual(after,before);
+  await page.locator('#environment-orb').waitFor();await page.screenshot({path:out+'/tutorial.png'});check('opening enters current tutorial, audio loads and ArrowUp moves player',{before,after});
   await page.getByRole('link',{name:'跳过教程',exact:true}).click();await page.waitForURL('**/?**chapter=lobby**');await page.locator('#player-name').waitFor();
   check('tutorial skip reaches the real multiplayer naming flow');
   const hotel=await context.newPage();hotel.on('pageerror',e=>report.errors.push('hotel: '+e.message));
   hotel.on('response',r=>{if(r.status()>=400&&!r.url().includes('/api/'))report.errors.push(r.status()+' '+new URL(r.url()).pathname);});
-  await hotel.goto(base+'/hotel/?silent=1&debug=1');await hotel.locator('#start').click();
+  await hotel.goto(base+'/hotel/?silent=1&debug=1');await hotel.locator('#case-envelope').click();await hotel.locator('#start').click();
   await hotel.locator('#chat').waitFor();await hotel.waitForFunction(()=>{try{return JSON.parse(document.getElementById('qa-state').textContent).audio.loaded>=38;}catch{return false;}},{},{timeout:20000}).catch(()=>{});
   await hotel.screenshot({path:out+'/hotel.png'});
   const initial=await hotel.locator('#qa-state').textContent();check('hotel loads and begins with packaged audio',{state:JSON.parse(initial).audio});

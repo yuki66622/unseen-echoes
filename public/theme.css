@@ -1,0 +1,238 @@
+/* The opening is the visual source of truth for every chapter. */
+html.unseen-ui {
+  color-scheme: dark;
+  --ue-ink: #b7c7dc;
+  --ue-dim: #94a3b8;
+  --ue-line: #354251;
+  --ue-surface: #05090eea;
+  --ue-error: #e1b5b2;
+  --ue-font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+  --ink: var(--ue-ink); --dim: var(--ue-dim); --line: var(--ue-line);
+  --text: var(--ue-ink); --muted: var(--ue-dim); --accent: var(--ue-ink);
+  --focus: var(--ue-ink); --bg: #000;
+  --journey-ink: var(--ue-ink); --journey-line: var(--ue-line);
+  --gemini-beam-radius: 0px;
+  background: #000;
+  color: var(--ue-ink);
+  font: 16px/1.7 var(--ue-font);
+  -webkit-font-smoothing: antialiased;
+}
+.unseen-ui body { margin: 0; background: #000; color: var(--ue-ink); font: inherit; }
+.unseen-ui *, .unseen-ui *::before, .unseen-ui *::after { box-sizing: border-box; }
+.unseen-ui [hidden] { display: none !important; }
+.unseen-ui main { position: relative; z-index: 1; }
+.unseen-ui .chapter-nebula { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; transition: opacity .5s ease; }
+.unseen-ui :is(h1,h2,h3) { color: var(--ue-ink); font-family: var(--ue-font); font-weight: 400; }
+.unseen-ui h1 { font-size: clamp(30px,3.4vw,38px); line-height: 1.5; letter-spacing: .07em; text-wrap: balance; }
+.unseen-ui h2 { font-size: 24px; line-height: 1.7; letter-spacing: .025em; }
+.unseen-ui p { color: var(--ue-dim); line-height: 1.85; }
+.unseen-ui :is(.eyebrow,.ue-eyebrow) { color: var(--ue-dim); font-size: 12px; font-weight: 400; letter-spacing: .2em; }
+.unseen-ui :is(button,input,textarea,select,summary) { font-family: var(--ue-font); font-weight: 400; }
+.unseen-ui button,
+.unseen-ui :is(.primary,.primary-action,.quiet-action) {
+  min-height: 44px; border: 0; border-bottom: 1px solid var(--ue-line);
+  border-radius: 0; background: transparent; box-shadow: none;
+  color: var(--ue-ink); padding: 9px 4px; font-size: 14px; line-height: 1.7;
+  letter-spacing: .04em; cursor: pointer; transition: border-color .15s, color .15s;
+}
+.unseen-ui button:hover:enabled, .unseen-ui .primary:hover:enabled {
+  background: transparent; color: #dce6f4; border-color: var(--ue-ink);
+}
+.unseen-ui button:disabled { opacity: .55; cursor: default; color: var(--ue-dim); }
+.unseen-ui button[aria-pressed=true] { border-bottom: 2px solid var(--ue-ink); }
+.unseen-ui :is(button,a,input,textarea,select,summary):focus-visible {
+  outline: 1px solid var(--ue-ink); outline-offset: 5px;
+}
+.unseen-ui :is(input:not([type=range]):not([type=checkbox]):not([type=color]),textarea,select) {
+  color: var(--ue-ink); font-size: 16px; line-height: 1.7; border: 0;
+  border-bottom: 1px solid var(--ue-line); border-radius: 0; background: transparent;
+  min-height: 44px; padding: 10px 2px; box-shadow: none;
+}
+.unseen-ui :is(input,textarea)::placeholder { color: #8998ac; opacity: 1; }
+.unseen-ui :is(input[type=range],input[type=checkbox]) { accent-color: var(--ue-ink); }
+.unseen-ui :is(.muted,.small,label) { color: var(--ue-dim); font-size: 14px; }
+.unseen-ui :is(.form-error,.notice[data-error=true],.message[data-kind=error]) { color: var(--ue-error); }
+.unseen-ui :is(.primary,.primary-action) { width: auto; min-width: 148px; border-bottom-color: #6b7b8f; }
+.unseen-ui :is(.gemini-beam-host,.gemini-beam-layer) { border-radius: 0; }
+.unseen-ui .gemini-beam-layer { opacity: .7; filter: grayscale(1); }
+.unseen-ui :is(.chat-log,.drawer) { scrollbar-width: thin; scrollbar-color: var(--ue-line) transparent; }
+.unseen-ui :is(.journey-nav,.journey-continue,.journey-finish) { font-family: var(--ue-font); color: var(--ue-ink); }
+.unseen-ui .journey-nav { top: 16px; left: 44px; right: 44px; font-size: 14px; }
+.unseen-ui .journey-nav span { font-size: 12px; letter-spacing: .1em; }
+.unseen-ui .journey-continue { background: transparent; padding: 12px 4px; }
+.unseen-ui .journey-finish { font-size: 14px; }
+
+/* The same quiet title stage, without changing the narration itself. */
+.unseen-ui #unseen-echoes-opening { font-family: var(--ue-font); --ue-dim: #94a3b8; }
+.unseen-ui #unseen-echoes-opening .ue-game { min-height: 100dvh; }
+.unseen-ui #unseen-echoes-opening .ue-stage { min-height: 0; }
+.unseen-ui #unseen-echoes-opening .ue-passage { transition: opacity .16s ease; }
+.unseen-ui #unseen-echoes-opening .ue-stage[data-clickable=true] { cursor: pointer; }
+.unseen-ui #unseen-echoes-opening :is(.ue-header,.ue-footer) { font-size: 14px; }
+.unseen-ui #unseen-echoes-opening :is(.ue-header,.ue-footer) button { font-size: 14px; }
+
+/* Tutorial: an opening stage above the existing sound field. */
+.unseen-ui[data-ui-chapter=tutorial] main { max-width: 980px; min-height: 100dvh; padding: 86px 44px 28px; }
+.unseen-ui[data-ui-chapter=tutorial] body:not(.has-entered) main { display: flex; flex-direction: column; }
+.unseen-ui[data-ui-chapter=tutorial] body:not(.has-entered) main>header { display: none; }
+.unseen-ui[data-ui-chapter=tutorial] .dark-field { background: transparent; }
+.unseen-ui[data-ui-chapter=tutorial] body:not(.has-entered) .dark-field { flex: 1; min-height: 0; padding: 34px 0; }
+.unseen-ui[data-ui-chapter=tutorial] .dark-field #intro { max-width: 660px; margin: 0 auto; }
+.unseen-ui[data-ui-chapter=tutorial] .dark-field h2 { font-size: clamp(30px,3.4vw,38px); font-weight: 400; letter-spacing: .05em; line-height: 1.6; margin: 20px 0; }
+.unseen-ui[data-ui-chapter=tutorial] .dark-field p { color: var(--ue-dim); font-size: 16px; line-height: 1.9; }
+.unseen-ui[data-ui-chapter=tutorial] .dark-field .primary { margin-top: 22px; padding: 10px 4px; }
+.unseen-ui[data-ui-chapter=tutorial] .dark-field .small { font-size: 14px; margin-top: 24px; }
+.unseen-ui[data-ui-chapter=tutorial] .lower-panel { border: 0; }
+.unseen-ui[data-ui-chapter=tutorial] #status { color: var(--ue-dim); font-size: 14px; }
+.unseen-ui[data-ui-chapter=tutorial] .volume { color: var(--ue-dim); font-size: 14px; margin-top: 12px; }
+.unseen-ui[data-ui-chapter=tutorial] .volume input { accent-color: var(--ue-ink); }
+.unseen-ui[data-ui-chapter=tutorial] body.has-entered main { padding-top: 70px; }
+.unseen-ui[data-ui-chapter=tutorial] .voice-control {
+  background: var(--ue-surface); border: 0; border-top: 1px solid var(--ue-line);
+  border-radius: 0; padding: 18px 0 10px; margin: 0;
+}
+.unseen-ui[data-ui-chapter=tutorial] :is(.voice-title strong,.voice-title>span) { color: var(--ue-ink); font-size: 14px; font-weight: 400; }
+.unseen-ui[data-ui-chapter=tutorial] :is(.chat-line,.chat-empty,.voice-reply) { font-size: 16px; line-height: 1.8; color: var(--ue-ink); }
+.unseen-ui[data-ui-chapter=tutorial] .chat-empty { color: var(--ue-dim); }
+.unseen-ui[data-ui-chapter=tutorial] .chat-line .speaker { color: var(--ue-dim); font-size: 12px; }
+.unseen-ui[data-ui-chapter=tutorial] .chat-line.user { color: #d1dceb; }
+.unseen-ui[data-ui-chapter=tutorial] .voice-text-row { gap: 16px; align-items: center; }
+.unseen-ui[data-ui-chapter=tutorial] .voice-text-row :is(button,input) { border-radius: 0; background: transparent; }
+.unseen-ui[data-ui-chapter=tutorial] :is(.voice-talk.recording,#voice-talk[aria-pressed=true]) { color: #edf4ff; border-color: #dce6f4; background: #182437; }
+.unseen-ui[data-ui-chapter=tutorial] :is(#chat-toggle,.chat-options summary) { color: var(--ue-dim); font-size: 14px; min-height: 44px; padding: 9px 4px; }
+.unseen-ui[data-ui-chapter=tutorial] .chat-options-panel { background: #070c14; border: 1px solid var(--ue-line); border-radius: 0; min-width: 170px; bottom: 44px; }
+.unseen-ui[data-ui-chapter=tutorial] .chat-options-panel :is(label,button) { font-size: 14px; }
+.unseen-ui[data-ui-chapter=tutorial] :is(.conversation-status p,#chat-collapsed-status,#voice-status,#speech-status) { font-size: 14px; color: var(--ue-dim); }
+.unseen-ui[data-ui-chapter=tutorial] :is(.privacy-note,.voice-privacy,#voice-help) { font-size: 12px; color: var(--ue-dim); }
+.unseen-ui[data-ui-chapter=tutorial] .wrong-feedback { background: transparent; border: 0; border-left: 1px solid var(--ue-error); border-radius: 0; }
+.unseen-ui[data-ui-chapter=tutorial] .wrong-feedback :is(strong,p) { font-size: 14px; color: var(--ue-error); }
+.unseen-ui[data-ui-chapter=tutorial] .play-controls button { background: transparent; border: 0; border-bottom: 1px solid var(--ue-line); color: var(--ue-ink); }
+
+/* Multiplayer: preserve the existing one-decision-per-screen journey. */
+.unseen-ui[data-ui-chapter=multiplayer] body[data-phase=opening] main { padding: 0; max-width: none; }
+.unseen-ui[data-ui-chapter=multiplayer] #opening { min-height: 100dvh; }
+.unseen-ui[data-ui-chapter=multiplayer] #opening-frame { min-height: 0; height: 100dvh; }
+.unseen-ui[data-ui-chapter=multiplayer] #tutorial-entry { position: absolute; left: 50%; bottom: 15vh; transform: translateX(-50%); margin: 0; }
+.unseen-ui[data-ui-chapter=multiplayer] :is(.lobby-scene h1,.passage h1,.room-scene h1) { font-size: clamp(28px,3.4vw,38px); font-weight: 400; letter-spacing: .05em; }
+.unseen-ui[data-ui-chapter=multiplayer] .scene-body { font-size: 17px; }
+.unseen-ui[data-ui-chapter=multiplayer] :is(.member-label,.member-state,.connection-strip,.connection-help,.roles button small,#role-prompt,#ready-hint,#room-share-status,.single-form label,.lobby-nav button,.rule-pagination,.rule-pagination button,.quiet-action) { font-size: 14px; }
+.unseen-ui[data-ui-chapter=multiplayer] .single-form input { font-size: 21px; }
+.unseen-ui[data-ui-chapter=multiplayer] .roles button[aria-pressed=true] { background: transparent; border-color: var(--ue-ink); }
+.unseen-ui[data-ui-chapter=multiplayer] .connection-strip[data-state=connected] .connection-dot { background: var(--ue-ink); }
+.unseen-ui[data-ui-chapter=multiplayer] #result { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.unseen-ui[data-ui-chapter=multiplayer] #result button { margin: 10px 0; }
+.unseen-ui[data-ui-chapter=multiplayer] #result-body { font-size: 17px; }
+
+/* Hotel: the same typography and controls, including active investigation. */
+.unseen-ui[data-ui-chapter=hotel] .intro { width: min(700px,calc(100% - 88px)); padding: 44px 0 52px; text-align: center; }
+.unseen-ui[data-ui-chapter=hotel] .intro h1 { margin: 18px 0 32px; }
+.unseen-ui[data-ui-chapter=hotel] .story { font: 16px/1.9 var(--ue-font); color: var(--ue-dim); }
+.unseen-ui[data-ui-chapter=hotel] .story p { margin-bottom: 20px; }
+.unseen-ui[data-ui-chapter=hotel] .story .invitation { font-style: normal; color: var(--ue-ink); margin: 30px 0; }
+.unseen-ui[data-ui-chapter=hotel] .tutorial { border-color: var(--ue-line); font-size: 14px; color: var(--ue-dim); padding: 22px 0; }
+.unseen-ui[data-ui-chapter=hotel] kbd { color: var(--ue-ink); }
+.unseen-ui[data-ui-chapter=hotel] #chat.chat { padding: 18px 20px 12px; background: var(--ue-surface); border: 0; border-top: 1px solid var(--ue-line); border-radius: 0; }
+.unseen-ui[data-ui-chapter=hotel] .chat-header h2 { font-size: 16px; margin: 4px 0 0; line-height: 1.6; letter-spacing: .015em; }
+.unseen-ui[data-ui-chapter=hotel] :is(.header-actions button,.context-actions button,.suggestions button,.chat-footer button,.drawer,.drawer .check,.settings-row button,.movement button,.note-item button) { font-size: 14px; }
+.unseen-ui[data-ui-chapter=hotel] :is(.header-actions button,.context-actions button,.suggestions button,.chat-footer button) { background: transparent; border: 0; border-bottom: 1px solid var(--ue-line); color: var(--ue-ink); }
+.unseen-ui[data-ui-chapter=hotel] .message { font-size: 16px; line-height: 1.75; border-color: var(--ue-line); color: var(--ue-ink); }
+.unseen-ui[data-ui-chapter=hotel] .message-label,.unseen-ui[data-ui-chapter=hotel] .message[data-kind=user] .message-label { color: var(--ue-dim); font-size: 12px; font-weight: 400; }
+.unseen-ui[data-ui-chapter=hotel] :is(.notice,#note-count) { color: var(--ue-dim); font-size: 14px; }
+.unseen-ui[data-ui-chapter=hotel] :is(.notice[data-error=true],.message[data-kind=error]) { color: var(--ue-error); }
+.unseen-ui[data-ui-chapter=hotel] .chat-footer #connection { font-size: 12px; }
+.unseen-ui[data-ui-chapter=hotel] :is(.drawer,.note-item,.chat form) { border-color: var(--ue-line); }
+.unseen-ui[data-ui-chapter=hotel] #talk[aria-pressed=true] { color: #edf4ff; border-color: #dce6f4; background: #182437; }
+.unseen-ui[data-ui-chapter=hotel] .ending { text-align: center; }
+.unseen-ui[data-ui-chapter=hotel] .ending h1 { font-size: clamp(30px,3.4vw,38px); line-height: 1.6; }
+.unseen-ui[data-ui-chapter=hotel] .ending p:not(.eyebrow) { font: 17px/1.9 var(--ue-font); color: var(--ue-dim); margin: 24px auto; }
+.unseen-ui[data-ui-chapter=hotel] :is(.orientation,.compass,.compass span,#compass-arrow,.direction-hint,.interaction-prompt>span,.interaction-prompt small,.trail-map) { color: var(--ue-ink); }
+.unseen-ui[data-ui-chapter=hotel] :is(.orientation p,.orientation #floor-label,.orientation #search-budget,.interaction-prompt small) { color: var(--ue-dim); font-size: 12px; }
+.unseen-ui[data-ui-chapter=hotel] .orientation #search-budget[data-low=true] { color: var(--ue-error); }
+.unseen-ui[data-ui-chapter=hotel] .interaction-prompt kbd { border: 0; border-bottom: 1px solid var(--ue-ink); border-radius: 0; background: transparent; color: var(--ue-ink); }
+.unseen-ui[data-ui-chapter=hotel] .trail-map canvas { border-color: var(--ue-line); border-radius: 0; }
+.unseen-ui[data-ui-chapter=hotel] .trail-map header { font-size: 12px; }
+.unseen-ui[data-ui-chapter=hotel] .journey-nav { right: auto; }
+
+@media(max-width:600px) {
+  .unseen-ui .journey-nav { left: 20px; right: 20px; top: 10px; gap: 16px; }
+  .unseen-ui[data-ui-chapter=tutorial] main { padding: 70px 20px 20px; }
+  .unseen-ui[data-ui-chapter=tutorial] .dark-field h2 { font-size: 30px; }
+  .unseen-ui[data-ui-chapter=tutorial] .dark-field p { font-size: 16px; }
+  .unseen-ui[data-ui-chapter=tutorial] .voice-text-row { flex-wrap: wrap; gap: 10px 16px; }
+  .unseen-ui[data-ui-chapter=tutorial] .voice-text-row input { flex-basis: calc(100% - 65px); }
+  .unseen-ui[data-ui-chapter=tutorial] .voice-talk { margin-left: auto; }
+  .unseen-ui[data-ui-chapter=multiplayer] .lobby-scene { min-height: 0; padding: 30px 0; }
+  .unseen-ui[data-ui-chapter=multiplayer] .scene-body { font-size: 16px; }
+  .unseen-ui[data-ui-chapter=hotel] .intro { width: calc(100% - 40px); padding-top: 25px; }
+  .unseen-ui[data-ui-chapter=hotel] #chat.chat { padding: 12px 10px 8px; width: calc(100% - 24px); }
+  .unseen-ui[data-ui-chapter=hotel] .chat-header { align-items: flex-start; }
+  .unseen-ui[data-ui-chapter=hotel] .chat-header h2 { font-size: 14px; }
+  .unseen-ui[data-ui-chapter=hotel] .header-actions { gap: 10px; }
+  .unseen-ui[data-ui-chapter=hotel] .header-actions button { padding: 8px 0; }
+  .unseen-ui[data-ui-chapter=hotel] .orientation { top: 68px; left: 25%; }
+  .unseen-ui[data-ui-chapter=hotel] .trail-map { top: 76px; right: 20px; }
+  .unseen-ui[data-ui-chapter=hotel] .trail-map header { font-size: 10px; }
+  .unseen-ui[data-ui-chapter=hotel] .chat-footer { flex-wrap: wrap; }
+  .unseen-ui[data-ui-chapter=hotel] .chat-footer #connection { font-size: 12px; }
+}
+@media(max-height:650px) {
+  .unseen-ui #unseen-echoes-opening .ue-game { padding-block: 12px; }
+  .unseen-ui #unseen-echoes-opening .ue-stage { padding: 12px 0; }
+  .unseen-ui #unseen-echoes-opening .ue-action { margin-top: 20px; }
+  .unseen-ui[data-ui-chapter=tutorial] .dark-field #intro { margin: 0 auto; }
+  .unseen-ui[data-ui-chapter=hotel] .compass { width: 66px; height: 66px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .unseen-ui .chapter-nebula,.unseen-ui button { transition: none; }
+  .unseen-ui #unseen-echoes-opening .ue-passage { transition: none; }
+}
+
+/* One key legend in the tutorial; the later worlds carry no repeated lessons. */
+.unseen-ui .key-legend { position: fixed; left: 34px; top: 30%; z-index: 3; margin: 0; padding: 0; background: none; border: 0; border-radius: 0; color: var(--ue-dim); }
+.unseen-ui .key-legend dl { margin: 20px 0 0; }
+.unseen-ui .key-legend dl>div { display: flex; align-items: center; gap: 18px; margin: 13px 0; }
+.unseen-ui .key-legend dt { display: flex; gap: 9px; width: 54px; color: var(--ue-ink); }
+.unseen-ui .key-legend kbd { font: 14px/1.7 var(--ue-font); border: 0; padding: 0; border-radius: 0; }
+.unseen-ui .key-legend dd { margin: 0; font-size: 14px; }
+.unseen-ui[data-ui-chapter=tutorial] body:not(.has-entered) .lower-panel { display: none; }
+.unseen-ui[data-ui-chapter=tutorial] body.has-entered .key-legend { top: 18%; }
+.unseen-ui[data-ui-chapter=hotel] .case-intro { display: flex; align-items: center; justify-content: center; min-height: calc(100dvh - 68px); width: min(760px,calc(100% - 88px)); }
+.unseen-ui[data-ui-chapter=hotel] #case-envelope-stage { width: 100%; padding: 30px 0; }
+.unseen-ui[data-ui-chapter=hotel] .case-intro[data-letter-open=true] { display: block; }
+.unseen-ui[data-ui-chapter=hotel] .case-envelope { display: flex; flex-direction: column; align-items: center; justify-content: center; width: min(510px,100%); min-height: 290px; margin: 48px auto 0; padding: 52px 32px 25px; position: relative; overflow: hidden; border: 1px solid #526276; background: #03080dcc; }
+.unseen-ui[data-ui-chapter=hotel] .case-envelope:hover { background: #0c1420cc; border-color: var(--ue-ink); }
+.unseen-ui .envelope-flap { position: absolute; width: 74%; height: 180px; border: 1px solid var(--ue-line); left: 13%; top: -147px; transform: rotate(24deg) skewX(-42deg); pointer-events: none; }
+.unseen-ui .envelope-address { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.unseen-ui .envelope-name { font-size: 27px; letter-spacing: .05em; }
+.unseen-ui .envelope-recipient { font-size: 14px; color: var(--ue-dim); }
+.unseen-ui .envelope-open { font-size: 14px; margin-top: 35px; border-bottom: 1px solid var(--ue-line); padding: 6px 2px; }
+.unseen-ui .case-letter { padding: 32px 48px 42px; border-top: 1px solid #526276; border-bottom: 1px solid var(--ue-line); background: #03080ded; text-align: left; outline: none; animation: letter-arrive .22s ease both; }
+.unseen-ui .letter-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.unseen-ui #letter-title { font-size: 32px; margin: 24px 0 30px; letter-spacing: .06em; }
+.unseen-ui .letter-signature { text-align: right; font-size: 16px; margin: 28px 0 34px; }
+.unseen-ui .letter-signature span { font-size: 14px; color: var(--ue-dim); }
+.unseen-ui .case-letter #start { display: block; margin: 28px auto 0; }
+.unseen-ui .case-letter #load-status { text-align: center; }
+@keyframes letter-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media(max-width:1050px) {
+  .unseen-ui .key-legend { left: 24px; top: 22%; }
+  .unseen-ui .key-legend dl>div { gap: 8px; }
+  .unseen-ui .key-legend dd { font-size: 12px; }
+  .unseen-ui[data-ui-chapter=tutorial] .dark-field #intro { margin-left: 180px; }
+}
+@media(max-width:600px) {
+  .unseen-ui .key-legend,.unseen-ui[data-ui-chapter=tutorial] body.has-entered .key-legend { left: 20px; top: 88px; }
+  .unseen-ui .key-legend .eyebrow { margin: 0; }
+  .unseen-ui .key-legend dl { margin-top: 10px; }
+  .unseen-ui .key-legend dl>div { margin: 7px 0; }
+  .unseen-ui .key-legend dt { width: 44px; }
+  .unseen-ui[data-ui-chapter=tutorial] .dark-field #intro { margin: 245px auto 0; }
+  .unseen-ui[data-ui-chapter=tutorial] body.has-entered .dark-field { min-height: 300px; }
+  .unseen-ui[data-ui-chapter=hotel] .case-intro { width: calc(100% - 40px); }
+  .unseen-ui[data-ui-chapter=hotel] .case-envelope { min-height: 240px; margin-top: 32px; }
+  .unseen-ui .case-letter { padding: 20px 18px 32px; }
+  .unseen-ui .letter-header { align-items: flex-start; }
+  .unseen-ui .letter-header .eyebrow { max-width: 50%; line-height: 1.8; }
+  .unseen-ui #letter-title { font-size: 28px; }
+}
+@media(prefers-reduced-motion:reduce) { .unseen-ui .case-letter { animation: none; } }

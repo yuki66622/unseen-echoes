@@ -15,7 +15,9 @@
 | 双人追逐 | 8×8 米无物理墙体的场地；监管者听方向心跳，求生者听移动脚步；找到电机后循雨声到出口按 E 离开 |
 | 旅馆调查 | 两层空间、门与楼梯、三位证人的录音、事件录音、个人 Gemini 对话与推理判定 |
 
-W/S 前后移动，A/D 转向，E 交互；教程与旅馆可用 F 操作门。按 P 暂停，语音关卡可按住 V 录音。声音从主动开始后播放；后台/暂停会停止。语音输入最长 12 秒。
+↑/↓ 前后移动，←/→ 转向，E 交互；教程与旅馆可用 F 操作门。按 P 暂停，语音关卡可按住 V 录音。声音从主动开始后播放；后台/暂停会停止。语音输入最长 12 秒。
+
+各章节沿用开场的 Nebula Dark 风格。点击序章画面或按 Enter/Space 进入下一句；教程不设逐项教学，只在左侧显示按键表，并保留右侧指南针。追逐与旅馆共用中央路径图和右侧指南针，行走约一米后逐渐显示走过的路径，不预先显示目标或对手。旅馆先拆开信封阅读案件，再进入调查；最新版推理支持相对方向提示和可随时接管的短程导航协助。
 
 ## 本地运行
 
@@ -37,7 +39,7 @@ npm run dev
 | public/ | 玩家客户端、已选音频与许可 |
 | src/ | Cloudflare Worker、教程和旅馆对话服务 |
 | spacetimedb/ | 与客户端匹配的权威追逐规则 |
-| tests/ | Worker、服务契约及错误边界检查 |
+| tests/ | Worker、服务契约、旅馆移动／导航／路径图及错误边界检查 |
 
 前端与 API 由 Cloudflare Workers 兼容运行时托管；联机订阅通过受限同源网关进入 SpacetimeDB。两个单人关卡使用独立 API 路径，服务器分别执行相应规则与角色记忆。案件判定使用单独的模型请求；没有完成初始证言与事件录音时不能通过。
 
@@ -49,7 +51,7 @@ npm test
 npm run typecheck
 ```
 
-`verify-browser.cjs` 使用 Playwright 和静音 Chrome，可通过 `PLAYWRIGHT_MODULE`、`CHROME_PATH`、`GAME_SITE_URL` 指定环境。它会以虚构答案调用真实已配置的 Gemini。所有自动试玩禁止开启扬声器与麦克风。验证结果及范围见 [VALIDATION.md](VALIDATION.md)。
+`verify-ui.cjs` 检查开场快进、按键、信封、样式与明确模拟的失败重试；`verify-chapters.cjs` 运行双人章节衔接；`verify-browser.cjs` 完成真实旅馆调查。均使用 Playwright 和静音 Chrome，可通过 `PLAYWRIGHT_MODULE`、`CHROME_PATH`、`GAME_SITE_URL` 指定环境。完整旅馆验证会以虚构答案调用真实已配置的 Gemini。所有自动试玩禁止开启扬声器与麦克风。验证结果及范围见 [VALIDATION.md](VALIDATION.md)。
 
 ## 发布与后续同步
 
@@ -57,7 +59,7 @@ npm run typecheck
 
 追逐规则变化时，先验证 `spacetimedb/` 与 `public/multiplayer/` 的同一快照，再配对发布。数据库更新坚持 `--delete-data=never`，不删除房间或重建身份。
 
-这里是整合后的独立运行仓库。`import_game.py`、`apply_release_bridges.py` 仅供原多任务工作区明确刷新快照时使用，普通构建不依赖上游。不要运行旧父目录 `sync_cloud.py`：它不包含完整章节，会覆盖衔接。后续上游改动必须先比较快照再有选择地合并。
+这里是整合后的独立运行仓库。`import_game.py`、`apply_release_bridges.py` 是最初整合时的历史工具，普通构建不依赖上游；重新全量运行会覆盖目前的统一主题、按键、信封和云端适配。不要运行旧父目录 `sync_cloud.py`：它不包含完整章节，会覆盖衔接。后续上游改动必须先比较 `upstream-snapshot.json`、最新旅馆的 `hotel-snapshot.json` 与 `PROJECT_NOTES.md`，再有选择地合并。
 
 回退时恢复上一份 Sites 版本；若规则也变化，配对恢复对应规则源码，保留数据库数据。多人身份保存在当前浏览器标签会话；不同设备或全新会话不保证自动恢复同一角色。
 

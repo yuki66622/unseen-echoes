@@ -1,0 +1,18 @@
+{
+  "revision": "3",
+  "source": "sound-hunt-prototype/hotel",
+  "sha256": {
+    "app.mjs": "5012d68ddfbe9bb44b28c293b6f647ba65ca4a9410628d069077af92865d266b",
+    "style.css": "7915d3f1fd0b56705ec859f6095b7596a99a3288999eefe246f1d1214400d940",
+    "navigation-hint.mjs": "4d04a92e8dd4302cd945e60b2c87f738099bfce7075569b6e356229f4522826c",
+    "navigation-assist.mjs": "93820546ce9e1d200101fb2ce3639562bb2983f8d356b3fb7b52891a10b4b451"
+  },
+  "adaptations": [
+    "chapter API paths",
+    "45-second hotel request timeout",
+    "shared theme",
+    "envelope briefing",
+    "arrow-only keyboard",
+    "shared navigation geometry options"
+  ]
+}

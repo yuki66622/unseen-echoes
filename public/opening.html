@@ -1,4 +1,4 @@
-<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>未见回声 · 序章</title>
+<!doctype html><html lang="zh-CN" class="unseen-ui" data-ui-chapter="opening"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>未见回声 · 序章</title>
 <div id="unseen-echoes-opening" aria-label="未见回声 · 序章" lang="zh-CN">
   <div class="ue-game">
     <header class="ue-header"><span id="ue-chapter"></span><button id="ue-skip" type="button" hidden>跳过序章</button></header>
@@ -62,20 +62,22 @@
  function render(){
   const scene=scenes[index];root.dataset.scene=scene.kind;root.dataset.step=String(index);
   heading.textContent=scene.heading;body.textContent=scene.body||'';body.hidden=!scene.body;eyebrow.textContent=scene.eyebrow||'';eyebrow.hidden=!scene.eyebrow;
-  next.hidden=scene.kind==='tagline'||scene.kind==='tutorial';next.textContent=scene.button||'继续';next.disabled=busy;
+  next.hidden=scene.kind==='tutorial';next.textContent=scene.button||'继续';next.disabled=busy;
   skip.hidden=index===0||scene.kind==='tutorial';back.hidden=index<2||scene.kind==='tutorial';replay.hidden=scene.kind!=='tutorial';note.textContent=scene.note||'';
   $('ue-chapter').textContent='';
+  root.querySelector('.ue-stage').dataset.clickable=String(scene.kind!=='tutorial');
+  if(!scene.note)note.textContent=index>0?'点击画面继续':'';
  }
  function focusPrimary(){if(!next.hidden)next.focus({preventScroll:true});else if(!skip.hidden)skip.focus({preventScroll:true});else replay.focus({preventScroll:true});}
  function go(target){
   if(target<0||target>=scenes.length)return;
   clearTimers();const generation=++token;busy=true;root.dataset.transitioning='true';next.disabled=true;passage.classList.add('ue-faded');
-  const delay=reduced.matches?0:850;
+  const delay=reduced.matches?0:160;
   fadeTimer=setTimeout(()=>{
    if(generation!==token)return;index=target;render();
    raf1=requestAnimationFrame(()=>{raf2=requestAnimationFrame(()=>{
     if(generation!==token)return;passage.classList.remove('ue-faded');
-    fadeTimer=setTimeout(()=>{if(generation!==token)return;busy=false;root.dataset.transitioning='false';next.disabled=false;focusPrimary();if(index===1)scheduleTagline(3400);},delay);
+    fadeTimer=setTimeout(()=>{if(generation!==token)return;busy=false;root.dataset.transitioning='false';next.disabled=false;focusPrimary();if(index===1)scheduleTagline(1200);},delay);
    });});
   },delay);
  }
@@ -83,7 +85,8 @@
  skip.addEventListener('click',()=>go(scenes.length-1));
  back.addEventListener('click',()=>{if(!busy)go(Math.max(0,index-1));});
  replay.addEventListener('click',()=>go(0));
- root.addEventListener('keydown',event=>{if(event.key!=='Enter'||event.repeat||event.target.tagName==='BUTTON')return;event.preventDefault();if(!busy&&!next.hidden)next.click();});
+ root.querySelector('.ue-stage').addEventListener('click',event=>{if(event.target.closest('button,a,input,textarea,select,summary')||busy||index===scenes.length-1)return;go(index+1);});
+ root.addEventListener('keydown',event=>{if(!['Enter',' '].includes(event.key)||event.repeat||event.target.closest('button,a,input,textarea,select,summary'))return;event.preventDefault();if(!busy&&!next.hidden)next.click();});
  document.addEventListener('visibilitychange',()=>{if(index!==1||busy)return;if(document.hidden){clearTimeout(autoTimer);autoRemaining=Math.max(0,autoDue-performance.now());}else scheduleTagline(autoRemaining);});
  root.openingDiagnostics=()=>({index,kind:scenes[index].kind,busy,heading:heading.textContent,background:getComputedStyle(root.querySelector('.ue-game')).backgroundColor});
  root.dataset.transitioning='false';render();
@@ -93,3 +96,5 @@
 <style>.ue-game{position:relative;isolation:isolate;overflow:hidden}#unseen-echoes-opening .nebula-backdrop{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;transition:opacity .65s}#unseen-echoes-opening h1,#unseen-echoes-opening .ue-body{text-shadow:0 2px 20px #000}@media(prefers-reduced-motion:reduce){.nebula-backdrop{transition:none!important}}</style><script src="/nebula-source.js"></script><script type="module" src="/nebula-opening.mjs"></script>
 
 <style>#unseen-echoes-opening .ue-game{min-height:100dvh}</style>
+
+<link rel="stylesheet" href="/theme.css">

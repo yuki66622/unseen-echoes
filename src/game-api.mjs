@@ -40,9 +40,9 @@ async function speak(payload,env,fetchImpl){
   const cacheKey=role+':'+payload.text;
   if(speechCache.has(cacheKey))return new Response(speechCache.get(cacheKey),{headers:{...headers,'Content-Type':'audio/mpeg'}});
   const response=await fetchImpl(`https://api.elevenlabs.io/v1/text-to-speech/${voices[role]}?output_format=mp3_44100_128`,{
-    method:'POST',redirect:'error',signal:AbortSignal.timeout(20000),headers:{'xi-api-key':env.ELEVENLABS_API_KEY,'Content-Type':'application/json','Accept':'audio/mpeg'},
+    method:'POST',redirect:'manual',signal:AbortSignal.timeout(20000),headers:{'xi-api-key':env.ELEVENLABS_API_KEY,'Content-Type':'application/json','Accept':'audio/mpeg'},
     body:JSON.stringify({text:payload.text,model_id:'eleven_flash_v2_5',voice_settings:{stability:.6,similarity_boost:.75}})});
-  if(!response.ok){await response.body?.cancel();throw {status:502,code:'speech_provider',message:'The spoken reply could not be generated. Your text reply is still available.'};}
+  if(!response.ok||response.redirected){await response.body?.cancel();throw {status:502,code:'speech_provider',message:'The spoken reply could not be generated. Your text reply is still available.'};}
   const reader=response.body.getReader(),chunks=[];let length=0;
   try{while(true){const {value,done}=await reader.read();if(done)break;length+=value.length;if(length>2000000){await reader.cancel();throw Error('audio size');}chunks.push(value);}}finally{reader.releaseLock();}
   if(length<100)throw Error('incomplete audio');

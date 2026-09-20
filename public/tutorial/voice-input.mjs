@@ -45,14 +45,17 @@ async function requestJson(url, options, signal) {
   signal?.addEventListener('abort', abort, { once: true });
   if (signal?.aborted) controller.abort();
   let timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, 25_000);
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, 35_000);
   try {
     const response = await fetch(url, { ...options, credentials: 'same-origin', cache: 'no-store', signal: controller.signal });
     const data = await response.json();
-    if (!response.ok) throw new Error(data?.error?.message || '语音服务暂时不可用，请重试。');
+    if (!response.ok) {
+      const error = new Error(data?.error?.message || '语音服务暂时不可用，请重试。');
+      error.code = data?.error?.code; error.status = response.status; throw error;
+    }
     return data;
   } catch (error) {
-    if (timedOut) throw new Error('语音请求超时，请重试。');
+    if (timedOut) { const error = new Error('等待回复超时，这句话未执行。可以重新发送。'); error.code = 'client_timeout'; throw error; }
     throw error;
   } finally {
     clearTimeout(timer); signal?.removeEventListener('abort', abort);
@@ -322,6 +325,7 @@ export class VoiceInput {
   _fail(operation, error) {
     if (!this._current(operation)) return false;
     operation.controller.abort(); operation.capture?.close(); this.active = null;
+    this.lastError = { code: error?.code || 'request_failed', status: error?.status };
     this._state('error', this._errorMessage(error)); return false;
   }
 

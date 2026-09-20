@@ -4,6 +4,13 @@ import {doorPosition} from './world.mjs';
 const initial={martin:'MARTIN-INITIAL',claire:'CLAIRE-INITIAL',elena:'ELENA-INITIAL'};
 const stairPortals={'stairs-lower':{x:16,y:8},'stairs-upper':{x:14,y:10}};
 
+/** Bearing is relative to the player's nose: positive means their right. */
+export function relativeDirection(bearing){
+  const angle=Math.atan2(Math.sin(bearing),Math.cos(bearing))*180/Math.PI;
+  const directions=['Ahead','Ahead to your right','To your right','Behind to your right','Behind you','Behind to your left','To your left','Ahead to your left'];
+  return directions[(Math.round(angle/45)+8)%8];
+}
+
 /** A route to outstanding sound evidence, through doorways rather than walls. */
 export function navigationGoal(state,collected,recordingHeard){
   if(state.stairs||state.phase==='ending')return null;
@@ -22,13 +29,23 @@ export function navigationGoal(state,collected,recordingHeard){
 /** Ten seconds without meaningful progress produces a two-second visual cue. */
 export class NavigationHint{
   constructor(){this.reset();}
-  reset(){this.goal=null;this.best=Infinity;this.stalled=0;this.remaining=0;this.lastPlayer=null;}
+  reset(){this.goal=null;this.approach=0;this.lastDistance=null;this.stalled=0;this.lostSeconds=0;this.remaining=0;this.lastPlayer=null;}
   update({goal,player,dt,active}){
     if(!active||!goal||goal.distance<=1.6){this.reset();return null;}
-    if(goal.id!==this.goal){this.reset();this.goal=goal.id;this.best=goal.distance;}
-    const moved=this.lastPlayer&&Math.hypot(player.x-this.lastPlayer.x,player.y-this.lastPlayer.y)>.005;
-    if(moved&&goal.distance<this.best-.12){this.best=goal.distance;this.stalled=0;}
+    if(goal.id!==this.goal){this.reset();this.goal=goal.id;}
+    const dx=this.lastPlayer?player.x-this.lastPlayer.x:0,dy=this.lastPlayer?player.y-this.lastPlayer.y:0;
+    const moved=Math.hypot(dx,dy),closer=this.lastDistance===null?0:this.lastDistance-goal.distance;
+    const aim=goal.bearing+(player.heading||0),toward=dx*Math.sin(aim)+dy*Math.cos(aim);
+    // Count recent recovery too: returning after a wrong turn is real progress.
+    // A source moving toward a stationary player cannot reset their timer.
+    if(moved>1e-5){
+      if(closer>0&&toward>0)this.approach+=Math.min(closer,toward);
+      else this.approach=0;
+      if(this.approach>=.12){this.approach=0;this.stalled=0;this.lostSeconds=0;}
+    }
+    this.lastDistance=goal.distance;
     this.lastPlayer={x:player.x,y:player.y};
+    this.lostSeconds+=dt;
     if(this.remaining>0)this.remaining=Math.max(0,this.remaining-dt-1e-10);
     else{
       this.stalled+=dt;

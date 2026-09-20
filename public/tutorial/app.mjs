@@ -1,3 +1,4 @@
+import {NavigationHUD} from '/navigation-hud.mjs';
 import {SoundHuntAudio} from './sound-engine.mjs?v=environment-orb-v1';
 import {SOUNDS,TARGET_SOUND} from './sound-catalog.mjs?v=rooms-v3';
 import {createGame,nearbySource,confirmSource,toggleDoor} from './world.mjs?v=rooms-v3';
@@ -16,6 +17,7 @@ const randomSeed=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 const specifiedSeed=params.get('seed');
 const initialSeed=specifiedSeed!==null&&/^\d+$/.test(specifiedSeed)?Number(specifiedSeed)>>>0:randomSeed();
 let game=createGame(initialSeed), starting=false, paused=false, operation=0;
+const navigationHud=new NavigationHUD({label:'初次穿行'});
 const orbHost=document.createElement('div');orbHost.id='environment-orb';orbHost.hidden=true;orbHost.setAttribute('aria-hidden','true');document.body.append(orbHost);
 const environmentOrb=mountEnvironmentOrb(orbHost,{readState:()=>game.stage==='explore'&&!starting&&!paused
   ?audio.getEnvironmentVisualState():{active:false,rms:0,proximity:0}});
@@ -73,6 +75,7 @@ function renderVoice(){
   $('voice-status').dataset.state=paused?'paused':voiceState;
   $('voice-control').dataset.voiceState=paused?'paused':voiceState;
   show('voice-retry',!voiceReady||voiceState==='error'||voiceState==='unavailable');
+  $('voice-retry').textContent=voiceReady&&$('voice-text').value.trim()?'重新发送':'重新连接';
   $('voice-text-send').disabled=!active||!voiceReady||voiceState==='transcribing'||!semanticMode;
   renderChatDisclosure();
 }
@@ -107,7 +110,7 @@ async function initializeVoice(force=false){
       :status.local
       ?'仅在按住时录音，松开后在本机识别，不上传、不保存录音。建议戴耳机。'
       :'仅在按住时录音，松开后发送至 ElevenLabs 识别。本地不保存录音；建议戴耳机。';
-    voiceMessage=voiceReady?`${status.provider||'语音服务'}已就绪。`:'语音服务未就绪，键盘仍可使用。';
+    voiceMessage=voiceReady?'可以输入你听见的声音。':'语音服务未就绪，键盘仍可使用。';
     $('voice-help').textContent=semanticMode
       ?'按住 V 聊线索、问问题或确认猜测，也可以打字。每次可说 12 秒。'
       :`当前是固定口令模式，例如“前进两步”“开门”。每次最多 ${status.maxSeconds||12} 秒。`;
@@ -270,6 +273,7 @@ function render(){
   $('step-find').className=game.stage==='explore'?'current':game.stage==='won'?'done':'';
   $('step-confirm').className=game.stage==='won'?'current':'';
   $('attempts').textContent=game.attempts;
+  navigationHud.update({player:game.player,active:game.stage==='explore',paused,roundKey:game});
   $('coords').value=`${game.player.x.toFixed(1)}, ${game.player.y.toFixed(1)} m`;
   $('map').dataset.moving=String(Boolean(motion.active));
   const p=point(game.player);
@@ -390,7 +394,12 @@ $('voice-talk').addEventListener('pointerup',()=>{void voice.stop();});
 $('voice-talk').addEventListener('pointercancel',invalidateVoice);
 $('voice-talk').addEventListener('keydown',event=>{if([' ','Enter'].includes(event.key)){event.preventDefault();if(!event.repeat)startVoice();}});
 $('voice-talk').addEventListener('keyup',event=>{if([' ','Enter'].includes(event.key)){event.preventDefault();void voice.stop();}});
-$('voice-retry').addEventListener('click',()=>{void initializeVoice(true);});
+$('voice-retry').addEventListener('click',async()=>{
+  const text=$('voice-text').value.trim();
+  if(!voiceReady||voice.lastError?.code==='session')await initializeVoice(true);
+  if(text&&voiceReady)$('voice-text-form').requestSubmit();
+  else if(voiceReady)await initializeVoice(true);
+});
 $('volume').addEventListener('input',event=>{audio.setVolume(Number(event.target.value)/100);replyVoice.setVolume();$('volume-value').value=`${event.target.value}%`;});
 $('voice-output-enabled').addEventListener('change',()=>{if(!$('voice-output-enabled').checked)replyVoice.cancel();});
 document.addEventListener('keydown',event=>{
@@ -401,7 +410,7 @@ document.addEventListener('keydown',event=>{
   if(event.metaKey||event.ctrlKey||event.altKey||event.target.closest('select,textarea,input:not([type="checkbox"]):not([type="range"])'))return;
   const key=event.key.toLowerCase();
   if(event.target.matches('input[type="range"]')&&key.startsWith('arrow'))return;
-  const action={w:'forward',s:'back',a:'left',d:'right',arrowup:'forward',arrowdown:'back',arrowleft:'left',arrowright:'right'}[key];
+  const action={arrowup:'forward',arrowdown:'back',arrowleft:'left',arrowright:'right'}[key];
   if(action){event.preventDefault();if(event.repeat&&motion.active?.action===action)return;invalidateVoice();act(action);}
   if(key==='e'&&!event.repeat){event.preventDefault();invalidateVoice();motion.cancel();confirm();}
   if(key==='f'&&!event.repeat){event.preventDefault();invalidateVoice();motion.cancel();useDoor();}

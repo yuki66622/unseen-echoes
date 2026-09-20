@@ -22,7 +22,8 @@ export class TutorialError extends Error {
 const invalidInput = () => new TutorialError(400, 'invalid_input', '这次输入不完整或格式无效，请重试。');
 const invalidAudio = () => new TutorialError(400, 'invalid_audio', '录音格式无效，请重新按住说话。');
 const invalidResponse = () => new TutorialError(502, 'gemini_response', 'Gemini 没有返回可执行的完整结果，本次未执行，请再说一次。');
-const timeoutError = () => new TutorialError(504, 'gemini_timeout', 'Gemini 连接超时或中断，本次未执行，请重试。');
+const timeoutError = () => new TutorialError(504, 'gemini_timeout', 'Gemini 回复超时，这句话未执行。可以重新发送。');
+const networkError = () => new TutorialError(502, 'gemini_network', '暂时无法连接 Gemini，这句话未执行。可以重新发送。');
 
 export function validatePlan(plan) {
   if (!exactKeys(plan, ['text', 'mode', 'message', 'actions'])) throw invalidResponse();
@@ -194,9 +195,9 @@ export async function tutorialReply(payload, env = {}, fetchImpl = fetch) {
     try {
       response = await fetchImpl('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent', {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify(body), signal: controller.signal, redirect: 'error',
+        body: JSON.stringify(body), signal: controller.signal, redirect: 'manual',
       });
-      if (!response.ok) {
+      if (!response.ok || response.redirected) {
         void response.body?.cancel().catch(() => {});
         if ([401, 403].includes(response.status)) throw new TutorialError(502, 'gemini_auth', 'Gemini 密钥或访问权限不可用，请检查 AI Studio 配置。');
         if (response.status === 429) throw new TutorialError(429, 'gemini_limit', 'Gemini 额度或频率受限，本次未执行；请稍后重试。');
@@ -205,7 +206,7 @@ export async function tutorialReply(payload, env = {}, fetchImpl = fetch) {
       data = await boundedResponse(response, controller.signal);
     } catch (error) {
       if (error instanceof TutorialError) throw error;
-      throw timeoutError();
+      throw controller.signal.aborted ? timeoutError() : networkError();
     }
     const plan = responsePlan(data);
     // Match GeminiGame: typed words are authoritative even if the model paraphrases.

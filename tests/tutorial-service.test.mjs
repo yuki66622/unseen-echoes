@@ -31,7 +31,7 @@ test('typed contract: configured model, server-only header, faithful text and pu
     { ...env, GEMINI_MODEL: 'gemini-fixture-1.0' }, async (url, options) => {
       assert.equal(url, 'https://generativelanguage.googleapis.com/v1beta/models/gemini-fixture-1.0:generateContent');
       assert.equal(options.method, 'POST'); assert.equal(options.headers['x-goog-api-key'], 'fixture-secret');
-      assert.equal(options.redirect, 'error'); assert.ok(options.signal instanceof AbortSignal);
+      assert.equal(options.redirect, 'manual'); assert.ok(options.signal instanceof AbortSignal);
       assert.doesNotMatch(url + options.body, /fixture-secret|secret-target|omit-history-extra/);
       const body = JSON.parse(options.body);
       assert.deepEqual(body.systemInstruction, { parts: [{ text: SYSTEM }] });
@@ -142,7 +142,7 @@ test('HTTP provider errors preserve intended classes and redact raw response bod
   for (const [status, expectedStatus, code] of [[401, 502, 'gemini_auth'], [403, 502, 'gemini_auth'], [429, 429, 'gemini_limit'], [500, 502, 'gemini_provider']]) {
     await assert.rejects(tutorialReply({ text: 'hi' }, env, async () => new Response('raw-secret', { status })), matchesError(expectedStatus, code));
   }
-  await assert.rejects(tutorialReply({ text: 'hi' }, env, async () => { throw new Error('raw-secret'); }), matchesError(504, 'gemini_timeout'));
+  await assert.rejects(tutorialReply({ text: 'hi' }, env, async () => { throw new Error('raw-secret'); }), matchesError(502, 'gemini_network'));
 });
 
 test('refused, incomplete, malformed and thought-only generations never become actions', async () => {

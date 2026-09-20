@@ -1,3 +1,4 @@
+import {NavigationHUD} from '/navigation-hud.mjs';
 import {SceneAudio} from './scene-audio.mjs';
 import {RoomConnection} from './network.bundle.mjs';
 import {sampleMotion,motionDuration} from './game-module/src/physics.mjs';
@@ -16,6 +17,7 @@ const sessionSet=(key,value)=>{try{sessionStorage.setItem(key,value);}catch{}};
 const sessionRemove=key=>{try{sessionStorage.removeItem(key);}catch{}};
 const params=new URLSearchParams(location.search),silent=params.get('silent')==='1',qa=silent&&params.get('qa')==='1';
 const audio=new SceneAudio({silent});
+const navigationHud=new NavigationHUD({map:true,label:'追逐'});
 const SOURCES=[{id:'a',soundId:'forest',x:1.5,y:4.8},{id:'b',soundId:'rain',x:6.5,y:5.5},{id:'c',soundId:'fire',x:2,y:7}];
 let phase='opening',local=null,motion=null,story=null,room=null,roomState=null,config=null;
 let pose={x:2,y:1,heading:0},pending=null,remoteMotion=null,remoteReceived=0,seq=0,roundId='';
@@ -123,7 +125,7 @@ function setPhase(next){
   $('chapter').textContent=phase.startsWith('tutorial')?'初次穿行':phase==='lobby'||phase.startsWith('chase')?'第一关 · 追逐':'第二关 · 沉默的钟声';
   $('role-label').textContent='';
   if(phase==='tutorial-ready'){
-    $('title').textContent='找到雨声。';$('objective').textContent='三种声音交叠。转身、移动，找到门后的雨声。\n按 W / S 前进或后退，A / D 转身，靠近门按 F 开关，按 E 查看。';$('begin').textContent='进入声场';
+    $('title').textContent='找到雨声。';$('objective').textContent='三种声音交叠。找到门后的雨声。';$('begin').textContent='进入声场';
   }else if(phase==='tutorial'){
     $('title').textContent='聆听。转身。循声而行。';$('objective').textContent='循着雨声靠近，再按 E 查看。鸟鸣与火声能帮助你辨认方位。';
   }else if(phase==='story-ready'){
@@ -300,6 +302,7 @@ async function chat(event){
 function frame(now){
   if(phase==='opening')refreshOpening?.();
   frameCount++;
+  navigationHud.update({player:pose,active:phase==='chase',paused,roundKey:roundId});
   if(canAct()){
     let current=phase==='chase'?pending||remoteMotion:motion;
     if(current){
@@ -380,9 +383,9 @@ function setColour(colour){
 let saved='';try{saved=localStorage.getItem('unseen-text-colour')||'';}catch{}if(/^#[0-9a-f]{6}$/i.test(saved))setColour(saved);
 $('text-colour').addEventListener('input',e=>setColour(e.target.value));$('reset-colour').addEventListener('click',()=>setColour('#b7c7dc'));
 document.addEventListener('keydown',event=>{
-  if(event.repeat||['INPUT','TEXTAREA','SELECT'].includes(event.target.tagName))return;
-  const action={w:'forward',s:'back',a:'left',d:'right',' ':'stop'}[event.key.toLowerCase()];
-  if(action){event.preventDefault();act(action);}else if(event.key.toLowerCase()==='f'){event.preventDefault();useDoor();}else if(event.key.toLowerCase()==='e'){event.preventDefault();inspect();}
+  if(event.repeat||event.metaKey||event.ctrlKey||event.altKey||['INPUT','TEXTAREA','SELECT'].includes(event.target.tagName))return;
+  const action={arrowup:'forward',arrowdown:'back',arrowleft:'left',arrowright:'right',' ':'stop'}[event.key.toLowerCase()];
+  if(action){event.preventDefault();act(action);}else if(event.key.toLowerCase()==='f'){event.preventDefault();useDoor();}else if(event.key.toLowerCase()==='e'){event.preventDefault();inspect();}else if(event.key.toLowerCase()==='p'&&active()){event.preventDefault();$('sound-toggle').click();}
 });
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden)return;

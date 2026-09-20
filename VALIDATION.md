@@ -1,6 +1,15 @@
 # Integration validation · 2026-09-20
 
-Release scope: existing Nebula Dark opening, current sound-hunt tutorial, square-open-v2 multiplayer chase and current Pinewood Inn investigation. Sources were frozen while other tasks continued; upstream changes after that snapshot are separate work.
+Release scope: unified Nebula Dark opening and chapters, current sound-hunt tutorial, square-open-v2 multiplayer chase and Pinewood Inn revision 3. Latest hotel navigation was selectively merged while preserving cloud voice routes, shared theme and the new envelope briefing. The chase database and audio rules are unchanged from the previous published release.
+
+## UI and latest investigation update
+
+- 132 checks against the integrated Worker and hotel sources, including navigation hints, collision-safe assistance, floor transitions, explored-path masking and clean resets.
+- Muted rendered UI checks: faster opening transitions, click/Enter/Space progression without double-advance, arrow movement, a single tutorial key legend, tutorial compass without a player map, envelope opening/full letter/explicit entry, shared controls and responsive layouts. An explicitly mocked provider error confirms that retry retains and resends the original input.
+- The complete tutorial → two independent players → shared chase result → two independent hotel entries was repeated with the current client against the production multiplayer gateway.
+- The full two-floor hotel journey, all initial testimony, incident recording, real incorrect/correct Gemini submissions, ending and restart were repeated against the integrated revision 3 source.
+- Provider failure reproduced in the local Worker before the fix: `birds` returned a misleading 504 in 8 ms. With manual redirect handling, the same live Gemini request returned 200 in 1,716 ms, and ElevenLabs returned 200 with 22,613 bytes of MPEG audio. Redirects remain rejected; secrets are not forwarded. Network failures now report 502 separately from a genuine deadline. Production confirmation follows deployment.
+- Rendered desktop, 390-pixel mobile and short-screen checks plus independent read-only review found no blocking layout or chapter-entry issues. Screenshots and reports remain in ignored `validation/ui-unified/`.
 
 ## Completed before publication
 

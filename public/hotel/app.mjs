@@ -1,6 +1,7 @@
 import {createState,queueMove,queueTurn,cancelMotion,updateWorld,nearestDoor,setDoor,nearestInteraction,regionAt,doorPosition,WALLS} from './world.mjs';
 import {HotelAudio} from './audio.mjs';
-import {NavigationHint,navigationGoal} from './navigation-hint.mjs';
+import {NavigationHint,navigationGoal,relativeDirection} from './navigation-hint.mjs';
+import {planAssistance} from './navigation-assist.mjs';
 import {TrailMap} from './trail-map.mjs';
 import {VoiceInput} from './voice-input.mjs';
 
@@ -16,7 +17,7 @@ let state=createState(),data=null,started=false,starting=false,role='guide',coll
 let foreground=false,speechEpoch=0,requestEpoch=0,passingStarted=false,passingComplete=false,passingMotion=null,welcomed=false;
 let investigationSeconds=0,hintSent=false,revealSent=false,frameTime=null,lastDebug=0,contextKey='',suggestionKey='',runNumber=0;
 let ttsController=null,routeBusy=false,voiceReady=false,recording=false,routeEpoch=0,pendingSubmission=false;
-let searchMistakes=0;
+let searchMistakes=0,lastTrailFrame=0,assistance=null;
 const navigationHint=new NavigationHint(),trailMap=new TrailMap($('trail-canvas'));
 const audio=new HotelAudio({silent,onError:error=>notice(typeof error==='string'?error:error.message,true)});
 const voice=new VoiceInput({isAllowed:()=>started&&!state.paused&&state.phase!=='ending',
@@ -49,7 +50,7 @@ function effectiveRole(){
 }
 function selectRole(next){role=next;renderContext();renderSuggestions();$('speaker-title').textContent=titles[role]||titles.guide;}
 function cancelRequest(){pendingSubmission=false;requestEpoch++;voice.cancel();ttsController?.abort();ttsController=null;}
-function stopSpeech(){speechEpoch++;audio.stopGroup('foreground');audio.stopGroup('guide');foreground=false;cancelRequest();}
+function stopSpeech(){stopAssistance();speechEpoch++;audio.stopGroup('foreground');audio.stopGroup('guide');foreground=false;cancelRequest();}
 async function playClip(id,{sourceId,collect=false,memory=false}={}){
   if(!started||state.paused||state.phase==='ending'||!data.speech[id])return false;
   const clip=data.speech[id],epoch=speechEpoch,run=runNumber;
@@ -105,6 +106,7 @@ async function playIncident(memory=false){
 }
 function useDoor(){
   if(!started||state.paused||state.stairs||state.phase==='ending')return false;
+  stopAssistance();
   const door=nearestDoor(state);if(!door)return false;
   cancelRequest();cancelMotion(state);
   if(!setDoor(state,door.id,state.doorTargets[door.id]<.5)){notice('Step clear of the doorway before closing it.');return false;}return true;
@@ -124,9 +126,10 @@ function interactionTarget(){
 }
 function interact(){
   if(!started||state.paused||state.stairs||state.phase==='ending')return;
+  stopAssistance();
   const target=interactionTarget();
   if(!target){
-    searchMistakes++;navigationHint.reset();
+    searchMistakes++;
     notice(`Nothing found here. ${5-searchMistakes} mistaken checks remaining.`,true);
     if(searchMistakes>=5){finish(false,'Five unsuccessful searches used up this round. Return to the entrance to try again.');$('ending-status').textContent='SEARCH ENDED';$('ending-title').textContent='Listen, then look closer.';notice('No searches remaining. Start a new round.',true);}
     renderWorldHud();return;
@@ -135,6 +138,9 @@ function interact(){
 }
 function renderWorldHud(){
   const active=started&&state.phase!=='ending';$('orientation').hidden=!active;$('trail-map').hidden=!active;
+  const chatLog=$('chat-log'),followLog=chatLog.scrollHeight-chatLog.clientHeight-chatLog.scrollTop<24;
+  const priorLayout=$('chat').dataset.worldPrompt+':'+$('chat').dataset.listening;
+  $('chat').dataset.listening=String(foreground);
   if(!active){$('interaction-prompt').hidden=true;$('chat').dataset.worldPrompt='false';return;}
   const degrees=((state.player.heading*180/Math.PI)%360+360)%360;
   const headings=['North','Northeast','East','Southeast','South','Southwest','West','Northwest'];
@@ -145,26 +151,66 @@ function renderWorldHud(){
   $('floor-label').textContent=state.stairs?(state.stairs.to===1?'Going upstairs':'Going downstairs'):(state.player.floor===0?'Ground floor':'Upper floor');
   $('trail-floor').textContent=state.player.floor===0?'GROUND FLOOR':'UPPER FLOOR';
   $('search-budget').textContent=`Search mistakes ${searchMistakes} / 5`;$('search-budget').dataset.low=String(searchMistakes>=3);
-  const target=interactionTarget(),show=!!target&&$('notes').hidden&&$('settings').hidden;
+  const target=interactionTarget(),show=!!target&&!foreground&&!assistance&&$('notes').hidden&&$('settings').hidden;
   $('interaction-prompt').hidden=!show;$('chat').dataset.worldPrompt=String(show);
+  if(followLog&&priorLayout!==String(show)+':'+String(foreground))chatLog.scrollTop=chatLog.scrollHeight;
   if(!show)return;
   const doorNames={entrance:'entrance',lounge:'lounge door',recording:'recorder room door',linen:'linen room door'};
   $('interaction-label').textContent=target.type==='door'?`${state.doorTargets[target.id]>.5?'Close':'Open'} ${doorNames[target.id]}`:target.type==='recorder'?'Play recording':`Talk to ${personLabel(target.id)}`;
-  const angle=target.bearing*180/Math.PI;
-  $('interaction-bearing').textContent=Math.abs(angle)<30?'Ahead':Math.abs(angle)>150?'Behind you':angle>0?'To your right':'To your left';
+  $('interaction-bearing').textContent=relativeDirection(target.bearing);
+}
+function explorationActive(){
+  const typing=['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName);
+  return started&&!state.paused&&!state.stairs&&state.phase!=='ending'&&!foreground&&!typing&&!routeBusy&&voice.state!=='recording'&&voice.state!=='transcribing'&&$('notes').hidden&&$('settings').hidden;
 }
 function updateNavigationHint(dt){
-  const typing=['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName);
-  const active=started&&!state.paused&&!state.stairs&&state.phase!=='ending'&&!foreground&&!typing&&voice.state!=='recording'&&voice.state!=='transcribing'&&$('notes').hidden;
-  const hint=navigationHint.update({goal:active?navigationGoal(state,collected,recordingHeard):null,player:state.player,dt,active});
+  const active=explorationActive()&&!assistance;
+  const goal=active?navigationGoal(state,collected,recordingHeard):null;
+  const hint=navigationHint.update({goal,player:state.player,dt,active});
   $('direction-hint').hidden=!hint;
   if(hint){
     const degrees=hint.bearing*180/Math.PI;$('hint-arrow').style.transform=`rotate(${degrees}deg)`;
-    $('hint-text').textContent=Math.abs(degrees)<30?'Follow the sound ahead':Math.abs(degrees)>150?'The sound is behind you':degrees>0?'Follow the sound to your right':'Follow the sound to your left';
+    $('hint-text').textContent=`Sound: ${relativeDirection(hint.bearing).toLowerCase()}`;
   }
+  if(active&&navigationHint.lostSeconds>=30&&!state.motion&&!state.motionQueue.length)startAssistance(goal);
+}
+function stopAssistance(message=''){
+  if(!assistance)return;
+  assistance=null;cancelMotion(state);navigationHint.reset();$('assist-status').hidden=true;
+  if(message)notice(message);
+}
+function startAssistance(goal){
+  if(!goal||!explorationActive()||assistance)return;
+  const plan=planAssistance(state,goal,2);navigationHint.reset();
+  if(!plan.points.length){
+    if(plan.stopReason==='door')notice('A door is within reach. Press E when you are ready.');
+    return;
+  }
+  cancelRequest();cancelMotion(state);selectRole('guide');
+  assistance={...plan,index:0,travelled:0,last:{...state.player},elapsed:0};
+  log('Gemini','I’ll guide you a few steps toward the sound. Move or press Esc to take over.');
+  notice('Gemini navigation assistance · you can take over at any time.');
+  $('assist-status').hidden=false;$('direction-hint').hidden=true;
+}
+function updateAssistance(dt){
+  if(!assistance)return;
+  if(!explorationActive()){stopAssistance();return;}
+  const run=assistance,p=state.player;
+  run.elapsed+=dt;run.travelled+=Math.hypot(p.x-run.last.x,p.y-run.last.y);run.last={...p};
+  if(run.elapsed>12){stopAssistance('Your turn. Listen again, then choose your next step.');return;}
+  if(run.elapsed<.9||state.motion||state.motionQueue.length)return;
+  if(run.travelled>=2-.001||run.index>=run.points.length){
+    stopAssistance(run.stopReason==='door'?'You are near the doorway. Press E to open it.':run.stopReason==='target'?'The sound is close. Press E when you are ready.':run.stopReason==='stairs'?'The stairs are ahead. Take the next step when you are ready.':'Your turn. Listen again, then choose your next step.');return;
+  }
+  const point=run.points[run.index],dx=point.x-p.x,dy=point.y-p.y,d=Math.hypot(dx,dy);
+  if(d<.025){run.index++;return;}
+  const target=Math.atan2(dx,dy),turn=Math.atan2(Math.sin(target-p.heading),Math.cos(target-p.heading))*180/Math.PI;
+  if(Math.abs(turn)>.3)queueTurn(state,Math.sign(turn)*Math.min(90,Math.abs(turn)));
+  else queueMove(state,Math.min(.5,d,Math.max(0,2-run.travelled)));
 }
 function move(action){
   if(!started||state.paused||state.phase==='ending'||state.stairs)return;
+  stopAssistance();
   cancelRequest();
   if(action==='forward'||action==='back')queueMove(state,action==='forward'?.5:-.5);
   else queueTurn(state,action==='right'?30:-30);
@@ -206,6 +252,7 @@ async function dynamicReply(text,who){
 }
 async function receiveReply(result){
   if(!started||state.paused||state.phase==='ending')return;
+  stopAssistance();
   if(typeof result.reply!=='string'||!Array.isArray(result.actions))return notice('The reply was incomplete. Please try again.',true);
   log('You',result.text,'user');remember('user',result.text);
   const who=effectiveRole();if(result.role!==who)return notice('You moved away before the reply arrived. Please ask again.');
@@ -248,6 +295,7 @@ function finish(revealed=false,reply=''){
 function until(predicate,epoch=requestEpoch){return new Promise(resolve=>{const check=()=>{if(predicate()||epoch!==requestEpoch||!started||state.paused)return resolve();requestAnimationFrame(check);};check();});}
 function pause(){
   if(!started||state.phase==='ending')return;
+  stopAssistance();
   state.paused=!state.paused;routeEpoch++;routeBusy=false;cancelRequest();
   if(state.paused){audio.pause();notice('Paused.');}else{audio.resume(state);notice('');}
   renderControls();renderContext();
@@ -273,7 +321,7 @@ function handleEvents(events){
     if(event.type==='footstep')void audio.play('step-'+event.material,{position:event.position,kind:'effect',group:'steps'});
     if(event.type==='door-near'){void audio.play('door-cue',{position:event.position,kind:'effect',group:'cues'});notice('A doorway is within reach.');}
     if(event.type==='door'){void audio.play((event.id==='entrance'?'entrance-':'door-')+(event.open?'open':'close'),{position:event.position,kind:'effect',group:'doors'});notice(event.open?'The door opens.':'The door closes.');}
-    if(event.type==='collision')notice('A wall or closed door is in front of you.');
+    if(event.type==='collision'){stopAssistance();notice('A wall or closed door is in front of you.');}
     if(event.type==='stairs-start'){cancelRequest();notice(event.to===1?'Climbing the stairs…':'Walking downstairs…');}
     if(event.type==='stairs-end'){if(event.floor===1&&state.phase==='testimony')state.phase='investigation';notice(event.floor===1?'You reach the upstairs landing.':'You return to the lounge.');}
     if(event.type==='region'&&event.region==='lobby'&&!welcomed){welcomed=true;log('Martin','Good afternoon, Detective. We’ve been expecting you.');if(!foreground)void playClip('DLG-01-EN-R4',{sourceId:'martin'});}
@@ -293,7 +341,7 @@ function frame(now){
       if(investigationSeconds>=360&&!revealSent&&!foreground){revealSent=true;finish(true);}
     }
   }
-  if(started){audio.update(state);renderContext();renderSuggestions();renderWorldHud();trailMap.update(state);updateNavigationHint(dt);}
+  if(started){updateAssistance(dt);audio.update(state);renderContext();renderSuggestions();renderWorldHud();if(now-lastTrailFrame>=50){trailMap.update(state);lastTrailFrame=now;}updateNavigationHint(dt);}
   if(debug&&now-lastDebug>160){lastDebug=now;renderDebug();}
   requestAnimationFrame(frame);
 }
@@ -304,7 +352,7 @@ function renderDebug(){
   ctx.font='18px system-ui';for(const [id,p]of Object.entries(state.sources)){if(p.floor!==state.player.floor||id.endsWith('-bed'))continue;ctx.fillStyle='#c4c8bd';ctx.beginPath();ctx.arc(X(p.x),Y(p.y),5,0,Math.PI*2);ctx.fill();ctx.fillText(id,X(p.x)+8,Y(p.y)-7);}
   const p=state.player;ctx.fillStyle='#78cde4';ctx.beginPath();ctx.arc(X(p.x),Y(p.y),7,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#78cde4';ctx.beginPath();ctx.moveTo(X(p.x),Y(p.y));ctx.lineTo(X(p.x)+Math.sin(p.heading)*20,Y(p.y)-Math.cos(p.heading)*20);ctx.stroke();
   ctx.fillStyle='#d5e5e3';ctx.fillText('Floor '+(p.floor+1)+' · '+regionAt(p),25,28);
-  $('qa-state').textContent=JSON.stringify({player:p,doors:state.doors,stairs:state.stairs,phase:state.phase,paused:state.paused,role,collected:[...collected],recordingHeard,foreground,routeBusy,audio:audio.getStats()},null,1);
+  $('qa-state').textContent=JSON.stringify({player:p,doors:state.doors,stairs:state.stairs,phase:state.phase,paused:state.paused,role,collected:[...collected],recordingHeard,foreground,routeBusy,searchMistakes,hint:{stalled:navigationHint.stalled,remaining:navigationHint.remaining,lostSeconds:navigationHint.lostSeconds},assistance:assistance?{goalId:assistance.goalId,travelled:assistance.travelled,elapsed:assistance.elapsed}:null,trail:trailMap.getStats?.()||null,audio:audio.getStats()},null,1);
 }
 async function navigate(points){
   const run=runNumber,route=routeEpoch;
@@ -353,20 +401,22 @@ async function qaWalk(returning=false){
 }
 
 $('start').onclick=()=>void begin();$('restart').onclick=$('play-again').onclick=()=>void restart();$('pause').onclick=pause;$('stop-audio').onclick=stopSpeech;
-$('notes-toggle').onclick=()=>{const open=$('notes').hidden;$('notes').hidden=!open;$('settings').hidden=true;$('notes-toggle').setAttribute('aria-expanded',String(open));$('settings-toggle').setAttribute('aria-expanded','false');};
-$('settings-toggle').onclick=()=>{const open=$('settings').hidden;$('settings').hidden=!open;$('notes').hidden=true;$('settings-toggle').setAttribute('aria-expanded',String(open));$('notes-toggle').setAttribute('aria-expanded','false');};
+$('notes-toggle').onclick=()=>{stopAssistance();const open=$('notes').hidden;$('notes').hidden=!open;$('settings').hidden=true;$('notes-toggle').setAttribute('aria-expanded',String(open));$('settings-toggle').setAttribute('aria-expanded','false');};
+$('settings-toggle').onclick=()=>{stopAssistance();const open=$('settings').hidden;$('settings').hidden=!open;$('notes').hidden=true;$('settings-toggle').setAttribute('aria-expanded',String(open));$('notes-toggle').setAttribute('aria-expanded','false');};
+$('assist-stop').onclick=()=>stopAssistance('You are in control.');
+$('message').addEventListener('focus',()=>stopAssistance());
 $('volume').oninput=()=>audio.setVolume(Number($('volume').value));$('spoken-replies').onchange=()=>{if(!$('spoken-replies').checked){ttsController?.abort();audio.stopGroup('guide');}};
 $('guide').onclick=$('back-guide').onclick=()=>{selectRole('guide');notice('Talk through the evidence with Gemini.');};
 $('chat-form').onsubmit=e=>{e.preventDefault();void sendMessage();};$('submit-case').onclick=()=>void sendMessage(true);
 $('message').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void sendMessage();}});
 for(const button of document.querySelectorAll('[data-move]'))button.onclick=()=>move(button.dataset.move);
-function startCapture(){if(silent)return notice('Microphone disabled in this silent test session.');stopSpeech();cancelMotion(state);void voice.start();}
+function startCapture(){stopAssistance();if(silent)return notice('Microphone disabled in this silent test session.');stopSpeech();cancelMotion(state);void voice.start();}
 $('talk').addEventListener('pointerdown',e=>{e.preventDefault();$('talk').setPointerCapture(e.pointerId);startCapture();});$('talk').addEventListener('pointerup',()=>void voice.stop());$('talk').addEventListener('pointercancel',()=>voice.cancel());
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){$('message').blur();cancelRequest();cancelMotion(state);return;}
+  if(e.key==='Escape'){stopAssistance('You are in control.');$('message').blur();cancelRequest();cancelMotion(state);return;}
   if(e.metaKey||e.ctrlKey||e.altKey||e.target.closest('input,textarea,select'))return;
-  const k=e.key.toLowerCase(),action={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'left',arrowleft:'left',d:'right',arrowright:'right'}[k];
-  if(action){e.preventDefault();if(!state.motion&&!state.motionQueue?.length)move(action);}
+  const k=e.key.toLowerCase(),action={arrowup:'forward',arrowdown:'back',arrowleft:'left',arrowright:'right'}[k];
+  if(action){e.preventDefault();if(assistance)stopAssistance();if(!state.motion&&!state.motionQueue?.length)move(action);}
   else if(k==='e'&&!e.repeat){e.preventDefault();interact();}else if(k==='f'&&!e.repeat){e.preventDefault();useDoor();}
   else if(k==='p'&&!e.repeat){e.preventDefault();pause();}else if(k==='v'&&!e.repeat){e.preventDefault();startCapture();}
 });
@@ -374,5 +424,6 @@ document.addEventListener('keyup',e=>{if(e.key.toLowerCase()==='v')void voice.st
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&started){if(state.phase==='ending')audio.stop();else if(!state.paused)pause();}});
 window.addEventListener('pagehide',()=>{voice.destroy();audio.stop();});
 $('qa-route').onclick=()=>void qaWalk();$('qa-return').onclick=()=>void qaWalk(true);
+$('qa-assist').onclick=()=>{if(debug)startAssistance(navigationGoal(state,collected,recordingHeard));};
 voice.init().then(status=>{voiceReady=status.configured;$('connection').textContent=voiceReady?'Gemini connected':'Gemini unavailable';renderControls();}).catch(()=>{$('connection').textContent='Gemini unavailable';});
 requestAnimationFrame(frame);

@@ -1,9 +1,11 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pinewood Inn · An audio mystery</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/hotel/style.css"><link rel="stylesheet" href="/chat-beam.bundle.css"><link rel="stylesheet" href="/journey.css"></head>
+<html lang="en" class="unseen-ui" data-ui-chapter="hotel"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pinewood Inn · An audio mystery</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/hotel/style.css"><link rel="stylesheet" href="/chat-beam.bundle.css"><link rel="stylesheet" href="/journey.css"><link rel="stylesheet" href="/theme.css"><link rel="stylesheet" href="/navigation.css"></head>
 <body>
 <main>
-<section id="intro" class="intro" aria-labelledby="title">
-<p class="eyebrow">MISTBROOK · AN AUDIO MYSTERY</p><h1 id="title">Pinewood Inn</h1>
+<section id="intro" class="intro case-intro" aria-labelledby="title">
+<div id="case-envelope-stage"><p class="eyebrow">第二关 · 旅馆调查</p><h1 id="title">一封寄给你的信。</h1>
+<button id="case-envelope" class="case-envelope" type="button" aria-expanded="false" aria-controls="case-letter"><span class="envelope-flap" aria-hidden="true"></span><span class="envelope-address"><span class="eyebrow">MISTBROOK</span><span class="envelope-name">Pinewood Inn</span><span class="envelope-recipient">致调查员</span></span><span class="envelope-open">拆开信封</span></button></div>
+<article id="case-letter" class="case-letter" aria-labelledby="letter-title" hidden tabindex="-1"><header class="letter-header"><span class="eyebrow">MISTBROOK · CASE BRIEF</span><button id="case-close" type="button">收起信件</button></header><h2 id="letter-title">Pinewood Inn</h2>
 <div class="story">
 <p>You are a detective, called to the quiet town of Mistbrook to investigate a mysterious death at the Pinewood Inn.</p>
 <p>Last night, a guest named Jake died in an upstairs room. Three witnesses heard sounds coming from the room around the time of his death.</p>
@@ -13,8 +15,7 @@
 <p>Your task is to identify the sources of those sounds, explain the conflicting accounts, and reconstruct what happened around Jake’s death.</p>
 <p class="invitation">Push open the door.</p>
 </div>
-<div class="tutorial"><p>Wear headphones. The world stays dark.</p><p><kbd>W</kbd> / <kbd>S</kbd> or <kbd>↑</kbd> / <kbd>↓</kbd> walk · <kbd>A</kbd> / <kbd>D</kbd> or <kbd>←</kbd> / <kbd>→</kbd> turn<br><kbd>E</kbd> interact with the person, recorder or door shown at the centre<br><kbd>P</kbd> pause · hold <kbd>V</kbd> to speak</p><p>Five unsuccessful E searches end the round. Finding a person, using the recorder or operating a door does not spend a mistake. The compass shows your facing direction. Walk into the stairway to change floors. Each step is gradual. You can also use the controls inside the conversation.</p></div>
-<button id="start" class="primary">Begin investigation</button><p id="load-status" role="status" class="muted">Sound begins only after you enter.</p>
+<div class="letter-signature">Mistbrook<br><span>致调查员</span></div><button id="start" class="primary">读完了，进入调查</button><p id="load-status" role="status" class="muted">Sound begins only after you enter.</p></article>
 </section>
 <section id="playfield" aria-label="The dark hotel" hidden></section>
 <div id="orientation" class="orientation" role="img" aria-label="Facing North" hidden>
@@ -24,7 +25,8 @@
 </div>
 <div id="interaction-prompt" class="interaction-prompt" role="status" hidden><kbd>E</kbd><span id="interaction-label">Open entrance</span><small id="interaction-bearing">Ahead</small></div>
 <div id="direction-hint" class="direction-hint" role="status" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><g id="hint-arrow"><path d="M12 3L5 11M12 3L19 11M12 3V21" fill="none" stroke="currentColor" stroke-width="1.5"/></g></svg><span id="hint-text"></span></div>
-<aside id="trail-map" class="trail-map" aria-label="Explored path" hidden><header><span>YOUR PATH</span><span id="trail-floor">GROUND FLOOR</span></header><canvas id="trail-canvas" width="360" height="300" aria-label="Only your explored route is revealed"></canvas></aside>
+<aside id="trail-map" class="trail-map" aria-label="Explored path" hidden><header><span>YOUR PATH</span><span id="trail-floor">GROUND FLOOR</span></header><canvas id="trail-canvas" width="880" height="734" aria-label="Only your explored route is revealed"></canvas></aside>
+<div id="assist-status" class="assist-status" role="status" hidden><span>Gemini is guiding you</span><button id="assist-stop" type="button">Take over</button></div>
 <section id="chat" data-gemini-beam class="chat" aria-label="Detective conversation" hidden>
 <header class="chat-header"><div><span class="eyebrow">PINEWOOD INN</span><h2 id="speaker-title">Gemini · your companion</h2></div><div class="header-actions"><button id="notes-toggle" aria-expanded="false" aria-controls="notes">Notes <span id="note-count">0</span></button><button id="settings-toggle" aria-expanded="false" aria-controls="settings" aria-label="Open settings and movement controls">Controls</button></div></header>
 <div id="notes" class="drawer" hidden><h3>Case notes</h3><div id="note-list"></div><button id="back-guide">Discuss with Gemini</button></div>
@@ -37,7 +39,7 @@
 <div class="chat-footer"><button id="submit-case">Submit explanation</button><button id="guide">Gemini</button><span id="connection" class="muted">Connecting…</span></div>
 </section>
 <section id="ending" class="ending" aria-labelledby="ending-title" hidden><p class="eyebrow" id="ending-status">CASE EXPLAINED</p><h1 id="ending-title">Honest ears.<br>Different stories.</h1><p id="ending-text"></p><button id="play-again" class="primary">Return to the entrance</button></section>
-<aside id="debug" hidden><h3>Designer view</h3><canvas id="debug-map" width="720" height="550" aria-label="Hotel map with player and sources"></canvas><div class="debug-actions"><button id="qa-route">Walk test route</button><button id="qa-return">Walk downstairs</button></div><output id="qa-state"></output></aside>
+<aside id="debug" hidden><h3>Designer view</h3><canvas id="debug-map" width="720" height="550" aria-label="Hotel map with player and sources"></canvas><div class="debug-actions"><button id="qa-route">Walk test route</button><button id="qa-return">Walk downstairs</button><button id="qa-assist">Guide a few steps</button></div><output id="qa-state"></output></aside>
 </main>
-<script type="module" src="/hotel/app.mjs"></script><script type="module" src="/chat-beam.bundle.mjs"></script><script src="/glitter.js"></script>
-<script type="module" src="/journey.mjs"></script></body></html>
+<script type="module" src="/hotel/briefing.mjs"></script><script type="module" src="/hotel/app.mjs"></script><script type="module" src="/chat-beam.bundle.mjs"></script><script src="/glitter.js"></script>
+<script type="module" src="/journey.mjs"></script><script type="module" src="/theme.mjs"></script></body></html>

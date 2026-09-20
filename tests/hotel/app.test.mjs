@@ -90,7 +90,7 @@ function harness({ speechSeconds = 0 } = {}) {
       interactionTarget, renderWorldHud,updateNavigationHint, startAssistance, stopAssistance, renderContext, talkTo, followup, replayMemory, selectRole,
       route: returning => qaWalk(returning),
       get state() { return state; },
-      get status() { return {started, role, foreground, passingComplete, routeBusy, recordingHeard, collected:[...collected],searchMistakes,assistance}; }
+      get status() { return {started, role, foreground, passingComplete, routeBusy, recordingHeard, collected:[...collected],searchAttempts,assistance}; }
     };`, context, { filename: 'hotel/app.mjs' });
   let now = 0;
   const flush = async () => { for (let i = 0; i < 10; i++) await Promise.resolve(); };
@@ -436,19 +436,19 @@ test('character identities remain in conversation, nearby labels and notes witho
 });
 
 
-test('only unsuccessful E searches spend the five-mistake allowance and restart restores it',async()=>{
+test('all accepted E searches spend the five-attempt allowance and restart restores it',async()=>{
  const h=harness();await h.begin();
- h.key('e');await h.tick();assert.equal(h.api.status.searchMistakes,1);
+ h.key('e');await h.tick();assert.equal(h.api.status.searchAttempts,1);
  h.place({x:5,y:-1.1,floor:0,heading:0});h.key('e');await h.tick(20);
- assert.equal(h.api.status.searchMistakes,1);assert.equal(h.api.state.doors.entrance,1);
+ assert.equal(h.api.status.searchAttempts,2);assert.equal(h.api.state.doors.entrance,1);
  h.place({x:4,y:7.5,floor:0,heading:0});h.key('e');await h.tick();
- assert.equal(h.api.status.searchMistakes,1);assert.ok(h.api.status.collected.includes('MARTIN-INITIAL'));
- h.place({x:8,y:1,floor:0,heading:0});for(let i=0;i<4;i++){h.key('e');await h.tick();}
- assert.equal(h.api.status.searchMistakes,5);assert.equal(h.api.state.phase,'ending');
+ assert.equal(h.api.status.searchAttempts,3);assert.ok(h.api.status.collected.includes('MARTIN-INITIAL'));
+ h.place({x:8,y:1,floor:0,heading:0});for(let i=0;i<2;i++){h.key('e');await h.tick();}
+ assert.equal(h.api.status.searchAttempts,5);assert.equal(h.api.state.phase,'ending');
  assert.equal(h.elements.get('ending-status').textContent,'SEARCH ENDED');
  assert.ok(!h.elements.get('ending-text').textContent.includes('ape'));
- h.key('e');assert.equal(h.api.status.searchMistakes,5);
- await h.api.restart();assert.equal(h.api.status.searchMistakes,0);
+ h.key('e');assert.equal(h.api.status.searchAttempts,5);
+ await h.api.restart();assert.equal(h.api.status.searchAttempts,0);
 });
 
 
@@ -473,7 +473,7 @@ test('thirty lost seconds trigger a smooth short assist that stops before a clos
   assert.equal(h.api.status.assistance, null);
   assert.ok(h.api.state.player.y>start.y && h.api.state.player.y<0);
   assert.equal(h.api.state.doors.entrance,0,'Assistance does not operate the door');
-  assert.equal(h.api.status.searchMistakes,0);
+  assert.equal(h.api.status.searchAttempts,0);
   assert.equal(h.api.status.collected.length,0);
   assert.equal(h.requests.length,0,'Movement never requires a provider request');
 });
@@ -519,4 +519,28 @@ test('reading and ongoing testimony do not accumulate lost time or start assista
   const talk=h.api.talkTo('martin'); await h.tick(650);
   assert.equal(h.api.status.foreground,true); assert.equal(h.api.status.assistance,null);
   await h.complete(talk); assert.equal(h.api.status.assistance,null);
+});
+
+test('the fifth successful recording finishes and a sixth E cannot interrupt it or add an attempt',async()=>{
+ const h=harness({speechSeconds:4});await h.begin();
+ h.key('e');await h.tick();
+ for(const id of ['martin','claire','elena']){
+   h.place({...h.api.state.sources[id],heading:0});h.key('e');await h.tick(100);
+ }
+ for(const id of ['MARTIN-INITIAL','CLAIRE-INITIAL','ELENA-INITIAL'])assert.ok(h.api.status.collected.includes(id));
+ h.place({x:3,y:3.6,floor:1,heading:0});h.key('e');await h.tick();
+ assert.equal(h.api.status.searchAttempts,5);assert.notEqual(h.api.state.phase,'ending');
+ assert.equal(h.api.status.foreground,true);
+ const stops=h.stops;h.key('e');await h.tick();
+ assert.equal(h.api.status.searchAttempts,5);assert.equal(h.stops,stops);
+ await h.tick(200);assert.equal(h.api.status.recordingHeard,true);
+ assert.notEqual(h.api.state.phase,'ending');
+ await h.api.receiveReply(reply([], {verdict:'correct'}));assert.equal(h.api.state.phase,'ending');
+});
+
+test('typing, held keys, pause and F do not consume the hotel E allowance',async()=>{
+ const h=harness();await h.begin();
+ h.key('e',{typing:true});h.key('e',{repeat:true});h.api.pause();h.key('e');h.api.pause();
+ h.place({x:5,y:-1.1,floor:0,heading:0});h.key('f');await h.tick(20);
+ assert.equal(h.api.status.searchAttempts,0);assert.equal(h.api.state.doors.entrance,1);
 });

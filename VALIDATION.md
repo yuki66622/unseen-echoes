@@ -1,6 +1,6 @@
 # Integration validation · 2026-09-20
 
-Release scope: unified Nebula Dark opening and chapters, current sound-hunt tutorial, square-open-v2 multiplayer chase and Pinewood Inn revision 3. Latest hotel navigation was selectively merged while preserving cloud voice routes, shared theme and the new envelope briefing. The chase database and audio rules are unchanged from the previous published release.
+Release scope: unified Nebula Dark opening and chapters, current sound-hunt tutorial, square-open-v2 multiplayer chase and Pinewood Inn revision 3. Latest hotel navigation was selectively merged while preserving cloud voice routes, shared theme and the new envelope briefing. The chase map and audio are unchanged; rematch and interaction budgets are updated in the paired multiplayer service.
 
 ## UI and latest investigation update
 
@@ -39,4 +39,8 @@ Preserve the previous saved Sites version and its corresponding SpacetimeDB rule
 
 - Two real local database identities completed a chase, voted separately to restart, returned to the same room with roles/readiness/votes cleared, exchanged roles, and completed another chase. A first vote alone preserved the shared result; a fresh role choice and readiness were required for round two.
 - Desktop screenshots confirm the chase movement rows and letter-key hints are gone. Hotel movement controls, the E badge and duplicate nearby interaction buttons are removed; the envelope, settings, contextual object labels, conversations and evidence notes remain functional. All visited states had no browser errors.
-- Twenty hotel application tests and the multiplayer TypeScript check passed. The existing hotel allowance is still five unsuccessful searches until the pending E-budget clarification is resolved.
+- Twenty hotel application tests and the multiplayer TypeScript check passed. The user subsequently confirmed five total interaction attempts per round, including successful checks. Sixty rule/physics/hotel application checks passed, including fifth-attempt capture and escape, failed exhaustion, fifth recording completion despite a sixth E, no cost for rejected/replayed inputs, old-state compatibility and fresh-round reset.
+
+The fifth hotel recording test collects the three initial witness statements through E, spends one empty check, then uses the fifth E for the recording. A sixth E neither spends another attempt nor stops playback; recording completion and the subsequent explanation remain possible. Actual microphone input and subjective listening remain outside these muted checks.
+
+Eight actual muted browser checks passed against the isolated local database: fifth-attempt capture, two-vote role reset, role swap, refresh-preserved attempts, five-attempt loss, hotel exhaustion/reset, unrestricted tutorial and absence of page errors.

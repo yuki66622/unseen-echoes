@@ -28,8 +28,11 @@ const pass=name=>{report.checks.push(name);console.log('PASS '+name);};
    await a.locator('#ready').click();await b.locator('#ready').click();
    await Promise.all([a,b].map(p=>p.waitForFunction(()=>window.__unseen?.state().phase==='chase',null,{timeout:25000})));
   };
-  const capture=async hunter=>{
+  const capture=async(hunter,misses=0)=>{
    await hunter.waitForFunction(()=>window.__unseen.state().room.game.headstartSeconds===0,null,{timeout:12000});
+   for(let n=0;n<misses;n++){
+    await hunter.keyboard.press('e');await hunter.waitForFunction(left=>window.__unseen.state().room.game.attemptsRemaining===left,4-n);
+   }
    for(let n=0;n<11;n++){await hunter.keyboard.press('ArrowUp');await hunter.waitForTimeout(600);}
    await hunter.keyboard.press('e');
    await Promise.all([a,b].map(p=>p.locator('#result').waitFor({timeout:8000})));
@@ -41,7 +44,10 @@ const pass=name=>{report.checks.push(name);console.log('PASS '+name);};
    assert.doesNotMatch(await p.locator('body').innerText(),/按\s*[EF]|·\s*[EF]/);
   }
   await a.screenshot({path:out+'/chase-clean.png'});
-  await capture(a);pass('arrow movement and E still complete a real capture without repeated controls');
+  await capture(a,4);
+  assert.equal(await a.evaluate(()=>window.__unseen.state().room.game.attemptsRemaining),0);
+  assert.equal(await a.evaluate(()=>window.__unseen.state().room.game.outcome),'captured');
+  pass('a real capture on the fifth E succeeds without repeated controls');
   await a.locator('#rematch').click();
   await a.waitForFunction(()=>window.__unseen.state().room.members.some(p=>p.restartVote));
   assert.equal(await b.evaluate(()=>window.__unseen.state().phase),'chase-result');
@@ -60,8 +66,22 @@ const pass=name=>{report.checks.push(name);console.log('PASS '+name);};
   pass('both restart votes return the same room to empty role selections and require new readiness');
   await choose('survivor','hunter');
   const fresh=await a.evaluate(()=>window.__unseen.state().room.game);
-  assert.notEqual(fresh.roundId,original.game.roundId);assert.equal(fresh.role,'survivor');
+  assert.notEqual(fresh.roundId,original.game.roundId);assert.equal(fresh.role,'survivor');assert.equal(fresh.attemptsRemaining,5);
   await capture(b);pass('players swap roles, start a fresh round and finish with the new hunter');
+  await a.locator('#rematch').click();await b.locator('#rematch').click();
+  await Promise.all([a,b].map(p=>p.waitForFunction(()=>window.__unseen.state().phase==='lobby')));
+  await choose('hunter','survivor');
+  await a.waitForFunction(()=>window.__unseen.state().room.game.headstartSeconds===0);
+  for(let n=0;n<2;n++){await a.keyboard.press('e');await a.waitForFunction(left=>window.__unseen.state().room.game.attemptsRemaining===left,4-n);}
+  const beforeReload=await a.evaluate(()=>window.__unseen.state().room.game.roundId);
+  await a.reload();await a.waitForFunction(()=>window.__unseen?.state().phase==='chase'&&window.__unseen.state().audio.running&&!window.__unseen.state().paused&&!window.__unseen.state().room.game.paused);
+  assert.equal(await a.evaluate(()=>window.__unseen.state().room.game.roundId),beforeReload);
+  assert.equal(await a.evaluate(()=>window.__unseen.state().room.game.attemptsRemaining),3);
+  for(let n=0;n<3;n++){await a.keyboard.press('e');await a.waitForFunction(left=>window.__unseen.state().room.game.attemptsRemaining===left,2-n);}
+  await Promise.all([a,b].map(p=>p.locator('#result').waitFor()));
+  const exhausted=await a.evaluate(()=>window.__unseen.state().room.game);
+  assert.equal(exhausted.outcome,'attempts_exhausted');assert.equal(exhausted.winner,'survivor');
+  pass('refresh preserves the remaining budget and five unsuccessful checks end the shared round');
   for(const p of [a,b]){await p.locator('#next-level').click();await p.locator('#case-envelope').waitFor();}
   await a.locator('#case-envelope').click();await a.locator('#start').click();await a.locator('#chat').waitFor();
   assert.equal(await a.locator('kbd,[data-move]').count(),0);
@@ -72,7 +92,24 @@ const pass=name=>{report.checks.push(name);console.log('PASS '+name);};
   await a.locator('#settings-toggle').click();
   await a.screenshot({path:out+'/hotel-clean.png'});
   pass('hotel keeps the letter and functional settings while removing repeated movement and E prompts');
+  for(let n=0;n<5;n++){await a.keyboard.press('e');if(n<4)await a.waitForFunction(left=>document.getElementById('search-budget').textContent===`Checks left ${left} / 5`,4-n);}
+  await a.locator('#ending').waitFor();assert.equal(await a.locator('#ending-status').textContent(),'SEARCH ENDED');
+  await a.locator('#play-again').click();await a.locator('#chat').waitFor();
+  await a.waitForFunction(()=>document.getElementById('search-budget').textContent==='Checks left 5 / 5');
+  pass('hotel ends after five empty checks and restart restores all five attempts');
+  await a.goto(base+'/tutorial/?silent=1');await a.locator('#start').click();await a.locator('body.has-entered').waitFor();
+  for(let n=0;n<6;n++)await a.keyboard.press('e');
+  const before=await a.locator('#coords').textContent();await a.keyboard.press('ArrowUp');
+  await a.waitForFunction(()=>document.getElementById('map').dataset.moving==='false');
+  assert.notEqual(await a.locator('#coords').textContent(),before);assert.equal(await a.locator('#search-budget').count(),0);
+  pass('tutorial keeps its controls and remains playable after more than five checks');
   assert.deepEqual(report.errors,[]);pass('updated flow has no browser errors');
- }catch(error){report.failure=error.stack;throw error;}
+ }catch(error){
+  report.failure=error.stack;
+  report.states=await Promise.all(browser.contexts().flatMap(c=>c.pages()).map(p=>p.evaluate(()=>{
+   const s=window.__unseen?.state();return {phase:s?.phase,paused:s?.paused,audioRunning:s?.audio?.running,attempts:s?.room?.game?.attemptsRemaining,headstart:s?.room?.game?.headstartSeconds,roomPaused:s?.room?.game?.paused,status:document.getElementById('status')?.textContent};
+  }).catch(()=>null)));
+  throw error;
+ }
  finally{fs.writeFileSync(out+'/rounds-browser.json',JSON.stringify(report,null,2));await browser.close();}
 })().catch(error=>{console.error(error.stack);process.exitCode=1;});

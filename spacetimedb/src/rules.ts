@@ -6,8 +6,9 @@ export const HEADSTART_MS = 8_000;
 export const RECONNECT_MS = 30_000;
 export const STEP_MS = 50;
 export const MAX_CATCHUP_MS = 100;
+export const MAX_INTERACTION_ATTEMPTS = 5;
 export type Role = 'hunter' | 'survivor';
-export type Outcome = 'captured' | 'escaped' | 'timeout' | 'abandoned' | 'interrupted';
+export type Outcome = 'captured' | 'escaped' | 'timeout' | 'abandoned' | 'interrupted' | 'attempts_exhausted';
 export type DoorEvent = { seq: number; openedAtMs: number; x: number; y: number };
 type ActiveMotion = Motion & { expiresAtMs: number };
 export type PlayerState = {
@@ -18,6 +19,7 @@ export type PlayerState = {
   motion: ActiveMotion | null;
   lastProcessedInputSeq: number;
   notice: string;
+  interactionAttempts?: number;
 };
 export type ChaseState = {
   roundId: string;
@@ -55,7 +57,7 @@ export function createChase(
       id: player.id, role: player.role as Role, online: true,
       pose: player.role === 'hunter'
         ? { x: 2, y: 7, heading: Math.PI } : { x: 2, y: 1, heading: 0 },
-      motion: null, lastProcessedInputSeq: 0,
+      motion: null, lastProcessedInputSeq: 0, interactionAttempts: 0,
       notice: player.role === 'hunter' ? 'Wait for the head start, then listen for the survivor heartbeat.'
         : 'Find the old motor, then reach the rain at the exit.',
     })),
@@ -252,16 +254,24 @@ export function applyInput(state: ChaseState, id: string, command: InputCommand,
   } else if (command.kind === 'stop') {
     player.motion = null;
     player.notice = '';
-  } else if (canInteract(state, id)) {
-    if (player.role === 'hunter') finishChase(state, 'captured', 'hunter');
-    else if (state.hasKey) finishChase(state, 'escaped', 'survivor');
-    else {
-      state.hasKey = true;
-      player.notice = 'You found the old motor. Reach the rain at the exit.';
-    }
   } else {
-    player.notice = player.role === 'hunter' ? 'No survivor within reach.'
-      : state.hasKey ? 'The exit is not within reach.' : 'The old motor is not within reach.';
+    const attempts = player.interactionAttempts ?? 0;
+    if (attempts >= MAX_INTERACTION_ATTEMPTS) throw new RuleError('No interaction attempts remain.');
+    player.interactionAttempts = attempts + 1;
+    if (canInteract(state, id)) {
+      if (player.role === 'hunter') finishChase(state, 'captured', 'hunter');
+      else if (state.hasKey) finishChase(state, 'escaped', 'survivor');
+      else {
+        state.hasKey = true;
+        player.notice = 'You found the old motor. Reach the rain at the exit.';
+      }
+    } else {
+      player.notice = player.role === 'hunter' ? 'No survivor within reach.'
+        : state.hasKey ? 'The exit is not within reach.' : 'The old motor is not within reach.';
+    }
+    if (player.interactionAttempts >= MAX_INTERACTION_ATTEMPTS && !state.outcome) {
+      finishChase(state, 'attempts_exhausted', player.role === 'hunter' ? 'survivor' : 'hunter');
+    }
   }
   player.lastProcessedInputSeq = command.seq;
   state.revision++;
@@ -299,6 +309,7 @@ export function snapshotFor(state: ChaseState, id: string, restartVotes: number)
     outcome: state.outcome, winner: state.winner,
     remainingSeconds: Math.max(0, Math.ceil((state.startedAtMs + ROUND_MS - effectiveTime(state)) / 1000)),
     headstartSeconds: headstartSeconds(state), hasKey: state.hasKey,
+    attemptsRemaining: Math.max(0, MAX_INTERACTION_ATTEMPTS - (me.interactionAttempts ?? 0)),
     canInteract: canInteract(state, id), restartVotes, revision: state.revision, paused,
   };
 }

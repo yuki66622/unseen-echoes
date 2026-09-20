@@ -7,9 +7,11 @@ const OUTCOMES=Object.freeze({
   timeout:'追逐时间已到，监管者获胜。',
   abandoned:'有玩家离开，对局已结束。',
   interrupted:'有玩家未能及时重新连接，对局已结束。',
+  attempts_exhausted:'有玩家用完了五次尝试机会，本局结束。',
 });
 
 export const MESSAGE_ZH=Object.freeze({
+  'No interaction attempts remain.':'本局尝试机会已用完。',
   'Room code must contain six uppercase letters or digits.':'房间码需要由 6 位英文字母或数字组成。',
   'Player name must contain 1 to 32 characters without control characters.':'名字需要为 1 至 32 个字符，不能包含换行等控制字符。',
   'An active game connection is required.':'尚未连接游戏，请等待连接恢复。',

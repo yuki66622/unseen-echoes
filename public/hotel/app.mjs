@@ -17,7 +17,8 @@ let state=createState(),data=null,started=false,starting=false,role='guide',coll
 let foreground=false,speechEpoch=0,requestEpoch=0,passingStarted=false,passingComplete=false,passingMotion=null,welcomed=false;
 let investigationSeconds=0,hintSent=false,revealSent=false,frameTime=null,lastDebug=0,contextKey='',suggestionKey='',runNumber=0;
 let ttsController=null,routeBusy=false,voiceReady=false,recording=false,routeEpoch=0,pendingSubmission=false;
-let searchMistakes=0,lastTrailFrame=0,assistance=null;
+const MAX_SEARCH_ATTEMPTS=5;
+let searchAttempts=0,lastTrailFrame=0,assistance=null;
 const navigationHint=new NavigationHint(),trailMap=new TrailMap($('trail-canvas'));
 const audio=new HotelAudio({silent,onError:error=>notice(typeof error==='string'?error:error.message,true)});
 const voice=new VoiceInput({isAllowed:()=>started&&!state.paused&&state.phase!=='ending',
@@ -126,12 +127,13 @@ function interactionTarget(){
 }
 function interact(){
   if(!started||state.paused||state.stairs||state.phase==='ending')return;
+  if(searchAttempts>=MAX_SEARCH_ATTEMPTS){notice('No search attempts remaining. Review your notes or restart.',true);return;}
   stopAssistance();
+  searchAttempts++;
   const target=interactionTarget();
   if(!target){
-    searchMistakes++;
-    notice(`Nothing found here. ${5-searchMistakes} mistaken checks remaining.`,true);
-    if(searchMistakes>=5){finish(false,'Five unsuccessful searches used up this round. Return to the entrance to try again.');$('ending-status').textContent='SEARCH ENDED';$('ending-title').textContent='Listen, then look closer.';notice('No searches remaining. Start a new round.',true);}
+    notice(`Nothing found here. ${MAX_SEARCH_ATTEMPTS-searchAttempts} search attempts remaining.`,true);
+    if(searchAttempts>=MAX_SEARCH_ATTEMPTS){finish(false,'Five search attempts used up this round. Return to the entrance to try again.');$('ending-status').textContent='SEARCH ENDED';$('ending-title').textContent='Listen, then look closer.';notice('No searches remaining. Start a new round.',true);}
     renderWorldHud();return;
   }
   if(target.type==='door')useDoor();else if(target.type==='recorder')void playIncident();else if(target.type==='npc')void talkTo(target.id);
@@ -150,7 +152,7 @@ function renderWorldHud(){
   $('orientation').setAttribute('aria-label',$('facing').textContent);
   $('floor-label').textContent=state.stairs?(state.stairs.to===1?'Going upstairs':'Going downstairs'):(state.player.floor===0?'Ground floor':'Upper floor');
   $('trail-floor').textContent=state.player.floor===0?'GROUND FLOOR':'UPPER FLOOR';
-  $('search-budget').textContent=`Search mistakes ${searchMistakes} / 5`;$('search-budget').dataset.low=String(searchMistakes>=3);
+  $('search-budget').textContent=`Checks left ${MAX_SEARCH_ATTEMPTS-searchAttempts} / ${MAX_SEARCH_ATTEMPTS}`;$('search-budget').dataset.low=String(searchAttempts>=3);
   const target=interactionTarget(),show=!!target&&!foreground&&!assistance&&$('notes').hidden&&$('settings').hidden;
   $('interaction-prompt').hidden=!show;$('chat').dataset.worldPrompt=String(show);
   if(followLog&&priorLayout!==String(show)+':'+String(foreground))chatLog.scrollTop=chatLog.scrollHeight;
@@ -312,7 +314,7 @@ async function begin(){
 async function restart(){
   runNumber++;routeEpoch++;stopSpeech();audio.stop();state=createState();started=false;role='guide';collected=new Set();notes=new Map();history=[];recordingHeard=false;
   foreground=false;passingStarted=false;passingComplete=false;passingMotion=null;welcomed=false;investigationSeconds=0;hintSent=false;revealSent=false;contextKey='';suggestionKey='';routeBusy=false;
-  searchMistakes=0;navigationHint.reset();trailMap.reset();
+  searchAttempts=0;navigationHint.reset();trailMap.reset();
   $('chat-log').replaceChildren();$('ending').hidden=true;$('notes').hidden=true;$('settings').hidden=true;$('message').value='';$('notes-toggle').setAttribute('aria-expanded','false');$('settings-toggle').setAttribute('aria-expanded','false');renderNotes();$('note-count').textContent='0';await begin();
 }
 function handleEvents(events){
@@ -351,7 +353,7 @@ function renderDebug(){
   ctx.font='18px system-ui';for(const [id,p]of Object.entries(state.sources)){if(p.floor!==state.player.floor||id.endsWith('-bed'))continue;ctx.fillStyle='#c4c8bd';ctx.beginPath();ctx.arc(X(p.x),Y(p.y),5,0,Math.PI*2);ctx.fill();ctx.fillText(id,X(p.x)+8,Y(p.y)-7);}
   const p=state.player;ctx.fillStyle='#78cde4';ctx.beginPath();ctx.arc(X(p.x),Y(p.y),7,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#78cde4';ctx.beginPath();ctx.moveTo(X(p.x),Y(p.y));ctx.lineTo(X(p.x)+Math.sin(p.heading)*20,Y(p.y)-Math.cos(p.heading)*20);ctx.stroke();
   ctx.fillStyle='#d5e5e3';ctx.fillText('Floor '+(p.floor+1)+' · '+regionAt(p),25,28);
-  $('qa-state').textContent=JSON.stringify({player:p,doors:state.doors,stairs:state.stairs,phase:state.phase,paused:state.paused,role,collected:[...collected],recordingHeard,foreground,routeBusy,searchMistakes,hint:{stalled:navigationHint.stalled,remaining:navigationHint.remaining,lostSeconds:navigationHint.lostSeconds},assistance:assistance?{goalId:assistance.goalId,travelled:assistance.travelled,elapsed:assistance.elapsed}:null,trail:trailMap.getStats?.()||null,audio:audio.getStats()},null,1);
+  $('qa-state').textContent=JSON.stringify({player:p,doors:state.doors,stairs:state.stairs,phase:state.phase,paused:state.paused,role,collected:[...collected],recordingHeard,foreground,routeBusy,searchAttempts,hint:{stalled:navigationHint.stalled,remaining:navigationHint.remaining,lostSeconds:navigationHint.lostSeconds},assistance:assistance?{goalId:assistance.goalId,travelled:assistance.travelled,elapsed:assistance.elapsed}:null,trail:trailMap.getStats?.()||null,audio:audio.getStats()},null,1);
 }
 async function navigate(points){
   const run=runNumber,route=routeEpoch;

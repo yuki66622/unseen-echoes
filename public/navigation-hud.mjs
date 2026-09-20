@@ -12,6 +12,7 @@ export class NavigationHUD {
     const host=document.querySelector('main')||document.body;
     host.append(this.orientation);
     if(map) {
+      this.budget=document.createElement('p');this.budget.id='search-budget';this.budget.hidden=true;this.orientation.append(this.budget);
       this.mapHost = document.createElement('aside'); this.mapHost.className = 'trail-map'; this.mapHost.id = 'trail-map'; this.mapHost.hidden = true;
       this.mapHost.setAttribute('aria-label','已探索的路径');
       this.mapHost.innerHTML = '<header><span>YOUR PATH</span><span>追逐</span></header><canvas id="trail-canvas" width="880" height="734" aria-label="只显示你走过的路径"></canvas>';
@@ -20,10 +21,11 @@ export class NavigationHUD {
     }
     this.roundKey = null; this.lastMapFrame = 0;
   }
-  update({player,active=false,paused=false,roundKey} = {}) {
+  update({player,active=false,paused=false,roundKey,attemptsRemaining} = {}) {
     this.orientation.hidden = !active;
     if(this.mapHost)this.mapHost.hidden = !active;
     if(!active||!player)return;
+    if(this.budget){this.budget.hidden=!Number.isFinite(attemptsRemaining);this.budget.textContent=`剩余尝试 ${attemptsRemaining} / 5`;}
     const degrees=((player.heading*180/Math.PI)%360+360)%360;
     const direction=['北','东北','东','东南','南','西南','西','西北'][Math.round(degrees/45)%8];
     this.arrow.style.transform=`rotate(${degrees}deg)`;

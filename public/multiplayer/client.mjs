@@ -305,7 +305,7 @@ async function chat(event){
 function frame(now){
   if(phase==='opening')refreshOpening?.();
   frameCount++;
-  navigationHud.update({player:pose,active:phase==='chase',paused,roundKey:roundId});
+  navigationHud.update({player:pose,active:phase==='chase',paused,roundKey:roundId,attemptsRemaining:roomState?.game?.attemptsRemaining});
   if(canAct()){
     let current=phase==='chase'?pending||remoteMotion:motion;
     if(current){

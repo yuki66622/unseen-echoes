@@ -15,6 +15,8 @@
 | 双人追逐 | 8×8 米无物理墙体的场地；监管者听方向心跳，求生者听移动脚步；找到电机后循雨声到出口按 E 离开 |
 | 旅馆调查 | 两层空间、门与楼梯、三位证人的录音、事件录音、个人 Gemini 对话与推理判定 |
 
+教程以外，每位玩家每局有 5 次 E 交互尝试，成功交互也计次；重开恢复。追逐第五次若未成功抓捕或逃脱，则由对手获胜。旅馆第五次成功的证词或录音可继续播放，之后仍可讨论和提交推理，但不能再执行第六次交互。
+
 ↑/↓ 前后移动，←/→ 转向，E 交互；教程与旅馆可用 F 操作门。按 P 暂停，语音关卡可按住 V 录音。声音从主动开始后播放；后台/暂停会停止。语音输入最长 12 秒。
 
 各章节沿用开场的 Nebula Dark 风格。点击序章画面或按 Enter/Space 进入下一句；教程不设逐项教学，只在左侧显示按键表，并保留右侧指南针。追逐与旅馆共用中央路径图和右侧指南针，行走约一米后逐渐显示走过的路径，不预先显示目标或对手。旅馆先拆开信封阅读案件，再进入调查；最新版推理支持相对方向提示和可随时接管的短程导航协助。
@@ -51,7 +53,7 @@ npm test
 npm run typecheck
 ```
 
-`verify-ui.cjs` 检查开场快进、按键、信封、样式与明确模拟的失败重试；`verify-chapters.cjs` 运行双人章节衔接；`verify-browser.cjs` 完成真实旅馆调查。均使用 Playwright 和静音 Chrome，可通过 `PLAYWRIGHT_MODULE`、`CHROME_PATH`、`GAME_SITE_URL` 指定环境。完整旅馆验证会以虚构答案调用真实已配置的 Gemini。所有自动试玩禁止开启扬声器与麦克风。验证结果及范围见 [VALIDATION.md](VALIDATION.md)。
+`verify-rounds.cjs` 检查重开重选角色、五次机会和无重复操作按钮；`verify-ui.cjs` 检查开场快进、按键、信封、样式与明确模拟的失败重试；`verify-chapters.cjs` 运行双人章节衔接；`verify-browser.cjs` 完成真实旅馆调查。均使用 Playwright 和静音 Chrome，可通过 `PLAYWRIGHT_MODULE`、`CHROME_PATH`、`GAME_SITE_URL` 指定环境。完整旅馆验证会以虚构答案调用真实已配置的 Gemini。所有自动试玩禁止开启扬声器与麦克风。验证结果及范围见 [VALIDATION.md](VALIDATION.md)。
 
 ## 发布与后续同步
 

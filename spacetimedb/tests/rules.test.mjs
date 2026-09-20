@@ -379,3 +379,58 @@ test('only survivor receives moving hunter footsteps; hunter receives nearby hea
   assert.ok(snapshotFor(state,'hunter-id',0).heartbeatIntensity>0);
   assert.equal('heartbeatSource' in snapshotFor(state,'survivor-id',0),false);
 });
+
+test('five unsuccessful interactions exhaust only that player and cannot be replayed', () => {
+  const state=newGame();ticks(state,8000);
+  for(let seq=1;seq<=4;seq++)act(state,hunter(state),seq,'interact','inspect');
+  assert.equal(snapshotFor(state,'hunter-id',0).attemptsRemaining,1);
+  assert.equal(snapshotFor(state,'survivor-id',0).attemptsRemaining,5);
+  act(state,hunter(state),5,'interact','inspect');
+  assert.equal(state.outcome,'attempts_exhausted');assert.equal(state.winner,'survivor');
+  assert.equal(hunter(state).lastProcessedInputSeq,5);
+  for(const seq of [5,6])assert.throws(()=>act(state,hunter(state),seq,'interact','inspect'),RuleError);
+  assert.equal(hunter(state).interactionAttempts,5);
+});
+
+test('a fifth capture or escape succeeds before the exhaustion decision', () => {
+  const capture=newGame();ticks(capture,8000);
+  for(let seq=1;seq<=4;seq++)act(capture,hunter(capture),seq,'interact','inspect');
+  hunter(capture).pose={...survivor(capture).pose};
+  act(capture,hunter(capture),5,'interact','inspect');
+  assert.equal(capture.outcome,'captured');assert.equal(capture.winner,'hunter');
+  const escape=newGame();
+  for(let seq=1;seq<=3;seq++)act(escape,survivor(escape),seq,'interact','inspect');
+  survivor(escape).pose={x:1.5,y:4.8,heading:0};act(escape,survivor(escape),4,'interact','inspect');
+  assert.equal(escape.hasKey,true);assert.equal(escape.outcome,null);
+  assert.equal(snapshotFor(escape,'survivor-id',0).attemptsRemaining,1);
+  survivor(escape).pose={x:7.6,y:5.5,heading:0};act(escape,survivor(escape),5,'interact','inspect');
+  assert.equal(escape.outcome,'escaped');assert.equal(escape.winner,'survivor');
+});
+
+test('a fifth motor inspection spends the attempt but cannot grant a sixth escape', () => {
+  const state=newGame();for(let seq=1;seq<=4;seq++)act(state,survivor(state),seq,'interact','inspect');
+  survivor(state).pose={x:1.5,y:4.8,heading:0};act(state,survivor(state),5,'interact','inspect');
+  assert.equal(state.hasKey,true);assert.equal(state.outcome,'attempts_exhausted');assert.equal(state.winner,'hunter');
+});
+
+test('rejected inputs do not spend attempts, reconnect preserves them, and a new round resets them', () => {
+  const state=newGame();
+  assert.throws(()=>act(state,hunter(state),1,'interact','inspect'),/head start/);
+  assert.equal(hunter(state).interactionAttempts,0);
+  act(state,survivor(state),1,'interact','inspect');
+  for(const command of [{roundId:'old',seq:2,kind:'interact',value:'inspect'},{roundId:state.roundId,seq:1,kind:'interact',value:'inspect'},{roundId:state.roundId,seq:2,kind:'invalid',value:''}])assert.throws(()=>applyInput(state,'survivor-id',command,0),RuleError);
+  assert.equal(survivor(state).interactionAttempts,1);
+  setPlayerOnline(state,'hunter-id',false,10);
+  assert.throws(()=>act(state,survivor(state),2,'interact','inspect',20),/paused/);
+  setPlayerOnline(state,'hunter-id',true,30);
+  assert.equal(snapshotFor(state,'survivor-id',0).attemptsRemaining,4);
+  assert.equal(snapshotFor(newGame(),'survivor-id',0).attemptsRemaining,5);
+});
+
+test('persisted rounds without a budget field start at zero and count the next accepted attempt', () => {
+  const state=newGame();delete survivor(state).interactionAttempts;
+  assert.equal(snapshotFor(state,'survivor-id',0).attemptsRemaining,5);
+  act(state,survivor(state),1,'interact','inspect');
+  assert.equal(survivor(state).interactionAttempts,1);
+  assert.equal(snapshotFor(state,'survivor-id',0).attemptsRemaining,4);
+});

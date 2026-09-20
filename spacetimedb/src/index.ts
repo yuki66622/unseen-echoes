@@ -126,7 +126,11 @@ export const restart_round = spacetimedb.reducer({}, ctx => {
   if (me.restartVote) return;
   ctx.db.member.identity.update({ ...me, restartVote: true });
   const members = [...ctx.db.member.roomCode.filter(current.code)];
-  if (members.every(player => player.restartVote)) startRound(ctx, current, members);
+  if (members.every(player => player.restartVote)) {
+    removeTicks(ctx, current.code);
+    for (const player of members) ctx.db.member.identity.update({ ...player, role: '', ready: false, restartVote: false });
+    ctx.db.room.code.update({ ...current, phase: 'lobby', stateJson: 'null' });
+  }
 });
 export const input = spacetimedb.reducer(
   { roundId: t.string(), seq: t.u32(), kind: t.string(), value: t.string() },

@@ -33,3 +33,10 @@ The prepublication chase browser test used the independent local SpacetimeDB tes
 ## Recovery
 
 Preserve the previous saved Sites version and its corresponding SpacetimeDB rules. If a chapter fails to load or the two-player flow regresses, restore matching frontend/backend versions while preserving database data and browser identity. Never use a destructive database reset as a connection fix.
+
+
+## Rematch and repeated controls update
+
+- Two real local database identities completed a chase, voted separately to restart, returned to the same room with roles/readiness/votes cleared, exchanged roles, and completed another chase. A first vote alone preserved the shared result; a fresh role choice and readiness were required for round two.
+- Desktop screenshots confirm the chase movement rows and letter-key hints are gone. Hotel movement controls, the E badge and duplicate nearby interaction buttons are removed; the envelope, settings, contextual object labels, conversations and evidence notes remain functional. All visited states had no browser errors.
+- Twenty hotel application tests and the multiplayer TypeScript check passed. The existing hotel allowance is still five unsuccessful searches until the pending E-budget clarification is resolved.

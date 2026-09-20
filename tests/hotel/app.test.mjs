@@ -411,7 +411,7 @@ test('stairs hide and disable interaction while compass continuously reaches the
   assert.equal(h.elements.get('floor-label').textContent, 'Ground floor');
 });
 
-test('character identities appear in conversation headings, recorded and AI labels, buttons and notes', async () => {
+test('character identities remain in conversation, nearby labels and notes without duplicate interaction buttons', async () => {
   const h = harness();
   await h.begin();
   await h.complete(h.api.route(false));
@@ -422,7 +422,9 @@ test('character identities appear in conversation headings, recorded and AI labe
   for (const identity of ['Martin · Receptionist:', 'Claire · Witness:', 'Elena · Witness:', 'Hotel cleaner:']) assert.ok(notes.includes(identity), `${identity} identifies a collected note`);
   await h.complete(h.api.route(true));
   h.api.renderContext();
-  assert.ok(textOf(h.elements.get('context-actions')).includes('Talk to Elena · Witness'));
+  assert.ok(!textOf(h.elements.get('context-actions')).includes('Talk to Elena'));
+  h.api.renderWorldHud();
+  assert.ok(h.elements.get('interaction-label').textContent.includes('Elena · Witness'));
   await h.complete(h.api.talkTo('elena'));
   assert.equal(h.elements.get('speaker-title').textContent, 'Elena · Witness');
   await h.api.receiveReply(reply([], { role: 'elena', reply: 'I remember the sound.' }));

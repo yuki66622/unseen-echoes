@@ -64,7 +64,7 @@ function renderPartnerWait(){
     const partner=roomState.members.find(m=>m.identity!==room?.identity);
     if(mine?.restartVote&&partner){
       if(!partner.online)message='等待朋友重新连接……';
-      else if(!partner.restartVote)message='等待朋友同意再玩一局……';
+      else if(!partner.restartVote)message='等待朋友同意重新选择角色……';
     }
   }
   if(target&&waitIndicator.parentElement!==target)target.append(waitIndicator);
@@ -117,8 +117,7 @@ function setPhase(next){
   phase=next;document.body.dataset.phase=phase;lastRender='';
   show('opening',phase==='opening');show('game',phase!=='opening');
   show('lobby',phase==='lobby');show('narrative',!['lobby','chase-result','story-result'].includes(phase));
-  show('controls',active());show('story-panel',phase==='story');
-  show('door',phase!=='chase');
+  show('story-panel',phase==='story');
   show('result',phase.endsWith('-result'));show('begin',phase.endsWith('-ready'));
   show('skip-tutorial-active',['tutorial-ready','tutorial'].includes(phase));
   show('sound-toggle',active());
@@ -169,6 +168,10 @@ function renderLobby(){lobby.updateRoom(roomState,room?.identity);}
 function onRoom(next){
   if(!next&&!room?.ready&&phase==='lobby'){renderPartnerWait();return;}
   const previous=roomState;roomState=next;
+  if(next?.phase==='lobby'&&['chase','chase-result'].includes(phase)){
+    epoch++;stopSound();motion=null;pending=null;remoteMotion=null;remoteSamples.clear();
+    roundId=null;seq=0;paused=false;setPhase('lobby');sessionSet('unseen-checkpoint','lobby');say('');
+  }
   renderPartnerWait();
   if(phase==='lobby')renderLobby();
   if(!next){
@@ -217,7 +220,7 @@ function onRoom(next){
     $('result-title').textContent=g.winner===g.role?'你赢得了这场追逐。':g.winner?'追逐结束了。':'连接中断，本局结束。';
     $('result-body').textContent=outcomeLabel(g.outcome);
     show('next-level',true);show('rematch',next.members.length===2);show('return-title',false);
-    $('rematch').textContent=`再玩一局${g.restartVotes?`（${g.restartVotes}/2 人同意）`:''}`;
+    $('rematch').textContent=`重新选择角色${g.restartVotes?`（${g.restartVotes}/2 人同意）`:''}`;
   }
 }
 function currentDoor(){return phase==='chase'?Boolean(roomState?.game?.doorOpen):Boolean(local?.doorOpen);}
@@ -253,7 +256,7 @@ function act(action){
 }
 function useDoor(){
   if(!canAct())return;
-  if(phase==='chase')return say('这里没有门。找到电机后，到雨声处按 E 逃脱。');
+  if(phase==='chase')return say('这里没有门。循着电机声音寻找出口。');
   motion=null;
   if(!isNearDoor(pose))return say('请先靠近门。');
   if(local.doorOpen&&occupiesDoor(pose))return say('请先离开门口，再关门。');
@@ -318,11 +321,6 @@ function frame(now){
       if(near&&doorArmed){audio.playCue('door',DOOR.center);doorArmed=false;}
       if(distance(pose,DOOR.center)>DOOR.rearmRadius)doorArmed=true;
     }
-    const label=phase==='chase'?(near?'雨声就在这里。找到电机后，按 E 逃脱。':'空旷场地，循声辨认方位。'):
-      near?(currentDoor()?'前方的门已打开。':'你已靠近一扇关着的门。'):'聆听下一个声源，辨认方位。';
-    if($('nearby').textContent!==label)$('nearby').textContent=label;
-    $('door').disabled=!near;$('door').textContent=currentDoor()?'关门 · F':'开门 · F';
-    $('interact').textContent=phase==='chase'&&roomState?.game?.role==='hunter'?'尝试抓捕 · E':'查看 · E';
   }
   requestAnimationFrame(frame);
 }
@@ -353,8 +351,6 @@ $('begin').addEventListener('click',async()=>{
   if(phase==='tutorial-ready'){setPhase('tutorial');say('慢慢转身，雨声在门后。');await startSound();}
   else if(phase==='story-ready'){setPhase('story');say('靠近鸟鸣、雨声和火声，分别查看，寻找三条证据。');await startSound();}
 });
-document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>act(b.dataset.action)));
-$('door').addEventListener('click',useDoor);$('interact').addEventListener('click',inspect);
 $('chat-text').addEventListener('invalid',()=>$('chat-text').setCustomValidity('请先输入想讨论的问题。'));
 $('chat-text').addEventListener('input',()=>$('chat-text').setCustomValidity(''));
 $('next-level').addEventListener('click',enterStory);

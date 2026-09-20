@@ -183,12 +183,12 @@ function startAssistance(goal){
   if(!goal||!explorationActive()||assistance)return;
   const plan=planAssistance(state,goal,2);navigationHint.reset();
   if(!plan.points.length){
-    if(plan.stopReason==='door')notice('A door is within reach. Press E when you are ready.');
+    if(plan.stopReason==='door')notice('A door is within reach.');
     return;
   }
   cancelRequest();cancelMotion(state);selectRole('guide');
   assistance={...plan,index:0,travelled:0,last:{...state.player},elapsed:0};
-  log('Gemini','I’ll guide you a few steps toward the sound. Move or press Esc to take over.');
+  log('Gemini','I’ll guide you a few steps toward the sound. You can take over at any time.');
   notice('Gemini navigation assistance · you can take over at any time.');
   $('assist-status').hidden=false;$('direction-hint').hidden=true;
 }
@@ -200,7 +200,7 @@ function updateAssistance(dt){
   if(run.elapsed>12){stopAssistance('Your turn. Listen again, then choose your next step.');return;}
   if(run.elapsed<.9||state.motion||state.motionQueue.length)return;
   if(run.travelled>=2-.001||run.index>=run.points.length){
-    stopAssistance(run.stopReason==='door'?'You are near the doorway. Press E to open it.':run.stopReason==='target'?'The sound is close. Press E when you are ready.':run.stopReason==='stairs'?'The stairs are ahead. Take the next step when you are ready.':'Your turn. Listen again, then choose your next step.');return;
+    stopAssistance(run.stopReason==='door'?'You are near the doorway.':run.stopReason==='target'?'The sound is close.':run.stopReason==='stairs'?'The stairs are ahead. Take the next step when you are ready.':'Your turn. Listen again, then choose your next step.');return;
   }
   const point=run.points[run.index],dx=point.x-p.x,dy=point.y-p.y,d=Math.hypot(dx,dy);
   if(d<.025){run.index++;return;}
@@ -229,7 +229,6 @@ function renderContext(){
   if(key===contextKey)return;contextKey=key;$('context-actions').replaceChildren();
   if(state.paused||state.phase==='ending')return;
   const button=(text,fn)=>{const b=document.createElement('button');b.textContent=text;b.onclick=fn;$('context-actions').append(b);};
-  if(near)button(near.type==='recorder'?'Play recording':'Talk to '+personLabel(near.id),()=>near.type==='recorder'?void playIncident():void talkTo(near.id));
   if(near&&['claire','elena'].includes(near.id)&&passingStarted)button('Repeat your conversation',()=>void playPassing(true));
 }
 function renderSuggestions(){
@@ -409,7 +408,6 @@ $('volume').oninput=()=>audio.setVolume(Number($('volume').value));$('spoken-rep
 $('guide').onclick=$('back-guide').onclick=()=>{selectRole('guide');notice('Talk through the evidence with Gemini.');};
 $('chat-form').onsubmit=e=>{e.preventDefault();void sendMessage();};$('submit-case').onclick=()=>void sendMessage(true);
 $('message').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void sendMessage();}});
-for(const button of document.querySelectorAll('[data-move]'))button.onclick=()=>move(button.dataset.move);
 function startCapture(){stopAssistance();if(silent)return notice('Microphone disabled in this silent test session.');stopSpeech();cancelMotion(state);void voice.start();}
 $('talk').addEventListener('pointerdown',e=>{e.preventDefault();$('talk').setPointerCapture(e.pointerId);startCapture();});$('talk').addEventListener('pointerup',()=>void voice.stop());$('talk').addEventListener('pointercancel',()=>voice.cancel());
 document.addEventListener('keydown',e=>{

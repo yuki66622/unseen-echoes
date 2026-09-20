@@ -1,3 +1,5 @@
+import {setLanguage} from '../../public/locale-state.mjs';
+setLanguage('en');
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { TrailMap } from '../../public/hotel/trail-map.mjs';

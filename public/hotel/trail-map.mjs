@@ -8,12 +8,12 @@ const pose = player => ({ x: player.x, y: player.y, floor: player.floor, heading
 
 /** Complete north-up floor plan with the player's own walking trail. */
 export class TrailMap {
-  constructor(canvas, { scene = 'hotel', walls = WALLS, door = null, bounds = { width: 18, height: 15, north: 12 } } = {}) {
+  constructor(canvas, { scene = 'hotel', walls = WALLS, door = null, mapDoors = [], bounds = { width: 18, height: 15, north: 12 } } = {}) {
     if (!canvas?.getContext) throw new TypeError('TrailMap requires a canvas.');
     this.canvas = canvas;
     this.walls = walls;
     this.scene = scene;
-    this.door = door;
+    this.door = door;this.mapDoors=mapDoors;
     this.bounds = bounds;
     this.context = canvas.getContext('2d');
     if (!this.context) throw new Error('A two-dimensional canvas is unavailable.');
@@ -101,7 +101,7 @@ export class TrailMap {
     const Y = y => offsetY + (this.bounds.north - y) * scale;
     const pixelScale = Math.min(width / 360, height / 300);
 
-    this.visibleMarkers=drawFloorPlan(context,{scene:this.scene,floor:this.activeFloor,walls:this.walls,door:this.door,bounds:this.bounds,doors:this.doors,sources:this.sources,X,Y,scale,pixelScale});
+    this.visibleMarkers=drawFloorPlan(context,{scene:this.scene,floor:this.activeFloor,walls:this.walls,door:this.door,mapDoors:this.mapDoors,bounds:this.bounds,doors:this.doors,sources:this.sources,X,Y,scale,pixelScale});
 
     context.globalAlpha = 0.62;
     context.strokeStyle = '#b7c7dc';

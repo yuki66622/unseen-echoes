@@ -1,0 +1,19 @@
+#language-switch{position:fixed;top:16px;right:24px;z-index:60;display:flex;gap:8px;align-items:center;background:#000c;color:#b7c7dc;font:14px/1.7 "Times New Roman","PingFang SC",serif}
+#language-switch button{font:inherit;min-width:38px;min-height:40px;margin:0;padding:6px 4px;border:0;border-bottom:1px solid transparent;border-radius:0;background:transparent;color:#94a3b8;cursor:pointer}
+#language-switch button[aria-pressed=true]{color:#dce6f4;border-bottom-color:#94a3b8}
+#language-switch button:focus-visible{outline:1px solid #b7c7dc;outline-offset:3px}
+.unseen-ui[data-ui-chapter=tutorial] .journey-nav{right:150px}
+.unseen-ui[data-ui-chapter=multiplayer] #game>header{padding-right:112px}
+#unseen-echoes-opening .ue-header{padding-right:110px}
+@media(max-width:650px){
+ #language-switch{top:10px;right:16px;gap:4px;font-size:13px}
+ #language-switch button{min-width:32px}
+ .unseen-ui[data-ui-chapter=tutorial] .journey-nav{right:110px;gap:12px;font-size:12px}
+ .unseen-ui[data-ui-chapter=tutorial] .journey-nav>span{display:none}
+ .unseen-ui[data-ui-chapter=tutorial] .journey-nav>a{white-space:nowrap}
+ .unseen-ui[data-ui-chapter=multiplayer] #game>header{padding-right:88px;gap:8px;font-size:12px}
+ .unseen-ui[data-ui-chapter=multiplayer] #game>header button{font-size:12px}
+ #unseen-echoes-opening .ue-header{padding-right:90px}
+ html[lang=en][data-ui-chapter=tutorial] .key-legend dl>div{gap:8px}
+ html[lang=en][data-ui-chapter=tutorial] .key-legend dd{max-width:110px;font-size:12px}
+}

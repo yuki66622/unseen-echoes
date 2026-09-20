@@ -58,3 +58,17 @@ Yuki 明确要求：各模块统一为开场介绍的风格；开场文字更快
 - 心跳增益使用距离强度平方再乘 1.2，平滑过渡保持 0.2 秒；真实双人靠近时增益从 0.0807 到 1.1933，距离差异更大。
 - 开场改为“你在一个架空的空间醒来。面前，立着许多扇门。”文字、主要按钮和底部操作统一在同一开场页面内布局，删除父页面的重叠按钮。教程手机地图与按键分区，横屏键位缩紧；入口在模块绑定事件之后启用。
 - 新世界生成器为相邻 unseen/ 本地原型，不包含在此云端仓库。用户已澄清塞尔达仅作为声音设计风格参考，复用现有音库。该原型的默认提示和服务入口已相应收紧，不新增音频生成请求。
+
+
+## 最新用户决定（覆盖上方历史基线）
+- 全部英文 Times New Roman；首页标题单独放大；引言停留4秒并可点击立即继续。
+- 每个游戏保留左侧声音球及下方适用按键、居中完整地图、右侧指南针；不重播教程或到处重复按键介绍。教程 Gemini 默认折叠。源位置隐藏规则不变。
+- 中英切换保留状态、玩家名、输入与模型原话。所有非游玩页面播放指定轻雨，首次需用户手势。
+- 追逐可从准备页或对局中跳过至旅馆；玩法说明和设置同排。监管者开局冻结3秒，现有标题显示倒计时；抓捕1.25m、电机/出口1.5m；5E不变；呼吸录音每20秒一次，离开/结算停止。
+- 旅馆信封按用户参考采用透明完整折面及星尘；欢迎语音补录并先于方向说明；已问证人问题立即移除，重开清空。原事件第二声音暂不替换，人声含混样本仅供用户试听。
+- 旅馆结尾接 Gemini 新世界：复用现有工作流、声音球/按键/地图/指南针和5E，简洁描述入口，无旧WASD或教学。受限双语JSON→确定性地图编译→验证→明确进入；音库固定。最多12个世界保存在当前浏览器；没有共享匿名世界库。服务复用已有签名会话与密钥，单实例访问者每小时8次生成、全局2并发，无自动重试。
+- GitHub已按用户明确指示设为public。旧文档中的private/仅本地新世界描述已由本轮决定覆盖。
+
+### Latest opening-audio and label direction
+
+Use the supplied `Solo_Piano,_3_4,_Aba_Form._Minor_Key,_Early-romantic_Harmonic_Idiom,_Melancho....mp3` once before tutorial entry. After player activation wait two seconds, then fade in over three seconds and fade out over the last three seconds. Keep rain at 10% underneath, restore normal rain after the score ends if still on the opening, and cancel both menu tracks when actual tutorial loading begins. Never replay the score later in that tab journey. Preserve all non-playing-page rain behaviour after the opening. Tutorial top-left chapter label is “找到雨声”, English “Find the rain”.

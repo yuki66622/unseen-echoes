@@ -26,6 +26,7 @@ function animate(now) {
 }
 function sync() {
   if (chapter === 'multiplayer') opacity = document.body.dataset.phase === 'lobby' ? .38 : document.body.dataset.phase?.endsWith('result') ? .28 : 0;
+  else if (chapter === 'world') opacity=document.body.dataset.phase==='world'?0:.38;
   else if (chapter === 'tutorial') opacity = document.body.classList.contains('has-entered') ? 0 : .38;
   else opacity = !document.getElementById('intro')?.hidden || !document.getElementById('ending')?.hidden ? .38 : 0;
   canvas.style.opacity = String(opacity);

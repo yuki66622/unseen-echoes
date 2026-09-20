@@ -1,3 +1,4 @@
+import {PlayPanel} from '../play-panel.mjs';
 import {NavigationHUD} from '/navigation-hud.mjs';
 import {SceneAudio} from './scene-audio.mjs';
 import {RoomConnection} from './network.bundle.mjs';
@@ -120,7 +121,7 @@ function setPhase(next){
   show('story-panel',phase==='story');
   show('result',phase.endsWith('-result'));show('begin',phase.endsWith('-ready'));
   show('skip-tutorial-active',['tutorial-ready','tutorial'].includes(phase));
-  show('sound-toggle',active());
+  show('sound-toggle',active());show('skip-chase',phase==='lobby'||phase==='chase');show('show-rules',phase==='lobby'&&$('lobby').dataset.step!=='rules');
   $('chapter').textContent=phase.startsWith('tutorial')?'初次穿行':phase==='lobby'||phase.startsWith('chase')?'第一关 · 追逐':'第二关 · 沉默的钟声';
   $('role-label').textContent='';
   if(phase==='tutorial-ready'){
@@ -203,7 +204,8 @@ function onRoom(next){
     const nextIds=new Set((g.audiblePlayers||[]).map(p=>p.id));
     for(const id of remoteSamples.keys())if(!nextIds.has(id))remoteSamples.delete(id);
     for(const p of g.audiblePlayers||[])remoteSamples.set(p.id,{from:previous?.game?.audiblePlayers?.find(x=>x.id===p.id)||p,at:performance.now()});
-    $('title').textContent=g.role==='hunter'?'循着心跳声，找到求生者。':'找到老式电机，设法逃脱。';
+    $('title').textContent=g.role==='hunter'?(g.headstartSeconds>0?`追捕将在 ${Math.ceil(g.headstartSeconds)} 秒后开始。`:'循着心跳声，找到求生者。'):'找到老式电机，设法逃脱。';
+    if(g.role==='hunter'&&previous?.game?.headstartSeconds>0&&g.headstartSeconds===0)say('追捕开始。');
     $('role-label').textContent=`${roleLabel(g.role)} · 剩余 ${Math.ceil(g.remainingSeconds)} 秒${g.headstartSeconds>0?` · 求生者先行 ${Math.ceil(g.headstartSeconds)} 秒`:''}`;
     $('objective').textContent=localizeMessage(g.objective,'循着声音，完成你的目标。');
     if(g.notice&&g.notice!==previous?.game?.notice)say(g.notice);
@@ -302,8 +304,9 @@ async function chat(event){
   }catch(error){if(generation===epoch&&phase==='story')appendChat('连接提示',error.name==='AbortError'?'回复超时了，你可以稍后重试，同时继续调查。':localizeMessage(error.message,'对话暂时未完成，你仍可继续探索。'));}
   finally{clearTimeout(timeout);if(generation===epoch){chatBusy=false;$('chat-send').disabled=false;$('chat-send').textContent='询问 Gemini';}}
 }
+const playPanel=new PlayPanel({chapter:'chase',readState:()=>audio.getEnvironmentVisualState()});
 function frame(now){
-  frameCount++;
+  frameCount++;playPanel.update(phase==='chase');
   navigationHud.update({player:pose,active:phase==='chase',paused,roundKey:roundId,attemptsRemaining:roomState?.game?.attemptsRemaining});
   if(canAct()){
     let current=phase==='chase'?pending||remoteMotion:motion;
@@ -342,6 +345,7 @@ $('accuse-form').addEventListener('submit',e=>{
   const view=storyView(story);if(view.outcome){epoch++;chatAbort?.abort();stopSound();motion=null;setPhase('story-result');$('result-title').textContent='你听见了沉默背后的真相。';$('result-body').textContent=answer.message;show('next-level',false);show('rematch',false);show('return-title',true);}
 });
 $('return-title').addEventListener('click',()=>{sessionRemove('unseen-checkpoint');location.reload();});$('chat-form').addEventListener('submit',chat);
+$('skip-chase').addEventListener('click',()=>{stopSound();room?.disconnect();navigateChapter('/hotel/');});
 $('sound-toggle').addEventListener('click',()=>{
   if(paused){void startSound();return;}
   if(phase==='chase')void networkInput('stop');else pending=null;
@@ -361,6 +365,7 @@ function setColour(colour){
 let saved='';try{saved=localStorage.getItem('unseen-text-colour')||'';}catch{}if(/^#[0-9a-f]{6}$/i.test(saved))setColour(saved);
 $('text-colour').addEventListener('input',e=>setColour(e.target.value));$('reset-colour').addEventListener('click',()=>setColour('#b7c7dc'));
 document.addEventListener('keydown',event=>{
+  if(event.target.closest('#language-switch'))return;
   if(event.repeat||event.metaKey||event.ctrlKey||event.altKey||['INPUT','TEXTAREA','SELECT'].includes(event.target.tagName))return;
   const action={arrowup:'forward',arrowdown:'back',arrowleft:'left',arrowright:'right',' ':'stop'}[event.key.toLowerCase()];
   if(action){event.preventDefault();act(action);}else if(event.key.toLowerCase()==='f'){event.preventDefault();useDoor();}else if(event.key.toLowerCase()==='e'){event.preventDefault();inspect();}else if(event.key.toLowerCase()==='p'&&active()){event.preventDefault();$('sound-toggle').click();}
@@ -384,7 +389,7 @@ document.addEventListener('visibilitychange',resumeConnection);
 window.addEventListener('offline',()=>room?.goOffline());
 if(silent)$('silent-note').textContent='静默测试';
 if(qa)window.__unseen={
-  state:()=>({phase,pose:copyPose(pose),local,story:story&&storyView(story),room:roomState,identity:room?.identity,audio:audio.getStats(),frameCount,rttSamples:[...rttSamples],paused}),
+  state:()=>({phase,pose:copyPose(pose),local,story:story&&storyView(story),room:roomState,identity:room?.identity,audio:audio.getStats(),visual:audio.getEnvironmentVisualState(),frameCount,rttSamples:[...rttSamples],paused}),
   tutorial:()=>{resetLocal('tutorial');setPhase('tutorial-ready');},
   lobby:enterLobby,act,inspect,useDoor,
   localPose:p=>{if(!['tutorial','story'].includes(phase))throw Error('测试位置只能用于本地关卡。');motion=null;pose=copyPose(p);},

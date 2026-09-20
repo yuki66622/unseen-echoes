@@ -2,7 +2,7 @@ import { motionDuration, sampleMotion, type Motion, type Pose } from './physics.
 import { DOOR, LOCATIONS, distance, hasLineOfSight, isNearDoor, occupiesDoor } from './geometry.mjs';
 
 export const ROUND_MS = 180_000;
-export const HEADSTART_MS = 8_000;
+export const HEADSTART_MS = 3_000;
 export const RECONNECT_MS = 30_000;
 export const STEP_MS = 50;
 export const MAX_CATCHUP_MS = 100;
@@ -163,7 +163,7 @@ export function abandonChase(state: ChaseState, id: string, nowMs: number): void
 
 function nearSource(state: ChaseState, player: PlayerState, sourceId: string): boolean {
   const source = LOCATIONS.find(candidate => candidate.id === sourceId)!;
-  return distance(player.pose, source) <= 1.1
+  return distance(player.pose, source) <= 1.5
     && hasLineOfSight(player.pose, source, state.doorOpen);
 }
 
@@ -173,7 +173,7 @@ export function canInteract(state: ChaseState, id: string): boolean {
   if (player.role === 'hunter') {
     const target = state.players.find(candidate => candidate.role === 'survivor')!;
     return headstartSeconds(state) === 0 && target.online
-      && distance(player.pose, target.pose) <= 0.8
+      && distance(player.pose, target.pose) <= 1.25
       && hasLineOfSight(player.pose, target.pose, state.doorOpen);
   }
   return !state.hasKey ? nearSource(state, player, 'a') : nearSource(state, player, 'b');

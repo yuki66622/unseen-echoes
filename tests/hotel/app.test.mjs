@@ -23,6 +23,7 @@ function harness({ speechSeconds = 0 } = {}) {
     const element = {
       id, hidden: initiallyHidden.has(id), disabled: false, checked: false, value: id === 'volume' ? '0.35' : '', dataset: {},
       children: [], attributes: {}, textContent: '', style: {}, parentElement: null,
+      toggleAttribute(name,active) {if(active)this.attributes[name]='';else delete this.attributes[name];},
       setAttribute(name, value) { this.attributes[name] = value; },
       addEventListener() {}, dispatchEvent() {}, blur() {}, closest() { return null; }, setPointerCapture() {},
       append(...children) { for (const child of children) { child.parentElement = this; this.children.push(child); } },
@@ -44,7 +45,7 @@ function harness({ speechSeconds = 0 } = {}) {
   class AudioBoundary {
     async init() {}
     async start() { running = true; audioPaused = false; }
-    setVolume() {} getStats() { return { running, silent: true, finalOutputGain: 0 }; }
+    setVolume() {} getEnvironmentVisualState(){return {active:running&&!audioPaused,rms:0,proximity:0};} getStats() { return { running, silent: true, finalOutputGain: 0 }; }
     update() {} setListening() {}
     stopGroup(group) { for (const item of [...pendingAudio]) if (item.group === group) endAudio(item, false); }
     stop() { running = false; stops++; for (const item of [...pendingAudio]) endAudio(item, false); }
@@ -80,14 +81,14 @@ function harness({ speechSeconds = 0 } = {}) {
     });
   };
   const context = vm.createContext({
-    ...world, NavigationHint,navigationGoal,relativeDirection,planAssistance,TrailMap:class{update(){}reset(){}}, HotelAudio: AudioBoundary, VoiceInput: VoiceBoundary, URLSearchParams, location: { search: '?silent=1&debug=1' },
+    ...world, PlayPanel:class{update(){}}, NavigationHint,navigationGoal,relativeDirection,planAssistance,TrailMap:class{update(){}reset(){}}, HotelAudio: AudioBoundary, VoiceInput: VoiceBoundary, URLSearchParams, location: { search: '?silent=1&debug=1' },
     document, window: { addEventListener() {} }, requestAnimationFrame: fn => frames.push(fn),
     fetch: fetchBoundary, CustomEvent: class {}, AbortController, setTimeout, clearTimeout, console,
   });
   vm.runInContext(source + `
     globalThis.testApi = {
-      begin, restart, pause, playPassing, receiveReply, stopSpeech, navigate,
-      interactionTarget, renderWorldHud,updateNavigationHint, startAssistance, stopAssistance, renderContext, talkTo, followup, replayMemory, selectRole,
+      begin, restart, pause, playPassing, handleEvents, receiveReply, stopSpeech, navigate,
+      interactionTarget, renderWorldHud,updateNavigationHint, startAssistance, stopAssistance, renderContext, talkTo, followup, renderSuggestions, replayMemory, selectRole,
       route: returning => qaWalk(returning),
       get state() { return state; },
       get status() { return {started, role, foreground, passingComplete, routeBusy, recordingHeard, collected:[...collected],searchAttempts,assistance}; }
@@ -555,4 +556,35 @@ test('typing, held keys, pause and F do not consume the hotel E allowance',async
  h.key('e',{typing:true});h.key('e',{repeat:true});h.api.pause();h.key('e');h.api.pause();
  h.place({x:5,y:-1.1,floor:0,heading:0});h.key('f');await h.tick(20);
  assert.equal(h.api.status.searchAttempts,0);assert.equal(h.api.state.doors.entrance,1);
+});
+
+
+test('lobby welcome is spoken before directions, pauses with the world and spends no search', async()=>{
+ const h=harness({speechSeconds:1});await h.begin();
+ h.api.handleEvents([{type:'region',region:'lobby'}]);await h.tick(5);
+ assert.equal(h.played.find(x=>x.kind==='speech').id,'MARTIN-WELCOME-EN-R1');
+ h.api.pause();await h.tick(40);assert.ok(!h.played.some(x=>x.id==='DLG-01-EN-R4'));
+ h.api.pause();await h.tick(45);
+ assert.deepEqual(h.played.filter(x=>x.kind==='speech').map(x=>x.id),['MARTIN-WELCOME-EN-R1','DLG-01-EN-R4']);
+ h.api.handleEvents([{type:'region',region:'lobby'}]);await h.tick(2);
+ assert.equal(h.played.filter(x=>x.id==='MARTIN-WELCOME-EN-R1').length,1);
+ assert.equal(h.api.status.searchAttempts,0);assert.equal(h.api.status.collected.length,0);
+});
+
+test('restart cancels the welcome sequence and a new arrival can speak again', async()=>{
+ const h=harness({speechSeconds:2});await h.begin();h.api.handleEvents([{type:'region',region:'lobby'}]);await h.tick(2);
+ await h.api.restart();await h.tick(90);assert.ok(!h.played.some(x=>x.id==='DLG-01-EN-R4'));
+ h.api.handleEvents([{type:'region',region:'lobby'}]);await h.tick(85);
+ assert.equal(h.played.filter(x=>x.id==='MARTIN-WELCOME-EN-R1').length,2);
+ assert.equal(h.played.filter(x=>x.id==='DLG-01-EN-R4').length,1);
+});
+
+
+test('asked witness questions disappear immediately, stay gone on return, and reset for a new case',async()=>{
+ const h=harness();await h.begin();h.place({x:4,y:8,floor:0,heading:0});h.api.selectRole('martin');h.api.renderSuggestions();
+ assert.equal(h.elements.get('suggestions').children.length,2);
+ await h.api.followup('MARTIN-ITALIAN');assert.equal(h.elements.get('suggestions').children.length,1);
+ await h.api.followup('MARTIN-GERMAN');assert.equal(h.elements.get('suggestions').children.length,0);
+ h.api.selectRole('guide');h.api.selectRole('martin');h.api.renderSuggestions();assert.equal(h.elements.get('suggestions').children.length,0);
+ await h.api.restart();h.place({x:4,y:8,floor:0,heading:0});h.api.selectRole('martin');h.api.renderSuggestions();assert.equal(h.elements.get('suggestions').children.length,2);
 });

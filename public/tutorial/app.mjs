@@ -1,3 +1,5 @@
+import {translate} from '../locale-core.mjs';
+import {getLanguage} from '../locale-state.mjs';
 import {NavigationHUD} from '/navigation-hud.mjs';
 import {SoundHuntAudio} from './sound-engine.mjs?v=environment-orb-v1';
 import {SOUNDS,TARGET_SOUND} from './sound-catalog.mjs?v=rooms-v3';
@@ -8,7 +10,7 @@ import {VoiceInput} from './voice-input.mjs?v=voice-glow-v1';
 import {parseVoiceCommand} from './voice-commands.mjs?v=local-voice-v1';
 import {validateVoicePlan,executeVoicePlan,publicGameContext,doorApproach} from './voice-plan.mjs?v=gemini-v1';
 import {VoiceOutput} from './voice-output.mjs?v=gemini-chat-v1';
-import {mountEnvironmentOrb} from './chat-beam.bundle.mjs?v=environment-music-v4';
+import {PlayPanel} from '../play-panel.mjs';
 
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
@@ -18,9 +20,7 @@ const specifiedSeed=params.get('seed');
 const initialSeed=specifiedSeed!==null&&/^\d+$/.test(specifiedSeed)?Number(specifiedSeed)>>>0:randomSeed();
 let game=createGame(initialSeed), starting=false, paused=false, operation=0;
 const navigationHud=new NavigationHUD({map:true,scene:'tutorial',label:'初次穿行',walls:WALLS.map(w=>({floor:0,x1:w.a.x,y1:w.a.y,x2:w.b.x,y2:w.b.y})),door:DOOR});
-const orbHost=document.createElement('div');orbHost.id='environment-orb';orbHost.hidden=true;orbHost.setAttribute('aria-hidden','true');document.body.append(orbHost);
-const environmentOrb=mountEnvironmentOrb(orbHost,{readState:()=>game.stage==='explore'&&!starting&&!paused
-  ?audio.getEnvironmentVisualState():{active:false,rms:0,proximity:0}});
+const playPanel=new PlayPanel({chapter:'tutorial',readState:()=>game.stage==='explore'&&!starting&&!paused?audio.getEnvironmentVisualState():{active:false,rms:0,proximity:0}});
 let wrongMessage='',doorCueArmed=true,doorCueCount=0;
 let voiceReady=false,voiceState='idle',voiceMessage='正在检查语音服务…',voiceEpoch=0,captureEpoch=0,executingVoice=false;
 const seenVoiceRequests=new Set();
@@ -51,7 +51,7 @@ const motion=new SmoothMovement({getGame:()=>game,onUpdate:sample=>{
 }});
 const voice=new VoiceInput({
   isAllowed:()=>game.stage==='explore'&&!starting&&!paused,
-  getContext:()=>({context:publicGameContext(game),history:dialogue.slice(-8)}),
+  getContext:()=>({context:publicGameContext(game),history:dialogue.slice(-8).map(({role,text,authored})=>({role,text:authored?translate(text):text}))}),
   onState:({state,message})=>{voiceState=state;voiceMessage=message;renderVoice();},
   onLevel:level=>$('voice-control').dispatchEvent(new CustomEvent('voice-level',{detail:level})),
   onTranscript:result=>dispatchVoice(result),
@@ -129,10 +129,10 @@ function dispatchVoice(result){
   if(requestId){seenVoiceRequests.add(requestId);if(seenVoiceRequests.size>100)seenVoiceRequests.delete(seenVoiceRequests.values().next().value);}
   if(semanticMode||result.mode){void dispatchSemantic(result);return;}
   const parsed=parseVoiceCommand(text);
-  if(!parsed.ok){$('voice-result').textContent=`听到：“${text||'…'}”。${parsed.reason}`;return;}
+  if(!parsed.ok){$('voice-result').textContent=getLanguage()==='en'?`Heard: “${text||'…'}”. ${translate(parsed.reason)}`:`听到：“${text||'…'}”。${parsed.reason}`;return;}
   executingVoice=true;
   let outcome='';
-  const heard=`听到：“${text}”${Number.isFinite(recognitionMs)?`（识别 ${(recognitionMs/1000).toFixed(2)} 秒）`:''}`;
+  const heard=(getLanguage()==='en'?`Heard: “${text}”`:`听到：“${text}”`)+(Number.isFinite(recognitionMs)?translate(`（识别 ${(recognitionMs/1000).toFixed(2)} 秒）`):'');
   try{
     const command=parsed.command;
     $('map').dataset.lastVoiceAction=command.type;
@@ -141,9 +141,9 @@ function dispatchVoice(result){
       act(command.direction,command.type==='move'?command.steps:command.degrees/30,result=>{
         if(epoch!==voiceEpoch||game!==round||paused)return;
         const detail=result.status==='completed'?`已${parsed.label}`:result.status==='blocked'?`走了 ${result.travelled.toFixed(2)} 米，前方被挡住。`:'已停在当前位置。';
-        $('voice-result').textContent=`${heard} → ${detail}`;
+        $('voice-result').textContent=`${heard} → ${translate(detail)}`;
       });
-      $('voice-result').textContent=`${heard} → 正在${parsed.label}…`;
+      $('voice-result').textContent=`${heard} → ${translate(`正在${parsed.label}…`)}`;
       return;
     }else if(command.type==='door'){
       motion.cancel();
@@ -151,32 +151,33 @@ function dispatchVoice(result){
       else{useDoor();outcome=$('status').textContent;}
     }else if(command.type==='confirm'){motion.cancel();confirm();outcome=$('status').textContent;}
     else if(command.type==='pause'){pauseGame();outcome='已暂停声音。';}
-    $('voice-result').textContent=`${heard} → ${outcome}`;
+    $('voice-result').textContent=`${heard} → ${translate(outcome)}`;
   }finally{executingVoice=false;}
 }
 
-function remember(role,text){
-  dialogue.push({role,text:String(text).slice(0,600)});
+function remember(role,text,authored=false){
+  dialogue.push({role,text:String(text).slice(0,600),authored});
   dialogue=dialogue.slice(-40);
   $('chat-log').replaceChildren();
   for(const item of dialogue){
     const row=document.createElement('div');row.className=`chat-line ${item.role}`;
     const name=document.createElement('span');name.className='speaker';name.textContent=item.role==='user'?'你':'Gemini';
-    const content=document.createElement('span');content.textContent=item.text;row.append(name,content);$('chat-log').append(row);
+    const content=document.createElement('span');content.textContent=item.text;if(!item.authored)content.dataset.noLocalize='';row.append(name,content);$('chat-log').append(row);
   }
   $('chat-log').scrollTop=$('chat-log').scrollHeight;
   if(role==='assistant'&&!chatExpanded)chatUnread=true;
   renderChatDisclosure();
-  if(role==='assistant')void replyVoice.speak(String(text).slice(0,400));
+  if(role==='assistant')void replyVoice.speak((authored?translate(String(text)):String(text)).slice(0,400));
 }
+function modelReply(message,progress=''){const span=document.createElement('span');span.dataset.noLocalize='';span.textContent=message;$('voice-reply').replaceChildren(span);if(progress)$('voice-reply').append(document.createTextNode('\n'+progress));}
 async function dispatchSemantic(result){
   let plan;
   try{plan=validateVoicePlan(result);}catch(error){$('voice-reply').textContent=error.message;return;}
   const epoch=voiceEpoch,round=game;
   const current=()=>epoch===voiceEpoch&&game===round&&game.stage==='explore'&&!paused;
-  const heard=plan.text?`你说：“${plan.text}”`:'没有听到清晰的话';
-  $('voice-result').textContent=heard+(Number.isFinite(result.recognitionMs)?`（理解 ${(result.recognitionMs/1000).toFixed(2)} 秒）`:'');
-  $('voice-reply').textContent=plan.message;
+  const heard=plan.text?(getLanguage()==='en'?`You said: “${plan.text}”`:`你说：“${plan.text}”`):translate('没有听到清晰的话');
+  $('voice-result').textContent=heard+(Number.isFinite(result.recognitionMs)?translate(`（理解 ${(result.recognitionMs/1000).toFixed(2)} 秒）`):'');
+  modelReply(plan.message);
   if(plan.text)remember('user',plan.text);
   if(plan.mode!=='act'){remember('assistant',plan.message);$('voice-reply').textContent='';return;}
   const motionStep=(forward,turn)=>new Promise(resolve=>{
@@ -189,7 +190,7 @@ async function dispatchSemantic(result){
   });
   try{
     const outcome=await executeVoicePlan(plan,{isCurrent:current,
-      onProgress:(i,n)=>{$('voice-reply').textContent=`${plan.message}\n正在执行 ${i+1}/${n}…`;},
+      onProgress:(i,n)=>{modelReply(plan.message,translate(`正在执行 ${i+1}/${n}…`));},
       perform:async action=>{
         if(action.type==='move')return motionStep(action.amount,0);
         if(action.type==='turn')return motionStep(0,action.amount);
@@ -221,11 +222,11 @@ async function dispatchSemantic(result){
         }finally{executingVoice=false;}
       }});
     if(epoch!==voiceEpoch||game!==round)return;
-    const feedback=outcome.results.map(r=>r.message).join(' ');
+    const feedback=outcome.results.map(r=>translate(r.message)).join(' ');
     $('voice-reply').textContent='';
     remember('assistant',feedback||plan.message);
   }catch{
-    if(epoch===voiceEpoch&&game===round){$('voice-reply').textContent='动作没有完成，已停下。';motion.cancel();remember('assistant','动作执行中断，已停在当前位置。');}
+    if(epoch===voiceEpoch&&game===round){$('voice-reply').textContent='动作没有完成，已停下。';motion.cancel();remember('assistant','动作执行中断，已停在当前位置。',true);}
   }
 }
 function renderRoom(){
@@ -256,7 +257,7 @@ function checkDoorApproach(){
   }
 }
 function render(){
-  orbHost.hidden=game.stage!=='explore';
+  playPanel.update(game.stage==='explore');
   show('intro',game.stage==='ready');show('exploring',game.stage==='explore');show('victory',game.stage==='won');
   show('pause',game.stage==='explore'||starting);show('reset',game.stage!=='ready'||starting);
   show('movement',game.stage==='explore');show('keys',game.stage==='explore');
@@ -298,12 +299,12 @@ function render(){
 function pauseGame(message='声场已暂停。点击“继续声音”恢复。'){
   invalidateVoice();
   motion.cancel();
-  operation++;audio.pause();starting=false;paused=game.stage==='explore';say(message);render();
+  operation++;audio.pause();starting=false;delete document.body.dataset.audioStarting;paused=game.stage==='explore';say(message);render();
 }
 async function beginOrResume(){
   if(starting||game.stage==='won')return;
   invalidateVoice();
-  const token=++operation;starting=true;say('正在准备环境声场…');render();
+  const token=++operation;starting=true;document.body.dataset.audioStarting='true';say('正在准备环境声场…');render();
   try{
     await audio.init();
     if(token!==operation)return;
@@ -318,8 +319,8 @@ async function beginOrResume(){
     $('voice-reply').textContent='';
     say('目标是雨声。靠近门会有提示音，按 F 开门；走近声源后按 E 确认。');
     checkDoorApproach();
-  }catch(error){if(token===operation){audio.pause();paused=game.stage==='explore';say(`环境声音加载失败：${error.message}。请重试。`);if(tutorialSeen)$('voice-reply').textContent=$('status').textContent;}}
-  finally{if(token===operation){starting=false;render();}}
+  }catch(error){if(token===operation){audio.pause();paused=game.stage==='explore';say(getLanguage()==='en'?'The soundscape could not load. Please try again.':`环境声音加载失败：${error.message}。请重试。`);if(tutorialSeen)$('voice-reply').textContent=$('status').textContent;}}
+  finally{if(token===operation){starting=false;delete document.body.dataset.audioStarting;render();}}
 }
 function newRound(){
   invalidateVoice();$('voice-result').textContent='';
@@ -348,7 +349,7 @@ function act(action,count=1,onComplete=null){
     else say(near?(game.checked.includes(near.id)?'这里不是雨声，继续寻找其他方向。':'附近有一个声源。认为这是雨声，再按 E 确认。'):isNearDoor(game.player)?'你已靠近房门。按 F 开关，听门内外声音的变化。':'听雨声的方向和远近，继续移动。');
     if($('motion-check'))$('motion-check').textContent=JSON.stringify({result,samples:motionTrace});
     render();
-    if(result.status==='blocked'&&!onComplete)remember('assistant','前方被墙或关闭的门挡住，已停下。');
+    if(result.status==='blocked'&&!onComplete)remember('assistant','前方被墙或关闭的门挡住，已停下。',true);
     onComplete?.(result);
   }});
   say(turn?'正在转身，声音方向随朝向变化。':'正在行走，听声音如何逐渐靠近或远离。');render();
@@ -359,7 +360,7 @@ function useDoor(){
   const messages={opened:'门打开了。听门内传来的声音，穿过门口继续探索。',closed:'门关上了。门另一侧的声音现在更轻、更闷。',far:'再靠近门一些，然后按 F。',occupied:'你正站在门槛上。先向门内或门外走半米，再关门。'};
   if(messages[result])say(messages[result]);
   render();
-  if(messages[result]&&!executingVoice)remember('assistant',messages[result]);
+  if(messages[result]&&!executingVoice)remember('assistant',messages[result],true);
 }
 function confirm(){
   if(starting||paused||game.stage!=='explore')return;
@@ -372,7 +373,7 @@ function confirm(){
   }
   if(result==='won'){wrongMessage='';operation++;audio.pause();starting=false;paused=false;say(`找到雨声了！这一局结束，你一共确认了 ${game.attempts} 次。`);}
   render();
-  if(!executingVoice)remember('assistant',$('status').textContent);
+  if(!executingVoice)remember('assistant',$('status').textContent,true);
 }
 $('start').addEventListener('click',beginOrResume);
 $('chat-toggle').addEventListener('click',()=>setChatExpanded(!chatExpanded));
@@ -403,6 +404,7 @@ $('voice-retry').addEventListener('click',async()=>{
 $('volume').addEventListener('input',event=>{audio.setVolume(Number(event.target.value)/100);replyVoice.setVolume();$('volume-value').value=`${event.target.value}%`;});
 $('voice-output-enabled').addEventListener('change',()=>{if(!$('voice-output-enabled').checked)replyVoice.cancel();});
 document.addEventListener('keydown',event=>{
+  if(event.target.closest('#language-switch'))return;
   if(event.key==='Escape'){
     if(event.target.matches('input,textarea'))event.target.blur();
     invalidateVoice();motion.cancel();return;
@@ -421,7 +423,7 @@ document.addEventListener('keydown',event=>{
 document.addEventListener('keyup',event=>{if(event.key.toLowerCase()==='v'){event.preventDefault();void voice.stop();}});
 window.addEventListener('blur',()=>{invalidateVoice();motion.cancel();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){invalidateVoice();if(starting||game.stage==='explore'&&!paused)pauseGame('页面切到后台，声音已暂停。回来后手动继续。');}});
-window.addEventListener('pagehide',()=>{voice.destroy();replyVoice.cancel();motion.cancel();audio.pause();environmentOrb.destroy();});
+window.addEventListener('pagehide',()=>{voice.destroy();replyVoice.cancel();motion.cancel();audio.pause();playPanel.destroy();});
 // Explicit silent QA only: a generated file can exercise the real provider and
 // the exact game dispatcher without opening a microphone or playing audio.
 if(params.get('silent')==='1'&&params.get('voicecheck')==='1'){

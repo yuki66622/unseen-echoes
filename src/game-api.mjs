@@ -1,3 +1,4 @@
+import {generateWorld} from './world-service.mjs';
 import {hotelReply} from './hotel-service.mjs';
 import {tutorialReply} from './tutorial-service.mjs';
 
@@ -25,13 +26,13 @@ async function body(request,max=3300000){
   const bytes=new Uint8Array(length);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
   try{return JSON.parse(new TextDecoder().decode(bytes));}catch{throw {status:400,code:'input',message:'The message format is invalid.'};}
 }
-function admit(request,token){
+function admit(request,token,world=false){
   const now=Date.now(),key=request.headers.get('CF-Connecting-IP')||token.split('.')[0];
   for(const [key,value]of visitors)if(now-value.start>3600000)visitors.delete(key);
-  if(!visitors.has(key)){if(visitors.size>=2000)return false;visitors.set(key,{start:now,count:0,recent:[]});}
+  if(!visitors.has(key)){if(visitors.size>=2000)return false;visitors.set(key,{start:now,count:0,worlds:0,recent:[]});}
   const item=visitors.get(key);item.recent=item.recent.filter(t=>now-t<60000);
-  if(item.count>=60||item.recent.length>=12||activeCalls>=2)return false;
-  item.count++;item.recent.push(now);return true;
+  if((world&&item.worlds>=8)||item.count>=60||item.recent.length>=12||activeCalls>=2)return false;
+  item.count++;if(world)item.worlds++;item.recent.push(now);return true;
 }
 async function speak(payload,env,fetchImpl){
   if(!env.ELEVENLABS_API_KEY)throw {status:503,code:'speech_unavailable',message:'Spoken replies are unavailable. Your text reply is still available.'};
@@ -52,9 +53,10 @@ async function speak(payload,env,fetchImpl){
 }
 
 export async function gameApi(request,env,fetchImpl=fetch){
-  const url=new URL(request.url),match=url.pathname.match(/^\/api\/(tutorial|hotel)\/(status|interpret|speak)$/);
+  const url=new URL(request.url),match=url.pathname.match(/^\/api\/(tutorial|hotel|worlds)\/(status|interpret|speak|generate)$/);
   if(!match)return null;
   const [,chapter,action]=match,origin=request.headers.get('Origin');
+  if(chapter==='worlds'?!['status','generate'].includes(action):action==='generate')return null;
   if((origin&&origin!==url.origin)||request.headers.get('Sec-Fetch-Site')==='cross-site')return error(403,'origin','Open this request from the game itself.');
   if(action==='status'){
     if(request.method!=='GET')return error(405,'method','This request method is unsupported.');
@@ -69,12 +71,13 @@ export async function gameApi(request,env,fetchImpl=fetch){
   if(!env.GAME_SESSION_SECRET)return error(503,'not_configured','The conversation service is not configured. Recorded evidence remains available.');
   const token=request.headers.get('X-Voice-Token')||'';
   if(!token||!equal(token,sessionCookie(request))||!await validSession(token,env.GAME_SESSION_SECRET))return error(403,'session','Refresh the game to reconnect your conversation.');
-  if(!admit(request,token))return error(429,'busy','Please wait a moment before sending another message. Exploration is still available.');
+  if(!admit(request,token,chapter==='worlds'))return error(429,'busy','Please wait a moment before sending another message. Exploration is still available.');
   let acquired=false;
   try{
-    const payload=await body(request,action==='speak'?6000:3300000);
+    const payload=await body(request,action==='speak'?6000:action==='generate'?8000:3300000);
     if(activeCalls>=2)return error(429,'busy','Please wait a moment before sending another message. Exploration is still available.');
     activeCalls++;acquired=true;
+    if(action==='generate')return json(await generateWorld(payload,env,fetchImpl));
     if(action==='speak')return await speak(payload,env,fetchImpl);
     const result=await (chapter==='hotel'?hotelReply:tutorialReply)(payload,env,fetchImpl);
     return json({...result,requestId:crypto.randomUUID(),provider:'Gemini',model:env.GEMINI_MODEL||'gemini-3.1-flash-lite'});

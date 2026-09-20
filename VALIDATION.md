@@ -62,3 +62,19 @@ The user's latest direction replaces explored-path masking with a complete floor
 - Eight chapter UI checks pass, including arrow movement, collapsed Gemini, complete tutorial map, explicit mocked retry, envelope entry and no page errors/missing resources.
 - A real two-player approach changed heartbeat gain from 0.080658 to 1.193279. Both clients decoded the 30-second Epic loop at gain 0.25, never played the witch clip at entry, then stopped scene loops and played the 6.68-second witch recording once on capture. Final output gain stayed zero throughout.
 - Current evidence is in ignored validation/final-polish/ and validation/ui-unified/. These are muted implementation checks, not a subjective headphone audition. No real model-generation request was needed for this update. Final deployment identifiers and live checks belong in the outer integration release record.
+
+## Bilingual release, shared play layout and generated worlds
+
+The latest user direction supersedes earlier snapshots: every game retains the orb and applicable controls on the left, a centred complete map without private sound sources, and the compass on the right. English text uses Times New Roman; language switches preserve the current game and authored/player text boundaries.
+
+- 166 integrated service/application/audio tests pass; 44 authoritative chase checks and TypeScript validation pass. The Maincloud migration preserves existing database data.
+- Seven rendered language/layout checks cover opening, tutorial, lobby and hotel in four viewport sizes. Eight actual map/audio checks cover upfront maps, dedicated three-second stairs, sequential English welcome speech, chase Epic/witch and menu-rain lifecycles.
+- Real two-player Maincloud check observed 2,998 ms hunter freeze, 3→2→1 countdown, blocked movement/turn/E during freeze, and successful capture at exactly 1.0 m. Both clients played one 7.16-second breathing clip at 20 seconds; repeated snapshots did not restart it. Rematch removed all chase voices and required fresh roles.
+- Hotel follow-up questions disappear after selection and reset on replay. Opening/envelope screenshots and same-row rules/settings were inspected; skipping chase enters the hotel.
+- One actual Gemini world request returned 200 in 3.24 seconds with 1,034 reported tokens. Its validated bilingual response was reused for subsequent rendered integration checks without generating again.
+- Independent generated-world browser QA passed 16 checks: real arrow/F/E route, rain collection and return, success on the fifth E, failure on the fifth wrong E, sixth ignored, clean replay, saved-world reload, language preservation, complete source-free map, and cancellation during delayed audio loading. No page errors or unexpected external requests.
+- Browser audio checks are headless and muted; no microphone or subjective listening is claimed. Chrome headless did not expose a real hidden-tab state, so actual tab-background behaviour remains unverified; delayed-load cancellation was verified separately.
+
+The source copies of original supplied music remain unchanged. The opening piano uses a two-second activation delay and three-second volume envelopes, with menu rain at 10% of its normal level underneath. Natural completion restores rain; departure cancels pending playback and later chapters cannot replay the score in that tab's journey. The tutorial chapter label is “找到雨声” / “Find the rain”.
+
+Five additional real-media browser checks passed for the 20.7735-second piano: two-second start delay, natural three-second fades, normal rain restoration at the actual track end, no replay after reload/return, stop on tutorial entry, and cancellation when leaving during the delay. These checks used the original encoded file with Chrome output muted; no test audio was heard on the user's computer.

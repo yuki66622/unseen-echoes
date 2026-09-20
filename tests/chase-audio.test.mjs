@@ -5,7 +5,7 @@ import {
   CHASE_PEAK_LIMIT, HEARTBEAT_FADE_SECONDS, prepareChaseBuffer, makeFootstepSegment,
 } from '../public/multiplayer/chase-audio.mjs';
 
-const durations = { ending: 6.68, heartbeat: 10, background: 30, door: 4,
+const durations = { breathing:6, ending: 6.68, heartbeat: 10, background: 30, door: 4,
   'hunter-win': 4.16, footsteps: 3.88, motor: 30, rain: 20 };
 const sources = [{ id: 'a', soundId: 'motor', x: 1.5, y: 4.8 },
   { id: 'b', soundId: 'rain', x: 7.6, y: 5.5 }, { id: 'c', soundId: 'fire', x: 2, y: 7 }];
@@ -117,4 +117,17 @@ test('pause and suppressed results cannot restart music or ending sounds', async
   await audio.start(snapshot());audio.pause();assert.equal(await audio.finish(snapshot({outcome:'captured'})),false);
   const other=audio;await other.start(snapshot({roundId:'suppressed'}));assert.equal(await other.finish(snapshot({roundId:'suppressed',outcome:'escaped'}),{playVictory:false}),false);
   assert.equal(other.getStats().activeVoices,0);
+});
+
+
+test('breathing plays once per twenty active round seconds and stops outside play',async t=>{
+ const {make}=setup(t),audio=make();await audio.start(snapshot({remainingSeconds:180}));
+ audio.update(snapshot({remainingSeconds:160.1}));assert.equal(audio.getStats().counters.breathing,0);
+ audio.update(snapshot({remainingSeconds:160}));audio.update(snapshot({remainingSeconds:159}));assert.equal(audio.getStats().counters.breathing,1);
+ audio.update(snapshot({remainingSeconds:140}));assert.equal(audio.getStats().counters.breathing,2);
+ assert.equal(audio.getStats().voices.filter(v=>v.id==='breathing').length,1);
+ audio.pause();audio.update(snapshot({remainingSeconds:120}));assert.equal(audio.getStats().counters.breathing,2);assert.equal(audio.getStats().activeVoices,0);
+ await audio.start(snapshot({remainingSeconds:120}));assert.equal(audio.getStats().counters.breathing,2);
+ audio.update(snapshot({remainingSeconds:100}));assert.equal(audio.getStats().counters.breathing,3);
+ await audio.finish(snapshot({remainingSeconds:80,outcome:'captured',winner:'hunter'}));assert.ok(!audio.getStats().voices.some(v=>v.id==='breathing'));assert.equal(audio.getStats().masterGain,0);
 });

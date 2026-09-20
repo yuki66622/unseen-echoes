@@ -173,7 +173,8 @@ export async function tutorialReply(payload, env = {}, fetchImpl = fetch) {
   if (!key) throw new TutorialError(503, 'gemini_key_missing', '语音理解服务尚未配置，请稍后重新连接。');
   const model = env.GEMINI_MODEL || DEFAULT_MODEL;
   if (typeof model !== 'string' || !/^gemini-[a-zA-Z0-9.-]{1,90}$/.test(model)) throw new TutorialError(503, 'gemini_model_invalid', '语音理解模型配置无效，请联系维护者。');
-  if (!isObject(payload) || Object.keys(payload).some(name => !['audio', 'text', 'context', 'history'].includes(name)) || own(payload, 'audio') === own(payload, 'text')) throw invalidInput();
+  if (!isObject(payload) || Object.keys(payload).some(name => !['audio', 'text', 'context', 'history', 'language'].includes(name)) || own(payload, 'audio') === own(payload, 'text')) throw invalidInput();
+  if (payload.language !== undefined && !['en','zh'].includes(payload.language)) throw invalidInput();
   const audio = own(payload, 'audio');
   if (audio) decodeAudio(payload.audio);
   else if (typeof payload.text !== 'string' || length(payload.text.trim()) < 1 || length(payload.text.trim()) > 600) throw invalidInput();
@@ -181,7 +182,7 @@ export async function tutorialReply(payload, env = {}, fetchImpl = fetch) {
   if (audio) parts.push({ text: '请听这段玩家录音，理解意图并回应。' }, { inlineData: { mimeType: 'audio/wav', data: payload.audio } });
   else parts.push({ text: '玩家本轮输入：' + payload.text });
   const body = {
-    systemInstruction: { parts: [{ text: SYSTEM }] },
+    systemInstruction: { parts: [{ text: SYSTEM + (payload.language ? `\nThe player selected ${payload.language==='en'?'English':'Chinese'} for this session. Write message in that language, including clarifications. Keep text as the faithful original transcript or typed input. All action and evidence rules still apply.` : '') }] },
     contents: [{ role: 'user', parts }],
     generationConfig: { temperature: 0.2, maxOutputTokens: 1600, responseMimeType: 'application/json', responseJsonSchema: SCHEMA },
   };

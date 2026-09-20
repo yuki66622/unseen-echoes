@@ -234,6 +234,12 @@
         "kind": "evidence",
         "loop": false,
         "gainDb": -2
+      },
+      "MARTIN-WELCOME-EN-R1": {
+        "url": "/hotel/assets/martin-welcome-en-r1.mp3",
+        "kind": "speech",
+        "loop": false,
+        "gainDb": 0
       }
     },
     "ambience": [
@@ -390,6 +396,13 @@
       "subtitle_en": "The recorder? It's in the room at the end of this hall. Watch out for the cart.",
       "language_code": "en",
       "trigger": "directions"
+    },
+    "MARTIN-WELCOME-EN-R1": {
+      "id": "MARTIN-WELCOME-EN-R1",
+      "name": "Martin",
+      "subtitle_en": "Good afternoon, Detective. We’ve been expecting you.",
+      "language_code": "en",
+      "trigger": "welcome"
     }
   },
   "language_knowledge": {

@@ -1,3 +1,4 @@
+import {PlayPanel} from '../play-panel.mjs';
 import {createState,queueMove,queueTurn,cancelMotion,updateWorld,nearestDoor,setDoor,nearestInteraction,regionAt,doorPosition,WALLS} from './world.mjs';
 import {HotelAudio} from './audio.mjs';
 import {NavigationHint,navigationGoal,relativeDirection} from './navigation-hint.mjs';
@@ -13,7 +14,7 @@ const personLabel=value=>identities[String(value).toLowerCase()]||value;
 const initial={martin:'MARTIN-INITIAL',claire:'CLAIRE-INITIAL',elena:'ELENA-INITIAL'};
 const witnessNotes={martin:'Martin · Receptionist: heard English and a second voice he thought was Italian.',claire:'Claire · Witness: heard English and a second voice she thought was German.',elena:'Elena · Witness: heard English and a second voice she thought was French.'};
 const questionOptions={claire:[['Do you speak German?','CLAIRE-GERMAN'],['Which words did you hear?','CLAIRE-WORDS']],martin:[['Do you speak Italian?','MARTIN-ITALIAN'],['Did you recognize German?','MARTIN-GERMAN']],elena:[['Do you speak French?','ELENA-FRENCH-R2'],['Did you recognize Italian?','ELENA-ITALIAN']]};
-let state=createState(),data=null,started=false,starting=false,role='guide',collected=new Set(),notes=new Map(),history=[],recordingHeard=false;
+let state=createState(),data=null,started=false,starting=false,role='guide',collected=new Set(),askedQuestions=new Set(),notes=new Map(),history=[],recordingHeard=false;
 let foreground=false,speechEpoch=0,requestEpoch=0,passingStarted=false,passingComplete=false,passingMotion=null,welcomed=false;
 let investigationSeconds=0,hintSent=false,revealSent=false,frameTime=null,lastDebug=0,contextKey='',suggestionKey='',runNumber=0;
 let ttsController=null,routeBusy=false,voiceReady=false,recording=false,routeEpoch=0,pendingSubmission=false;
@@ -21,6 +22,7 @@ const MAX_SEARCH_ATTEMPTS=5;
 let searchAttempts=0,lastTrailFrame=0,assistance=null;
 const navigationHint=new NavigationHint(),trailMap=new TrailMap($('trail-canvas'));
 const audio=new HotelAudio({silent,onError:error=>notice(typeof error==='string'?error:error.message,true)});
+const playPanel=new PlayPanel({chapter:'hotel',readState:()=>audio.getEnvironmentVisualState()});
 const voice=new VoiceInput({isAllowed:()=>started&&!state.paused&&state.phase!=='ending',
   getContext:()=>({context:{role:effectiveRole(),submit:pendingSubmission,collected:[...collected],recordingHeard,phase:state.phase,player:{...state.player}},history:history.slice(-8)}),
   onLevel:level=>$('chat').dispatchEvent(new CustomEvent('voice-level',{detail:level})),
@@ -28,10 +30,10 @@ const voice=new VoiceInput({isAllowed:()=>started&&!state.paused&&state.phase!==
   onTranscript:result=>void receiveReply(result)});
 
 function notice(text,error=false){$('notice').textContent=text;$('notice').dataset.error=String(error);}
-function log(speaker,text,kind='assistant'){
+function log(speaker,text,kind='assistant',authored=true){
   const item=document.createElement('div');item.className='message';item.dataset.kind=kind;
   const label=document.createElement('span');label.className='message-label';label.textContent=personLabel(speaker);
-  item.append(label,document.createTextNode(text));$('chat-log').append(item);
+  const content=document.createElement('span');content.textContent=text;if(kind==='user'||!authored)content.dataset.noLocalize='';item.append(label,content);$('chat-log').append(item);
   while($('chat-log').children.length>70)$('chat-log').firstElementChild.remove();
   $('chat-log').scrollTop=$('chat-log').scrollHeight;
 }
@@ -63,6 +65,10 @@ async function playClip(id,{sourceId,collect=false,memory=false}={}){
   if(ended&&id==='DLG-03-EN-R4'){collected.add(id);addNote(id,'Elena · Witness (passing conversation): Jake was the only zoologist in town.',id);}
   notice(ended?'': 'Playback stopped. You can replay it.');renderSuggestions();return ended;
 }
+async function playWelcome(){
+  welcomed=true;
+  if(await playClip('MARTIN-WELCOME-EN-R1',{sourceId:'martin'}))await playClip('DLG-01-EN-R4',{sourceId:'martin'});
+}
 async function replayMemory(id){stopSpeech();await playClip(id,{memory:true});}
 async function talkTo(id){
   if(!started||state.paused||state.stairs||state.phase==='ending')return;
@@ -74,6 +80,7 @@ async function talkTo(id){
 }
 async function followup(id){
   const who=effectiveRole();if(who==='guide')return;
+  if(askedQuestions.has(id))return;askedQuestions.add(id);renderSuggestions();
   stopSpeech();await playClip(id,{sourceId:who,collect:true});
 }
 async function playPassing(replay=false){
@@ -139,7 +146,7 @@ function interact(){
   if(target.type==='door')useDoor();else if(target.type==='recorder')void playIncident();else if(target.type==='npc')void talkTo(target.id);
 }
 function renderWorldHud(){
-  const active=started&&state.phase!=='ending';$('orientation').hidden=!active;$('trail-map').hidden=!active;
+  const active=started&&state.phase!=='ending';playPanel.update(active);$('orientation').hidden=!active;$('trail-map').hidden=!active;
   const chatLog=$('chat-log'),followLog=chatLog.scrollHeight-chatLog.clientHeight-chatLog.scrollTop<24;
   const priorLayout=$('chat').dataset.worldPrompt+':'+$('chat').dataset.listening;
   $('chat').dataset.listening=String(foreground);
@@ -234,9 +241,9 @@ function renderContext(){
   if(near&&['claire','elena'].includes(near.id)&&passingStarted)button('Repeat your conversation',()=>void playPassing(true));
 }
 function renderSuggestions(){
-  const who=effectiveRole(),key=who+':'+[...collected].join(',');if(key===suggestionKey)return;suggestionKey=key;
+  const who=effectiveRole(),key=who+':'+[...collected].join(',')+':'+[...askedQuestions].join(',');if(key===suggestionKey)return;suggestionKey=key;
   $('suggestions').replaceChildren();
-  for(const [label,id]of questionOptions[who]||[]){const b=document.createElement('button');b.textContent=label;b.onclick=()=>void followup(id);$('suggestions').append(b);}
+  for(const [label,id]of questionOptions[who]||[]){if(askedQuestions.has(id)||collected.has(id))continue;const b=document.createElement('button');b.textContent=label;b.onclick=()=>void followup(id);$('suggestions').append(b);}
 }
 async function dynamicReply(text,who){
   if(!$('spoken-replies').checked||!text||state.paused||state.phase==='ending')return;
@@ -257,9 +264,9 @@ async function receiveReply(result){
   if(typeof result.reply!=='string'||!Array.isArray(result.actions))return notice('The reply was incomplete. Please try again.',true);
   log('You',result.text,'user');remember('user',result.text);
   const who=effectiveRole();if(result.role!==who)return notice('You moved away before the reply arrived. Please ask again.');
-  log(who==='guide'?'Gemini':who,result.reply);remember('assistant',result.reply);notice('');
+  log(who==='guide'?'Gemini':who,result.reply,'assistant',false);remember('assistant',result.reply);notice('');
   if(result.verdict==='correct'){
-    if(recordingHeard&&Object.values(initial).every(id=>collected.has(id)))return finish(false,result.reply);
+    if(recordingHeard&&Object.values(initial).every(id=>collected.has(id)))return finish(false,result.reply,true);
     return notice('Listen to all three initial statements and the complete recording first.',true);
   }
   if(result.verdict==='incorrect'||result.verdict==='incomplete')notice(result.verdict==='incorrect'?'That explanation does not yet fit the evidence. You can keep investigating.':'Your explanation is not complete yet. Keep comparing the evidence.',true);
@@ -283,11 +290,12 @@ async function sendMessage(submit=false){
   if(submit)selectRole('guide');stopSpeech();cancelMotion(state);
   pendingSubmission=submit;try{const sent=await voice.sendText(text);if(sent)$('message').value='';}finally{pendingSubmission=false;}
 }
-function finish(revealed=false,reply=''){
+function finish(revealed=false,reply='',modelReply=false){
   if(state.phase==='ending')return;
   stopSpeech();cancelMotion(state);state.phase='ending';audio.update(state);
   $('ending-title').innerHTML='Honest ears.<br>Different stories.';
   $('chat').hidden=true;$('ending').hidden=false;$('ending-status').textContent=revealed?'CASE REVIEW':'CASE EXPLAINED';
+  $('ending-text').toggleAttribute('data-no-localize',modelReply);
   $('ending-text').textContent=reply||'The second voice was an animal vocalization, consistent with the ape in this case, rather than another language. The witnesses honestly described an unfamiliar sound, then attached different language labels to it. Their impressions were not translations. Jake’s death was known from the beginning; the testimony alone does not establish its cause.';
   const endingRun=runNumber;
   void audio.play('ending',{kind:'effect',group:'ending'}).then(()=>{if(endingRun===runNumber&&state.phase==='ending')audio.stop();});
@@ -312,7 +320,7 @@ async function begin(){
   finally{starting=false;}
 }
 async function restart(){
-  runNumber++;routeEpoch++;stopSpeech();audio.stop();state=createState();started=false;role='guide';collected=new Set();notes=new Map();history=[];recordingHeard=false;
+  runNumber++;routeEpoch++;stopSpeech();audio.stop();state=createState();started=false;role='guide';collected=new Set();askedQuestions=new Set();notes=new Map();history=[];recordingHeard=false;
   foreground=false;passingStarted=false;passingComplete=false;passingMotion=null;welcomed=false;investigationSeconds=0;hintSent=false;revealSent=false;contextKey='';suggestionKey='';routeBusy=false;
   searchAttempts=0;navigationHint.reset();trailMap.reset();
   $('chat-log').replaceChildren();$('ending').hidden=true;$('notes').hidden=true;$('settings').hidden=true;$('message').value='';$('notes-toggle').setAttribute('aria-expanded','false');$('settings-toggle').setAttribute('aria-expanded','false');renderNotes();$('note-count').textContent='0';await begin();
@@ -325,7 +333,7 @@ function handleEvents(events){
     if(event.type==='collision'){stopAssistance();notice('A wall or closed door is in front of you.');}
     if(event.type==='stairs-start'){cancelRequest();notice(event.to===1?'Climbing the stairs…':'Walking downstairs…');if(event.to===1){audio.stopGroup('steps');audio.stopGroup('stairs');void audio.play('stairs-up',{kind:'effect',group:'stairs',local:true});}}
     if(event.type==='stairs-end'){if(event.floor===1&&state.phase==='testimony')state.phase='investigation';notice(event.floor===1?'You reach the upstairs landing.':'You return to the lounge.');}
-    if(event.type==='region'&&event.region==='lobby'&&!welcomed){welcomed=true;log('Martin','Good afternoon, Detective. We’ve been expecting you.');if(!foreground)void playClip('DLG-01-EN-R4',{sourceId:'martin'});}
+    if(event.type==='region'&&event.region==='lobby'&&!welcomed&&!foreground)void playWelcome();
   }
 }
 function frame(now){
@@ -353,7 +361,7 @@ function renderDebug(){
   ctx.font='18px system-ui';for(const [id,p]of Object.entries(state.sources)){if(p.floor!==state.player.floor||id.endsWith('-bed'))continue;ctx.fillStyle='#c4c8bd';ctx.beginPath();ctx.arc(X(p.x),Y(p.y),5,0,Math.PI*2);ctx.fill();ctx.fillText(id,X(p.x)+8,Y(p.y)-7);}
   const p=state.player;ctx.fillStyle='#78cde4';ctx.beginPath();ctx.arc(X(p.x),Y(p.y),7,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#78cde4';ctx.beginPath();ctx.moveTo(X(p.x),Y(p.y));ctx.lineTo(X(p.x)+Math.sin(p.heading)*20,Y(p.y)-Math.cos(p.heading)*20);ctx.stroke();
   ctx.fillStyle='#d5e5e3';ctx.fillText('Floor '+(p.floor+1)+' · '+regionAt(p),25,28);
-  $('qa-state').textContent=JSON.stringify({player:p,doors:state.doors,stairs:state.stairs,phase:state.phase,paused:state.paused,role,collected:[...collected],recordingHeard,foreground,routeBusy,searchAttempts,hint:{stalled:navigationHint.stalled,remaining:navigationHint.remaining,lostSeconds:navigationHint.lostSeconds},assistance:assistance?{goalId:assistance.goalId,travelled:assistance.travelled,elapsed:assistance.elapsed}:null,trail:trailMap.getStats?.()||null,audio:audio.getStats()},null,1);
+  $('qa-state').textContent=JSON.stringify({player:p,doors:state.doors,stairs:state.stairs,phase:state.phase,paused:state.paused,role,collected:[...collected],recordingHeard,foreground,routeBusy,searchAttempts,hint:{stalled:navigationHint.stalled,remaining:navigationHint.remaining,lostSeconds:navigationHint.lostSeconds},assistance:assistance?{goalId:assistance.goalId,travelled:assistance.travelled,elapsed:assistance.elapsed}:null,trail:trailMap.getStats?.()||null,audio:audio.getStats(),visual:audio.getEnvironmentVisualState()},null,1);
 }
 async function navigate(points){
   const run=runNumber,route=routeEpoch;
@@ -413,6 +421,7 @@ $('message').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.p
 function startCapture(){stopAssistance();if(silent)return notice('Microphone disabled in this silent test session.');stopSpeech();cancelMotion(state);void voice.start();}
 $('talk').addEventListener('pointerdown',e=>{e.preventDefault();$('talk').setPointerCapture(e.pointerId);startCapture();});$('talk').addEventListener('pointerup',()=>void voice.stop());$('talk').addEventListener('pointercancel',()=>voice.cancel());
 document.addEventListener('keydown',e=>{
+  if(e.target.closest('#language-switch'))return;
   if(e.key==='Escape'){stopAssistance('You are in control.');$('message').blur();cancelRequest();cancelMotion(state);return;}
   if(e.metaKey||e.ctrlKey||e.altKey||e.target.closest('input,textarea,select'))return;
   const k=e.key.toLowerCase(),action={arrowup:'forward',arrowdown:'back',arrowleft:'left',arrowright:'right'}[k];

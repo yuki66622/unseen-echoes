@@ -25,5 +25,6 @@ export class SceneAudio {
     this.current = this.chase;
     return this.chase.finish(snapshot, options);
   }
+  getEnvironmentVisualState(){return this.current.getEnvironmentVisualState?.()||{active:false,rms:0,proximity:0};}
   getStats() { return { scene: this.current === this.chase ? 'chase' : 'local', ...this.current.getStats() }; }
 }

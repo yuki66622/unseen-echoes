@@ -243,6 +243,8 @@ async function requestJSON(system, schema, parts, key, model, fetchImpl) {
 
 export async function hotelReply(payload, env, fetchImpl = fetch) {
   if (!object(payload)) throw invalid();
+  if (payload.language !== undefined && !['en','zh'].includes(payload.language)) throw invalid();
+  const languageInstruction = payload.language ? `\nThe player selected ${payload.language==='en'?'English':'Chinese'} for this session. Write reply and the guide's speechText in that language. Preserve text as the original input, prerecorded clips, and each witness's spoken language.` : '';
   const hasText = payload.text !== undefined && payload.text !== null;
   const hasAudio = payload.audio !== undefined && payload.audio !== null;
   if (hasText === hasAudio) throw invalid('Provide exactly one text or audio input.');
@@ -272,7 +274,7 @@ export async function hotelReply(payload, env, fetchImpl = fetch) {
   const parts = [{ text: JSON.stringify(contextPayload) }, hasText ? { text: payload.text }
     : { inlineData: { mimeType: 'audio/wav', data: payload.audio } }];
   try {
-    const plan = conversation(await requestJSON(SYSTEM, CONVERSATION_SCHEMA, parts, key, model, fetchImpl), state);
+    const plan = conversation(await requestJSON(SYSTEM + languageInstruction, CONVERSATION_SCHEMA, parts, key, model, fetchImpl), state);
     if (hasText) plan.text = payload.text;
     let verdict = 'none';
     const explicitSubmit = state.submit && role === 'guide' && Boolean(plan.text.trim());
@@ -285,7 +287,7 @@ export async function hotelReply(payload, env, fetchImpl = fetch) {
         evidence_complete: ready,
         missing_initial_testimonies: INITIAL_IDS.filter(id => !state.collected.includes(id)).sort(),
         recordingHeard: state.recordingHeard };
-      const assessment = await requestJSON(ready ? ASSESSOR_SYSTEM : GATED_ASSESSOR_SYSTEM, ASSESSMENT_SCHEMA,
+      const assessment = await requestJSON((ready ? ASSESSOR_SYSTEM : GATED_ASSESSOR_SYSTEM) + languageInstruction, ASSESSMENT_SCHEMA,
         [{ text: JSON.stringify(assessmentContext) }], key, model, fetchImpl);
       check(exactKeys(assessment, ASSESSMENT_SCHEMA.required));
       check(['incomplete', 'incorrect', 'correct'].includes(assessment.verdict));

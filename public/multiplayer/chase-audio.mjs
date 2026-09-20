@@ -1,10 +1,11 @@
+import {createVisualMeter,readVisualMeter} from '../audio-visual.mjs';
 // Chase-only recorded audio. The square arena has no internal-wall acoustics.
 import {fetchWithTimeout} from './request.mjs';
 export const CHASE_MASTER_HEADROOM = 0.8;
 export const CHASE_PEAK_LIMIT = 0.8;
 export const CHASE_DEFAULT_VOLUME = 0.75;
 export const CHASE_MIX = Object.freeze({ background: 0.25, motor: 1.5, rain: 0.45,
-  ending: 0.8, heartbeat: 1.2, ownStep: 0.3, remoteStep: 0.85, door: 0.8 });
+  ending: 0.8, breathing: 0.45, heartbeat: 1.2, ownStep: 0.3, remoteStep: 0.85, door: 0.8 });
 export const HEARTBEAT_FADE_SECONDS = 0.2;
 export const FOOTSTEP_OFFSET_SECONDS = 0.75;
 export const FOOTSTEP_DURATION_SECONDS = 0.35;
@@ -22,6 +23,7 @@ const validPose = pose => Number.isFinite(pose?.x) && Number.isFinite(pose?.y)
 const copyPose = pose => ({ x: pose.x, y: pose.y, heading: pose.heading ?? 0 });
 
 export const CHASE_ASSETS = Object.freeze({
+  breathing: {label:'呼吸',path:'./assets/chase/breathing.mp3',targetRms:0.08},
   ending: { label: '女巫与狂风 · 结束', path: './assets/chase/entry.mp3', targetRms: 0.14 },
   heartbeat: { label: '求生者心跳 · 监管者聆听', path: './assets/chase/heartbeat.mp3', targetRms: 0.13 },
   background: { label: '暗黑鼓乐与弦乐 · 背景', path: './assets/chase/background.mp3', targetRms: 0.10 },
@@ -163,7 +165,7 @@ export class ChaseAudio {
     this.operation = 0; this.running = false; this.enabled = false; this.mode = 'idle';
     this.roundId = null; this.snapshot = null; this.listener = { x: 2, y: 1, heading: 0 };
     this.heartbeatTarget = 0; this.heartbeatVoice = null; this.lastDoorSeq = 0; this.lastError = null;
-    this.counters = { ending: 0, door: 0, hunterWin: 0, footstepsSelf: 0, footstepsRemote: 0,
+    this.lastBreathingSlot=0;this.counters = { breathing:0, ending: 0, door: 0, hunterWin: 0, footstepsSelf: 0, footstepsRemote: 0,
       background: 0, heartbeat: 0, anchors: 0, escape: 0 };
   }
 
@@ -210,7 +212,7 @@ export class ChaseAudio {
         });
         limiter.oversample = '2x';
         this.master.connect(limiter); limiter.connect(this.context.destination);
-        this.limiter = limiter;
+        this.limiter = limiter;this.visualMeter=createVisualMeter(this.context);
       }
       const outcomes = await Promise.allSettled(Object.entries(CHASE_ASSETS).map(async ([id, descriptor]) => {
         try {
@@ -268,6 +270,7 @@ export class ChaseAudio {
       panner.refDistance = 2; panner.rolloffFactor = 0.6;
       gain.connect(panner); panner.connect(this.master);
     } else gain.connect(this.master);
+    if(this.visualMeter)(panner||gain).connect(this.visualMeter.analyser);
     const voice = { id, kind, source, gain, panner, position: position ? copyPose(position) : null,
       actor, targets: {}, loop, startedAt: this.context.currentTime };
     this._position(voice, true); this.voices.add(voice);
@@ -318,7 +321,7 @@ export class ChaseAudio {
         this._stopVoices(); return false;
       }
       this.listener = copyPose(current.self);
-      this.running = true; this.mode = 'chase';
+      this.running = true; this.mode = 'chase';this.lastBreathingSlot=Math.floor(Math.max(0,180-(current.remainingSeconds??180))/20);
       this._voice('background', { level: CHASE_MIX.background, loop: true }); this.counters.background++;
       for (const source of anchors) {
         this._voice(source.soundId, { kind: 'anchor', level: source.id === 'a' ? CHASE_MIX.motor : CHASE_MIX.rain,
@@ -350,6 +353,8 @@ export class ChaseAudio {
     // Finishing a snapshot stops the scene but preserves the user's sound intent
     // so finish() can still play the result after an update-first caller.
     if (snapshot.outcome) { this._stopVoices(); return; }
+    const breathingSlot=Math.floor(Math.max(0,180-(snapshot.remainingSeconds??180))/20);
+    if(breathingSlot>this.lastBreathingSlot){this.lastBreathingSlot=breathingSlot;for(const voice of [...this.voices])if(voice.id==='breathing')this._dispose(voice,true);this._voice('breathing',{level:CHASE_MIX.breathing});this.counters.breathing++;}
     if (this.heartbeatVoice && validPose(snapshot.heartbeatSource)) {
       this.heartbeatVoice.position = copyPose(snapshot.heartbeatSource);
     }
@@ -405,6 +410,8 @@ export class ChaseAudio {
       this.enabled = false; this._stopVoices(); this.lastError = error.message; throw error;
     }
   }
+
+  getEnvironmentVisualState(){return readVisualMeter(this.visualMeter,this.running&&this.mode==='chase'&&this.context?.state==='running');}
 
   getStats() {
     return { running: this.running, mode: this.mode, silent: this.silent, volume: this.volume,

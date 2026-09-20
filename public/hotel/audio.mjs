@@ -1,3 +1,4 @@
+import {createVisualMeter,readVisualMeter} from '../audio-visual.mjs';
 import { acousticScene, webAudioListener, dbToGain, clamp } from './acoustics.mjs';
 
 const BUS_NAMES = ['ambience', 'music', 'foreground', 'effect'];
@@ -73,9 +74,10 @@ export class HotelAudio {
       // The final gate is the only connection to destination, including generated cues.
       this.output = this.context.createGain(); this.output.gain.value = 0;
       this.master.connect(this.output); this.output.connect(this.context.destination);
+      this.visualMeter=createVisualMeter(this.context);
       const impulse = roomImpulse(this.context);
       for (const name of BUS_NAMES) {
-        const gain = this.context.createGain(); gain.gain.value = 1; gain.connect(this.master);
+        const gain = this.context.createGain(); gain.gain.value = 1; gain.connect(this.master); if(this.visualMeter)gain.connect(this.visualMeter.analyser);
         const reverb = this.context.createConvolver(); reverb.normalize = false; reverb.buffer = impulse; reverb.connect(gain);
         this.buses[name] = { gain, reverb };
       }
@@ -324,6 +326,8 @@ export class HotelAudio {
     this.listening = !!value;
     this._updateBuses();
   }
+
+  getEnvironmentVisualState(){return readVisualMeter(this.visualMeter,this.running&&!this.paused&&this.context?.state==='running');}
 
   getStats() {
     const now = this.context?.currentTime || 0;

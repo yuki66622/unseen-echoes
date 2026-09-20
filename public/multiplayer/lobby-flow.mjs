@@ -5,7 +5,7 @@ const scenes={rules:'lobby-rules',name:'lobby-name',choice:'lobby-choice',join:'
 const rules=[
   ['下一扇门后，\n你不再独行。','两人进入同一个世界。\n一个追寻心跳，一个听脚步躲避。'],
   ['你要追寻，\n还是逃离？','监管者循着求生者的心跳接近，尝试抓捕。\n求生者听脚步躲避，找到电机后逃脱。\n场地没有墙和门。'],
-  ['等你们都准备好。','两人选择不同角色，再各自点击“准备开始”。\n当前测试场中，求生者先行 8 秒，一局限时 3 分钟。'],
+  ['等你们都准备好。','两人选择不同角色，再各自点击“准备开始”。\n当前测试场中，求生者先行 3 秒，一局限时 3 分钟。'],
 ];
 const stored=(storage,key)=>{try{return globalThis[storage].getItem(key)||'';}catch{return '';}};
 const remember=(storage,key,value)=>{try{globalThis[storage].setItem(key,value);}catch{/* Naming still works without storage. */}};
@@ -81,7 +81,7 @@ export class LobbyFlow{
     if(me?.name){this.name=me.name;remember('localStorage','unseen-player-name',me.name);$('player-name').value=me.name;}
     const slots=[me,partner].map((member,index)=>{
       const li=document.createElement('li'),label=document.createElement('span'),name=document.createElement('strong'),state=document.createElement('span');
-      label.className='member-label';label.textContent=index===0?'你':'同行的人';name.textContent=member?.name||'等待加入';state.className='member-state';
+      label.className='member-label';label.textContent=index===0?'你':'同行的人';name.textContent=member?.name||'等待加入';if(member?.name)name.dataset.noLocalize='';state.className='member-state';
       state.textContent=!member?'把上方房间码发给朋友':!member.online?'暂时离线':`${roleLabel(member.role)} · ${member.ready?'已准备':'未准备'}`;
       li.append(label,name,state);return li;
     });$('roster').replaceChildren(...slots);

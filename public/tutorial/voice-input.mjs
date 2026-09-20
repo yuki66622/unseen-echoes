@@ -1,3 +1,4 @@
+import {getLanguage} from '../locale-state.mjs';
 export const VOICE_INPUT_REVISION = 'gemini-chat-v1';
 const MAX_SECONDS = 12;
 const MAX_WAV_BYTES = 2_400_000;
@@ -168,7 +169,7 @@ const browserTransport = {
         payload={audio:btoa(chunks.join(''))};
       }else payload={text:input.text};
       return requestJson('/api/tutorial/interpret',{method:'POST',headers:{'Content-Type':'application/json','X-Voice-Token':token},
-        body:JSON.stringify({...payload,context:context.context??{},history:context.history??[]})},signal);
+        body:JSON.stringify({...payload,language:getLanguage(),context:context.context??{},history:context.history??[]})},signal);
     }
     if(!(input instanceof ArrayBuffer))throw new Error('文字对话需要连接 Gemini。');
     return requestJson('/api/tutorial/transcribe', {

@@ -24,19 +24,19 @@ test('creation requires two distinct online roles and gives exact initial poses'
   assert.equal(snapshotFor(state, 'survivor-id', 0).remainingSeconds, 180);
   assert.equal(snapshotFor(state,'survivor-id',0).objective,'Find the old motor and interact to inspect it.');
   assert.equal(survivor(state).notice,'Find the old motor, then reach the rain at the exit.');
-  assert.equal(snapshotFor(state, 'hunter-id', 0).headstartSeconds, 8);
+  assert.equal(snapshotFor(state, 'hunter-id', 0).headstartSeconds, 3);
   assert.throws(() => createChase('r', [{ id: 's', role: 'survivor', online: true }], 0), RuleError);
   assert.throws(() => createChase('r', [{ id: 's', role: 'survivor', online: true }, { id: 's', role: 'hunter', online: true }], 0), RuleError);
 });
 
-test('the hunter cannot move, turn, interact or operate a door during the eight-second head start', () => {
+test('the hunter cannot move, turn, interact or operate a door during the three-second head start', () => {
   const state = newGame();
   for (const [kind, value] of [['move', 'forward'], ['turn', 'right'], ['interact', 'inspect'], ['door', 'open']]) {
-    assert.throws(() => act(state, hunter(state), 1, kind, value, 7999), /head start/);
+    assert.throws(() => act(state, hunter(state), 1, kind, value, 2999), /head start/);
   }
-  act(state, survivor(state), 1, 'move', 'forward', 7999);
-  act(state, hunter(state), 1, 'move', 'forward', 8000);
-  ticks(state, 8500);
+  act(state, survivor(state), 1, 'move', 'forward', 2999);
+  act(state, hunter(state), 1, 'move', 'forward', 3000);
+  ticks(state, 3500);
   near(hunter(state).pose.y, 6.5);
 });
 
@@ -112,7 +112,7 @@ test('capture requires explicit interaction and range after head start', () => {
   const state = newGame();
   advanceChase(state, 8000);
   hunter(state).pose = { x: 3.2, y: 5.5, heading: Math.PI / 2 };
-  survivor(state).pose = { x: 4.3, y: 5.5, heading: 0 };
+  survivor(state).pose = { x: 4.6, y: 5.5, heading: 0 };
   assert.equal(canInteract(state, 'hunter-id'), false);
   act(state, hunter(state), 1, 'interact', 'inspect');
   assert.equal(state.outcome, null);

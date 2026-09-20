@@ -6,7 +6,7 @@ html.unseen-ui {
   --ue-line: #354251;
   --ue-surface: #05090eea;
   --ue-error: #e1b5b2;
-  --ue-font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+  --ue-font: "Times New Roman", "PingFang SC", "Songti SC", serif;
   --ink: var(--ue-ink); --dim: var(--ue-dim); --line: var(--ue-line);
   --text: var(--ue-ink); --muted: var(--ue-dim); --accent: var(--ue-ink);
   --focus: var(--ue-ink); --bg: #000;
@@ -235,3 +235,5 @@ html.unseen-ui {
   .unseen-ui #letter-title { font-size: 28px; }
 }
 @media(prefers-reduced-motion:reduce) { .unseen-ui .case-letter { animation: none; } }
+
+.unseen-ui :is(body,button,input,textarea,select,summary,kbd,output,.journey-nav,.journey-continue,.journey-finish){font-family:var(--ue-font)}

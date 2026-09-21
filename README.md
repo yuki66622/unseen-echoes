@@ -88,3 +88,5 @@ This is a standalone integrated repository. The historical import scripts are no
 ## Credits and asset rights
 
 Third-party code and recordings retain their individual terms and provenance in [public/licenses/](public/licenses/) and [AUDIO_PROVENANCE.md](AUDIO_PROVENANCE.md). The complete asset collection is not offered under one blanket open-source license. Backend answers are visible in this public source repository but are not served as static browser assets. Credentials and local configuration are excluded.
+
+Project team: yuki66622 and xuejunyue0911.

@@ -38,7 +38,7 @@ Every chapter after the tutorial allows **five E attempts per round**, including
 
 The opening piano begins two seconds after audio activation, fades in and out over three seconds, and plays once per journey. Refreshing the opening starts a fresh journey. Rain stays at 10% underneath, returns to normal after the piece ends, and stops with the piano when tutorial play begins. Later non-playing screens use gentle rain.
 
-The chase uses quiet Epic Dark background music, a breathing clip every 20 seconds, stronger heartbeat changes with distance, and a single Powerful Witch ending cue. The hotel includes its English welcome and a dedicated three-second stair recording. Browser playback requires a player gesture; voice input is limited to 12 seconds.
+The chase uses quiet Epic Dark background music, a breathing clip every 20 seconds, stronger heartbeat changes with distance, and a single Powerful Witch ending cue. The hotel includes its English welcome and a dedicated three-second stair recording. Browser playback requires a player gesture; voice input is limited to 6 seconds.
 
 Generated worlds reuse the existing rain, bird and fire recordings. Gemini does not create audio or executable code. The latest 12 worlds are saved in the current browser, without cross-device synchronization.
 

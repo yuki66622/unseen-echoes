@@ -28,6 +28,26 @@ For multiplayer, enter a name, create a room, and share its six-character code. 
 | V | Hold to speak in chapters with voice input |
 | Esc | Leave input or stop assisted movement |
 
+Xbox controllers with the browser's `standard` mapping work in Find the Rain, The Chase, Pinewood Inn and Another Door. Pair in macOS Bluetooth settings, focus the game and press a controller button, then release the sticks and buttons. Menus and first audio activation still use the mouse.
+
+| Controller input | Action |
+|---|---|
+| Left stick up / down | Forward / backward |
+| Right stick left / right | Turn |
+| D-pad | Equivalent movement and turning |
+| A / X | Inspect or interact / open or close a door |
+| B / Menu | Stop / pause or resume |
+
+Holding a stick repeats the existing half-metre or 30-degree actions; turning takes priority over walking. This version does not change speed with stick pressure or add strafing. Centre dead zones filter small drift. Releasing stops controller movement; loss of focus, disconnecting, typing or opening controls suspends it. Return the sticks to centre before continuing. Held A/X never repeat an interaction. Physical Xbox/macOS mapping and subjective listening still require a device check.
+
+Open `/controller/` on the local game server for a silent input check. It displays device identity, mapping, axes and buttons without microphone access, audio or input uploads. For this check and offline exploration only, no API credentials are needed:
+
+```sh
+python3 -m http.server 18779 --bind 127.0.0.1 --directory public
+```
+
+Then open `http://127.0.0.1:18779/controller/`. The static server does not provide multiplayer or AI APIs; use the full local runtime below for those. Current controller changes are local/source updates until the Site is separately deployed.
+
 Each game keeps the sound-reactive orb and applicable controls on the left, a complete map in the centre, and a compass on the right. The tutorial and generated worlds hide sound-source markers; the chase hides the motor and other player. The hotel reveals rooms, doors, stairs and investigation landmarks.
 
 English is the default. Switch between English and Chinese at the top right without resetting progress or typed text. English uses Times New Roman. Opening text advances on click; the first tagline also stays visible for four seconds. Tutorial Gemini chat starts collapsed. Previously asked witness questions disappear until replay.

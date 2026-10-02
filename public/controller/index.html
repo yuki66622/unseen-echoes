@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>无声手柄检查 · Unseen Echoes</title><link rel="stylesheet" href="./style.css"></head>
+<body><main>
+  <p class="eyebrow">UNSEEN ECHOES · INPUT CHECK</p>
+  <h1>无声手柄检查</h1>
+  <p>在 Mac 的蓝牙设置中连接 Xbox Wireless Controller，回到此页按一下 A，再松开所有按钮和摇杆。</p>
+  <p id="status" role="status">正在检查浏览器支持…</p>
+  <p id="device" class="muted"></p>
+  <section aria-labelledby="sticks-title"><h2 id="sticks-title">摇杆</h2><div class="sticks">
+    <label>左杆横轴 <meter id="axis-0" min="-1" max="1" value="0"></meter><output id="value-0">0.00</output></label>
+    <label>左杆纵轴 <meter id="axis-1" min="-1" max="1" value="0"></meter><output id="value-1">0.00</output></label>
+    <label>右杆横轴 <meter id="axis-2" min="-1" max="1" value="0"></meter><output id="value-2">0.00</output></label>
+    <label>右杆纵轴 <meter id="axis-3" min="-1" max="1" value="0"></meter><output id="value-3">0.00</output></label>
+  </div></section>
+  <section aria-labelledby="buttons-title"><h2 id="buttons-title">按钮</h2><div id="buttons" class="buttons"></div></section>
+  <section><h2>游戏动作</h2><p id="action" role="status">等待输入</p><p class="muted">左杆前后走，右杆左右转；方向键可替代。A 查看，X 开关门，B 停止，Menu 暂停/恢复。转向优先，按住按钮只触发一次交互。</p></section>
+  <details><summary>连接后仍无反应</summary><ol><li>确认这个页面在前台，点击页面空白处后再按 A。</li><li>如果按钮编号变化但提示映射不支持，记录设备名称和 mapping；先不要按错误布局控制游戏。</li><li>如果完全没有读数，先断开再重新配对，并用最新版 Safari 或 Chrome 重新检查。</li></ol><p>本页只读取本机手柄，不播放声音、不访问麦克风、不上传输入。</p></details>
+  <footer><a href="/tutorial/?silent=1">进入静音找雨教程</a><span>读数确认后，再到正常游戏中试听。</span></footer>
+</main><script type="module" src="./check.mjs"></script></body></html>

@@ -1,5 +1,16 @@
 # Integration validation · 2026-09-20
 
+## Controller integration · 2026-10-01 · source update, not deployed
+
+- Baseline: 166 application checks and 44 authoritative multiplayer checks passed. After integration: 185 application checks passed, including 19 new controller state-machine checks; the 44 rule checks remain unchanged and passing. Production build succeeds.
+- `verify-gamepad.cjs` passed six grouped checks in headless, muted Chrome against the local static server: diagnostic desktop/narrow rendering; tutorial movement/turning, centring, pause, blur and cached-page restoration; hotel interaction edge, text focus and settings recovery; saved-world disconnect/reconnect and pause; chase speed/stop/attempt rules; no page errors or external requests. Screenshots and report are in ignored `validation/gamepad/`.
+- Browser controller values are simulated. The chase transport is an explicit local test boundary using the real `createChase`, `applyInput`, `advanceChase` and `snapshotFor` rules; it does not validate a live SpacetimeDB connection or two physical controllers. Provider endpoints are stubbed and all external requests are blocked. No microphone or paid generation calls are made.
+- Independent integration review found and resolved two lifecycle issues: releasing controller ownership must not cancel a newly started tutorial recording, and a cached-page return must retain the controller listener.
+- Scope: four playable chapters use existing half-metre/30-degree actions. Held input repeats at chapter speed; turns take priority; no analog-speed or simultaneous walking/turning change. No server schema or live service change.
+- Still unverified: physical Xbox Bluetooth pairing, actual browser mapping and stick drift, subjective headphone experience, and production deployment. The user-facing `/controller/` page supplies a silent device check.
+
+To reproduce, run the local static server shown in README, then `node verify-gamepad.cjs` with Playwright installed or `PLAYWRIGHT_MODULE` pointing to it. `CHROME_PATH`, `GAME_SITE_URL` and `QA_OUTPUT` can override the local defaults. Other historical browser scripts may contact providers; this one blocks them.
+
 Release scope: unified Nebula Dark opening and chapters, current sound-hunt tutorial, square-open-v2 multiplayer chase and Pinewood Inn revision 3. Latest hotel navigation was selectively merged while preserving cloud voice routes, shared theme and the new envelope briefing. Current map, audio and layout checks are recorded below; earlier validation sections describe their historical snapshots. Rematch and interaction budgets remain in the paired multiplayer service.
 
 ## UI and latest investigation update

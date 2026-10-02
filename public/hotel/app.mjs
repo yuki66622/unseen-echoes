@@ -1,4 +1,5 @@
 import {PlayPanel} from '../play-panel.mjs';
+import {mountGamepad} from '../gamepad-controls.mjs';
 import {createState,queueMove,queueTurn,cancelMotion,updateWorld,nearestDoor,setDoor,nearestInteraction,regionAt,doorPosition,WALLS} from './world.mjs';
 import {HotelAudio} from './audio.mjs';
 import {NavigationHint,navigationGoal,relativeDirection} from './navigation-hint.mjs';
@@ -430,6 +431,16 @@ document.addEventListener('keydown',e=>{
   else if(k==='p'&&!e.repeat){e.preventDefault();pause();}else if(k==='v'&&!e.repeat){e.preventDefault();startCapture();}
 });
 document.addEventListener('keyup',e=>{if(e.key.toLowerCase()==='v')void voice.stop();});
+mountGamepad({
+  host:$('settings'),
+  isEnabled:()=>started&&!starting&&!state.paused&&state.phase!=='ending'&&!state.stairs&&!routeBusy&&$('notes').hidden&&$('settings').hidden&&!['permission','recording','transcribing'].includes(voice.state),
+  canPause:()=>started&&!starting&&state.phase!=='ending',
+  canRepeat:()=>!state.motion&&!state.motionQueue.length,
+  repeatMs:action=>['left','right'].includes(action)?120:312.5,
+  onAction:action=>{if(action==='interact')interact();else if(action==='door')useDoor();else move(action);},
+  onStop:()=>{stopAssistance();cancelMotion(state);},
+  onPause:pause,
+});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&started){if(state.phase==='ending')audio.stop();else if(!state.paused)pause();}});
 window.addEventListener('pagehide',()=>{voice.destroy();audio.stop();});
 $('qa-route').onclick=()=>void qaWalk();$('qa-return').onclick=()=>void qaWalk(true);

@@ -11,6 +11,7 @@ import {parseVoiceCommand} from './voice-commands.mjs?v=local-voice-v1';
 import {validateVoicePlan,executeVoicePlan,publicGameContext,doorApproach} from './voice-plan.mjs?v=gemini-v1';
 import {VoiceOutput} from './voice-output.mjs?v=gemini-chat-v1';
 import {PlayPanel} from '../play-panel.mjs';
+import {mountGamepad} from '../gamepad-controls.mjs';
 
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
@@ -403,6 +404,14 @@ $('voice-retry').addEventListener('click',async()=>{
 });
 $('volume').addEventListener('input',event=>{audio.setVolume(Number(event.target.value)/100);replyVoice.setVolume();$('volume-value').value=`${event.target.value}%`;});
 $('voice-output-enabled').addEventListener('change',()=>{if(!$('voice-output-enabled').checked)replyVoice.cancel();});
+mountGamepad({
+  isEnabled:()=>game.stage==='explore'&&!starting&&!paused&&!executingVoice&&!['permission','recording','transcribing'].includes(voiceState),
+  canPause:()=>game.stage==='explore'&&!starting,
+  canRepeat:()=>!motion.active,
+  onAction:action=>{invalidateVoice();if(action==='interact'){motion.cancel();confirm();}else if(action==='door'){motion.cancel();useDoor();}else act(action);},
+  onStop:()=>motion.cancel(),
+  onPause:()=>{if(paused)void beginOrResume();else pauseGame();},
+});
 document.addEventListener('keydown',event=>{
   if(event.target.closest('#language-switch'))return;
   if(event.key==='Escape'){

@@ -9,6 +9,7 @@ import {DOOR,isNearDoor,occupiesDoor,hasLineOfSight,distance} from '../room-layo
 import {createStory,inspectStory,storyView,accuseStory,STORY_INTRO,STORY_SOURCES} from './solo-story.mjs';
 import {localizeMessage,roleLabel,outcomeLabel} from './i18n.mjs';
 import {LobbyFlow} from './lobby-flow.mjs';
+import {mountGamepad} from '../gamepad-controls.mjs';
 import {fetchWithTimeout} from './request.mjs';
 
 const $=id=>document.getElementById(id), show=(id,yes)=>$(id).hidden=!yes;
@@ -362,6 +363,13 @@ document.addEventListener('keydown',event=>{
   if(event.repeat||event.metaKey||event.ctrlKey||event.altKey||['INPUT','TEXTAREA','SELECT'].includes(event.target.tagName))return;
   const action={arrowup:'forward',arrowdown:'back',arrowleft:'left',arrowright:'right',' ':'stop'}[event.key.toLowerCase()];
   if(action){event.preventDefault();act(action);}else if(event.key.toLowerCase()==='f'){event.preventDefault();useDoor();}else if(event.key.toLowerCase()==='e'){event.preventDefault();inspect();}else if(event.key.toLowerCase()==='p'&&active()){event.preventDefault();$('sound-toggle').click();}
+});
+mountGamepad({
+  isEnabled:()=>canAct()&&$('settings').hidden&&!(phase==='chase'&&roomState?.game?.role==='hunter'&&roomState.game.headstartSeconds>0),
+  canPause:()=>active()&&!starting,
+  onAction:action=>{if(action==='interact')inspect();else if(action==='door')useDoor();else act(action);},
+  onStop:()=>{if(phase==='chase'&&canAct())void networkInput('stop');else motion=null;},
+  onPause:()=>$('sound-toggle').click(),
 });
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden)return;

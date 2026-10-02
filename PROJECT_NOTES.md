@@ -1,5 +1,11 @@
 # Product Experience Contract · UI baseline 2 · 2026-09-20
 
+## Controller extension · 2026-10-01
+
+Yuki has purchased the previously discussed Xbox Wireless Controller and explicitly requested connection and code changes. This extends the keyboard-only input baseline with a shared Gamepad API adapter. Existing keyboard controls, chapter layout, role-based listening, half-metre/30-degree movement, collisions and authoritative multiplayer limits remain in place. No independent head tracking.
+
+The input path is `standard gamepad → shared dead-zone/edge/lifecycle adapter → chapter actions → existing movement and server rules`. A compact, collapsible controller hint uses the chapter footer (hotel settings drawer); detailed connection checks live at `/controller/`. Menus and first audio activation retain mouse operation. Validation and the physical-device gap are recorded at the top of VALIDATION.md; no Site or database deployment is part of this change.
+
 Yuki 明确要求：各模块统一为开场介绍的风格；开场文字更快消失，点击一次进入下一句。本轮直接沿用已选 Nebula Dark，不重新选择视觉方向。
 
 ## 体验与边界

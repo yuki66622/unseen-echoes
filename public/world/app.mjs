@@ -5,6 +5,7 @@ import {NavigationHUD} from '../navigation-hud.mjs';
 import {PlayPanel} from '../play-panel.mjs';
 import {getLanguage} from '../locale-state.mjs';
 import {translate} from '../locale-core.mjs';
+import {mountGamepad} from '../gamepad-controls.mjs';
 const $=id=>document.getElementById(id),query=new URLSearchParams(location.search),silent=query.get('silent')==='1',key='unseen-cloud-worlds-v1';
 const audio=new WorldAudio({silent});let scene='menu',run=null,envelope=null,hud=null,service=null,starting=false,generating=false,generation=null,epoch=0,saved=[];
 const panel=new PlayPanel({chapter:'world',readState:()=>audio.getEnvironmentVisualState()});
@@ -27,6 +28,23 @@ async function initService(){const r=await fetch('/api/worlds/status',{signal:Ab
 async function generate(event){event.preventDefault();if(generating)return;const brief=$('brief').value.trim();if(!brief)return;generating=true;library();$('generate').disabled=true;$('generation-status').textContent=translate('正在打开另一扇门…');generation=new AbortController();const timer=setTimeout(()=>generation?.abort(),52000);try{if(!service)await initService();const response=await fetch('/api/worlds/generate',{method:'POST',headers:{'Content-Type':'application/json','X-Voice-Token':service.csrfToken},body:JSON.stringify({brief,language:getLanguage()}),signal:generation.signal});const result=await response.json();if(!response.ok){const message=response.status===429?'生成请求较多，请稍后再试。':response.status===403?'连接已过期，请重试。':'这扇门暂时没有打开，请重试。';if(response.status===403)service=null;throw Error(message);}const entry=clean(result);saved=[entry,...saved.filter(x=>x.id!==entry.id)].slice(0,12);let saveFailed=false;try{localStorage.setItem(key,JSON.stringify(saved));}catch{saveFailed=true;}select(entry);if(saveFailed)$('entry-status').textContent=translate('当前浏览器无法保存世界，本次仍可游玩。');}catch(error){$('generation-status').textContent=translate(error.name==='AbortError'?'生成超时，请重试。':['生成请求较多，请稍后再试。','连接已过期，请重试。','这扇门暂时没有打开，请重试。'].includes(error.message)?error.message:'这扇门暂时没有打开，请重试。');}finally{clearTimeout(timer);generation=null;generating=false;library();$('generate').disabled=false;}}
 $('world-form').onsubmit=generate;$('enter-world').onclick=enter;$('back-create').onclick=()=>{stop();$('enter-world').disabled=false;change('menu');};$('world-settings').onclick=pause;$('resume-world').onclick=resume;$('leave-world').onclick=()=>{stop();change('menu');};$('replay-world').onclick=()=>select(envelope);$('another-world').onclick=()=>{stop();change('menu');};$('volume').oninput=()=>audio.setVolume(Number($('volume').value)/100);
 if(silent)$('return-title').href+='&silent=1';
+function gamepadAction(action){
+  if(scene!=='play')return;
+  if(action==='interact'){motion.cancel();check();return;}
+  if(action==='door'){
+    motion.cancel();const door=nearbyDoor(run),result=toggleDoor(run);
+    $('world-notice').textContent=result==='far'?'再靠近门一些。':result==='occupied'?'先离开门口。':'';
+    if(['opened','closed'].includes(result))audio.playCue('door',door);audio.setPose(run);draw();return;
+  }
+  motion.start({forward:action==='forward'?.5:action==='back'?-.5:0,turn:action==='left'?-Math.PI/6:action==='right'?Math.PI/6:0});
+}
+mountGamepad({
+  isEnabled:()=>scene==='play'&&!starting,
+  canPause:()=>['play','paused'].includes(scene)&&!starting,
+  canRepeat:()=>!motion.active,
+  onAction:gamepadAction,onStop:()=>motion.cancel(),
+  onPause:()=>{if(scene==='paused')void resume();else pause();},
+});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'){motion.cancel();event.target.blur?.();return;}if(event.target.closest('#language-switch,input,textarea,select')||event.metaKey||event.ctrlKey||event.altKey)return;const k=event.key.toLowerCase();if(k==='p'){event.preventDefault();if(!event.repeat)scene==='paused'?void resume():pause();return;}if(k==='escape'){motion.cancel();event.target.blur?.();return;}if(scene!=='play'||event.repeat||motion.active)return;const action={arrowup:{forward:.5},arrowdown:{forward:-.5},arrowleft:{turn:-Math.PI/6},arrowright:{turn:Math.PI/6}}[k];if(action){event.preventDefault();motion.start(action);}else if(k==='f'){event.preventDefault();const door=nearbyDoor(run),result=toggleDoor(run);$('world-notice').textContent=result==='far'?'再靠近门一些。':result==='occupied'?'先离开门口。':'';if(['opened','closed'].includes(result))audio.playCue('door',door);audio.setPose(run);draw();}else if(k==='e'){event.preventDefault();check();}});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)return;if(scene==='play')pause();else if(starting){stop();if(run)run.stage='paused';$('enter-world').disabled=false;$('resume-world').disabled=false;}});addEventListener('pagehide',()=>{stop();generation?.abort();});addEventListener('unseen-language-change',language);library();change('menu');
 if(query.get('qa')==='1')window.__world={state:()=>({scene,run:run?structuredClone(run):null,audio:audio.getStats(),visual:audio.getEnvironmentVisualState(),map:hud?.trail.getStats(),generating}),select};

@@ -81,7 +81,7 @@ function harness({ speechSeconds = 0 } = {}) {
     });
   };
   const context = vm.createContext({
-    ...world, PlayPanel:class{update(){}}, NavigationHint,navigationGoal,relativeDirection,planAssistance,TrailMap:class{update(){}reset(){}}, HotelAudio: AudioBoundary, VoiceInput: VoiceBoundary, URLSearchParams, location: { search: '?silent=1&debug=1' },
+    ...world, mountGamepad:()=>({reset(){},destroy(){}}), PlayPanel:class{update(){}}, NavigationHint,navigationGoal,relativeDirection,planAssistance,TrailMap:class{update(){}reset(){}}, HotelAudio: AudioBoundary, VoiceInput: VoiceBoundary, URLSearchParams, location: { search: '?silent=1&debug=1' },
     document, window: { addEventListener() {} }, requestAnimationFrame: fn => frames.push(fn),
     fetch: fetchBoundary, CustomEvent: class {}, AbortController, setTimeout, clearTimeout, console,
   });

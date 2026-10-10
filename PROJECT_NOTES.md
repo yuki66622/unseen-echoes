@@ -92,3 +92,12 @@ Refreshing the opening explicitly starts a new music journey and permits the pia
 Hotel navigation includes Skip case before reading and during investigation, linking directly to the generated-world page and preserving existing language/audio navigation rules.
 
 Opening Skip intro and language controls share the same top offset, 40px control height and text baseline on desktop and mobile, including the iframe/parent boundary.
+
+
+### 2026-10-10 · Local development and solo chase
+
+User intent: use a local app-like version for editing and testing first; choose a role and enter without a second player. The controller commit `9621f88` was verified on GitHub main. Solo testing uses the existing authoritative chase rules in the browser, with a stationary opposite-role target. It does not create a cloud room, change the multiplayer protocol or introduce a bot. Timers, the hunter head start and five-interaction limit stay intact. `?mode=solo` explicitly selects this flow, independently of multiplayer checkpoints.
+
+Research baseline checked 2026-10-10: [Cloudflare's local dev command](https://developers.cloudflare.com/workers/wrangler/commands/workers/) runs the existing Worker locally. The installed Wrangler source also provides asset watching; actual source-edit and new-file tests are required because a custom build changes its watching behavior. [Electron](https://www.electronjs.org/docs/latest/) embeds Chromium and Node and would add a separate runtime. [Chromium's app-mode switch](https://chromium.googlesource.com/chromium/chromium/+/master/chrome/common/chrome_switches.cc) supports an app-style browser window, allowing reuse of the installed Chrome. A small Mac launcher around Chrome is the current recommendation; the user has not yet selected it over an Electron package. No desktop wrapper, distribution/signing setup, installation or deployment is claimed complete.
+
+Local play is separate from cloud features: the solo chase and bundled recordings need no API keys; multiplayer still uses the configured Maincloud database. AI conversations, judging, world generation and newly generated speech need the user's provider configuration and network. Secret configuration remains in the ignored `.dev.vars`, never in static assets or a desktop bundle.

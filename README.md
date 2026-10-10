@@ -64,15 +64,22 @@ Generated worlds reuse the existing rain, bird and fire recordings. Gemini does 
 
 ## Run locally
 
-Use Node.js 24. Install dependencies, copy `.dev.vars.example` to `.dev.vars`, and configure your existing Gemini and ElevenLabs credentials plus a random `GAME_SESSION_SECRET`. Keep these values out of source control and `public/`.
+Use Node.js 24. Install dependencies, then start the local development service:
 
 ```sh
 npm ci
-npm run build
 npm run dev
 ```
 
-Open `http://127.0.0.1:18776/`. Multiplayer settings are in `connection.json` and currently point to the existing Maincloud service. Personal evidence and conversations are not stored in the multiplayer database.
+Open `http://127.0.0.1:18776/?mode=solo` to choose Hunter or Survivor and enter immediately, without a name, room code, second player or API credentials. The opposite character is a stationary test target. Movement, head start, timer, interactions and outcomes use the same rules as multiplayer. Use **Choose roles again** during play or after the result to restart on your own. This is a test mode, not an AI opponent.
+
+The development service reads `public/` and `src/` directly and rebuilds the solo rules when their source changes. Save changes and refresh the game to test them; no deployment is needed. Do not edit the generated `public/multiplayer/solo.bundle.mjs`. `npm run build` still creates the separate distribution in `dist/`.
+
+The role screen also links to the tutorial, hotel, generated worlds, controller check and original two-player game. Multiplayer settings remain in `connection.json` and point to the existing Maincloud service. Personal evidence and conversations are not stored in the multiplayer database.
+
+For optional AI features, copy `.dev.vars.example` to `.dev.vars` if that private file does not exist, and configure your existing Gemini and/or ElevenLabs credentials plus a random `GAME_SESSION_SECRET`. Keep these values out of source control and `public/`. Solo testing and existing recordings work without provider keys. Restart the development service after changing credentials.
+
+For a provider-free development-loop check, run `node verify-local-dev.mjs`. `verify-solo.cjs` checks the real single-player browser flow with audio muted and external requests blocked; supply your installed Playwright path through `PLAYWRIGHT_MODULE` if it is not on the module search path.
 
 Without Gemini, recorded audio and exploration still work, but free-form conversation, explanation judging and world generation are unavailable. Without ElevenLabs, text replies and existing recordings remain available. Provider calls use the configured accounts and quotas; no automatic purchases are made. World generation accepts at most eight requests per visitor per hour within each running service instance; this is not a global billing cap.
 

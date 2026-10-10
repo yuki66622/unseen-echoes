@@ -1,6 +1,19 @@
 // Authored UI only. Exclude player names, room codes, chat messages and diagnostics JSON.
 // All entries are canonical Chinese -> English; protocol IDs must remain unchanged.
 export const entries = [
+  ['单人测试', 'Solo test'],
+  ['本地 · 单人测试', 'Local · Solo test'],
+  ['选择角色，直接进入。', 'Choose a role. Step straight in.'],
+  ['一个人即可测试走路、转向和空间声音。另一角色留在原地，不会主动追逐；原有计时和交互次数规则仍生效。', 'Test movement, turning and spatial sound on your own. The other character stays still; the existing timer and interaction limits apply.'],
+  ['找到电机，探索声场。', 'Find the motor. Explore the sound field.'],
+  ['本地运行 · 对手静止', 'Local session · Stationary opponent'],
+  ['单人测试加载失败，请刷新重试。', 'Solo test could not load. Refresh to try again.'],
+  ['其他章节', 'Other chapters'],
+  ['找雨教程', 'Rain tutorial'],
+  ['生成世界', 'Generated worlds'],
+  ['双人联机', 'Two-player game'],
+  ['手柄检查', 'Controller check'],
+  ['旅馆调查', 'Inn investigation'],
   ['未见回声', 'Unseen Echoes'],
   ['未见回声 · 序章', 'Unseen Echoes · Prologue'],
   ['请从游戏入口打开', 'Open the game from its launcher'],

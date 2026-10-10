@@ -17,6 +17,7 @@ const sessionGet=key=>{try{return sessionStorage.getItem(key);}catch{return null
 const sessionSet=(key,value)=>{try{sessionStorage.setItem(key,value);}catch{}};
 const sessionRemove=key=>{try{sessionStorage.removeItem(key);}catch{}};
 const params=new URLSearchParams(location.search),silent=params.get('silent')==='1',qa=silent&&params.get('qa')==='1';
+const solo=params.get('mode')==='solo';
 const audio=new SceneAudio({silent});
 const navigationHud=new NavigationHUD({map:true,label:'追逐'});
 const SOURCES=[{id:'a',soundId:'forest',x:1.5,y:4.8},{id:'b',soundId:'rain',x:6.5,y:5.5},{id:'c',soundId:'fire',x:2,y:7}];
@@ -38,6 +39,7 @@ for(let row=0;row<5;row++)for(let col=0;col<5;col++){
   waitIndicator.querySelector('.origin-wave').append(dot);
 }
 function renderPartnerWait(){
+  if(solo){waitIndicator.hidden=true;return;}
   let message='',target=null;
   if(phase==='lobby'){
     target=$('lobby');
@@ -112,12 +114,13 @@ function resetLocal(kind){
 function setPhase(next){
   phase=next;document.body.dataset.phase=phase;lastRender='';
   show('opening',phase==='opening');show('game',phase!=='opening');
-  show('lobby',phase==='lobby');show('narrative',!['lobby','chase-result','story-result'].includes(phase));
+  show('solo-setup',phase==='solo-ready');show('solo-reselect',solo&&phase==='chase');
+  show('lobby',phase==='lobby');show('narrative',!['solo-ready','lobby','chase-result','story-result'].includes(phase));
   show('story-panel',phase==='story');
   show('result',phase.endsWith('-result'));show('begin',phase.endsWith('-ready'));
   show('skip-tutorial-active',['tutorial-ready','tutorial'].includes(phase));
   show('sound-toggle',active());show('skip-chase',phase==='lobby'||phase==='chase');show('show-rules',phase==='lobby'&&$('lobby').dataset.step!=='rules');
-  $('chapter').textContent=phase.startsWith('tutorial')?'初次穿行':phase==='lobby'||phase.startsWith('chase')?'第一关 · 追逐':'第二关 · 沉默的钟声';
+  $('chapter').textContent=solo?'单人测试':phase.startsWith('tutorial')?'初次穿行':phase==='lobby'||phase.startsWith('chase')?'第一关 · 追逐':'第二关 · 沉默的钟声';
   $('role-label').textContent='';
   if(phase==='tutorial-ready'){
     $('title').textContent='找到雨声。';$('objective').textContent='三种声音交叠。找到门后的雨声。';$('begin').textContent='进入声场';
@@ -137,7 +140,20 @@ function finishTutorial(){
   show('begin',true);$('begin').textContent='进入第一关';
 }
 let configLoading=null;
+async function enterSolo(){
+  epoch++;stopSound();motion=null;pending=null;remoteMotion=null;remoteSamples.clear();roundId='';seq=0;paused=false;
+  setPhase('solo-ready');say('');
+  try{
+    if(!room){
+      const {SoloConnection}=await import('./solo.bundle.mjs');
+      room=new SoloConnection(onRoom);
+    }
+    room.reset();
+    document.querySelectorAll('[data-solo-role]').forEach(button=>button.disabled=false);
+  }catch{ $('solo-error').textContent='单人测试加载失败，请刷新重试。'; }
+}
 async function enterLobby(options={}){
+  if(solo)return enterSolo();
   stopSound();motion=null;pending=null;setPhase('lobby');sessionSet('unseen-checkpoint','lobby');say('');
   lobby.begin(options);await connectLobby();
 }
@@ -165,7 +181,7 @@ function onRoom(next){
   const previous=roomState;roomState=next;
   if(next?.phase==='lobby'&&['chase','chase-result'].includes(phase)){
     epoch++;stopSound();motion=null;pending=null;remoteMotion=null;remoteSamples.clear();
-    roundId=null;seq=0;paused=false;setPhase('lobby');sessionSet('unseen-checkpoint','lobby');say('');
+    roundId=null;seq=0;paused=false;setPhase(solo?'solo-ready':'lobby');if(!solo)sessionSet('unseen-checkpoint','lobby');say('');
   }
   renderPartnerWait();
   if(phase==='lobby')renderLobby();
@@ -174,9 +190,9 @@ function onRoom(next){
     return;
   }
   const g=next.game;
-  $('network-indicator').textContent=`${next.members.filter(m=>m.online).length} / 2 人在线`;
+  $('network-indicator').textContent=solo?'本地运行 · 对手静止':`${next.members.filter(m=>m.online).length} / 2 人在线`;
   if(!g)return;
-  if(next.phase==='running'&&['lobby','chase','chase-result'].includes(phase)){
+  if(next.phase==='running'&&['solo-ready','lobby','chase','chase-result'].includes(phase)){
     const entering=phase!=='chase'||roundId!==g.roundId;
     if(entering){
       epoch++;roundId=g.roundId;seq=g.lastProcessedInputSeq||0;pose=copyPose(g.self);pending=null;remoteMotion=null;remoteSamples.clear();paused=false;setPhase('chase');void startSound();
@@ -325,6 +341,12 @@ document.querySelectorAll('[data-skip-tutorial]').forEach(button=>button.addEven
   if(!['opening','tutorial-ready','tutorial'].includes(phase))return;
   void enterLobby({skipRules:true});
 }));
+document.querySelectorAll('[data-solo-role]').forEach(button=>button.addEventListener('click',()=>{
+  if(phase!=='solo-ready'||!room)return;
+  $('solo-error').textContent='';
+  try{room.start(button.dataset.soloRole);}catch{ $('solo-error').textContent='单人测试加载失败，请刷新重试。'; }
+}));
+$('solo-reselect').addEventListener('click',()=>void enterSolo());
 $('begin').addEventListener('click',async()=>{
   if(phase==='tutorial-complete')return enterLobby().catch(e=>say(e.message));
   if(phase==='tutorial-ready'){setPhase('tutorial');say('慢慢转身，雨声在门后。');await startSound();}
@@ -380,7 +402,7 @@ document.addEventListener('visibilitychange',()=>{
 });
 window.addEventListener('pagehide',()=>{stopSound();chatAbort?.abort();room?.disconnect();});
 function resumeConnection(){
-  if(document.hidden||navigator.onLine===false)return;
+  if(document.hidden||(!solo&&navigator.onLine===false))return;
   if(room)room.resume();else if(phase==='lobby')void connectLobby();
 }
 window.addEventListener('pageshow',resumeConnection);
@@ -401,6 +423,7 @@ function navigateChapter(path){const url=new URL(path,location.origin);if(silent
 const requestedChapter=params.get('chapter');
 if(requestedChapter==='title')sessionRemove('unseen-checkpoint');
 const checkpoint=requestedChapter==='lobby'?'lobby':sessionGet('unseen-checkpoint');
-if(checkpoint==='lobby'||/^[A-Za-z0-9]{6}$/.test(params.get('room')||''))void enterLobby({skipRules:true});
+if(solo)void enterSolo();
+else if(checkpoint==='lobby'||/^[A-Za-z0-9]{6}$/.test(params.get('room')||''))void enterLobby({skipRules:true});
 else if(checkpoint==='story'||checkpoint==='hotel')void enterStory();
 else if(checkpoint==='tutorial')navigateChapter('/tutorial/');

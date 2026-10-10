@@ -1,6 +1,8 @@
 import {cpSync,mkdirSync,readFileSync,writeFileSync,readdirSync,rmSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {build} from 'esbuild';
+import {soloBuild} from './local/build-solo.mjs';
+await build(soloBuild);
 
 const files=[];
 function walk(directory){for(const item of readdirSync(directory,{withFileTypes:true})){const path=`${directory}/${item.name}`;if(item.isDirectory())walk(path);else if(item.isFile())files.push(path);else throw Error('Only regular application files are allowed');}}

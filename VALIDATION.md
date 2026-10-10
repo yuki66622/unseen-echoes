@@ -99,3 +99,16 @@ Opening title sizing is restored to 38px desktop / 31px narrow screens. Chapter 
 Refreshing the opening starts a fresh piano playback, superseding the earlier no-replay-on-refresh check. Returning normally from another chapter still keeps the score finished. Browser-back restoration reactivates menu rain without replaying the piano. All audio checks remain headless and muted.
 
 Additional checks passed: room-choice and envelope headings both render at 32px, the envelope caption at 16px; mobile Skip case avoids the language switch and reaches the new-world page both before reading and during play. Five actual-media checks confirm delayed playback, natural fades, rain restoration, refreshed opening replay, chapter stop and cancellation.
+
+
+## 2026-10-10 · Solo chase and local development
+
+- Single-player flow at `/?mode=solo`: Hunter and Survivor both enter from the role button, without a cloud room or second browser. The opposite role is a stationary target. The generated browser module reuses `spacetimedb/src/rules.ts`; no server rules or remote database were changed.
+- 196 application checks (including 11 solo-session checks), 44 authoritative-rule checks, the distribution build and the final single-player browser run passed.
+- `verify-solo.cjs` passed on both the static server and the real local Worker: both roles, simulated controller turning, keyboard movement, stop/pause/resume, disconnecting the browser network, changing roles, five-attempt result and immediate rematch. The added offline cached-page lifecycle regression failed before the fix, then passed. No API/provider/external requests or browser page errors were observed.
+- `verify-gamepad.cjs` passed all six existing groups again through the local Worker: silent diagnostic page, tutorial, hotel, saved generated world, real-rule chase with a simulated transport and absence of external calls. This is not a new live multiplayer service test.
+- Actual desktop and 390px role-selection screenshots were inspected in English and Chinese. A missing hotel-link translation was corrected. Screenshot capture waits for the entry animation to finish.
+- Existing frontend edits and Worker-source edits were observed without restarting. Adding new assets initially returned 404 under Wrangler custom builds; investigation isolated the missing current-bundle state in the installed Wrangler custom-build path. The final development runner uses esbuild watch for the solo rules plus Wrangler's standard dependency watcher. A newly created public resource returned its expected 200 response on the actual port 18776 without a restart; the temporary probe was removed afterward.
+- All browser runs were headless and muted with no microphone permission. Physical Xbox input, subjective sound quality, paid AI calls, desktop `.app` packaging, online deployment and a live two-player match were not tested in this update.
+
+- Final `node verify-local-dev.mjs` run passed in an isolated temporary project: new assets, Worker imports, shared public imports, solo adapter/rule rebuilds, clean SIGTERM/SIGINT shutdown and cleanup after failed startup/compilation. The test did not inherit provider secrets and removed its temporary fixture. The working source build is `2e4a8978b762`.

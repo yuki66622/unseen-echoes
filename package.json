@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node build.mjs",
     "test": "node --test tests/*.test.mjs tests/hotel/*.test.mjs",
-    "dev": "wrangler dev --ip 127.0.0.1 --port 18776"
+    "dev": "node local/dev.mjs"
   },
   "devDependencies": {"esbuild":"0.28.2","wrangler":"4.135.0"}
 }

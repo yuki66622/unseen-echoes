@@ -1,0 +1,1 @@
+export const soloBuild={entryPoints:['local/solo-session.mjs'],outfile:'public/multiplayer/solo.bundle.mjs',bundle:true,format:'esm',platform:'browser',target:'es2022',banner:{js:'// Generated from local/solo-session.mjs and spacetimedb/src/rules.ts; do not edit.'}};
